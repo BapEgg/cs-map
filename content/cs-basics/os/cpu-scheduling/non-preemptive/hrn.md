@@ -3,9 +3,9 @@ id: hrn
 title: HRN
 order: 3
 card:
-  one_line: 'HRN은 (대기 시간 + 실행 시간) / 실행 시간이 큰 것부터 처리해, 오래 기다린 작업이 밀리지 않게 한다.'
+  one_line: 'HRN은 짧은 작업을 먼저 하되 오래 기다린 작업은 우선순위를 올려, 긴 작업도 끝없이 밀리지 않게 한다.'
   analogy: ''
-  keywords: []
+  keywords: [응답 비율, '(대기+실행)/실행', 기아 방지]
 flow:
   prev: { id: sjf, reason: 긴 작업이 영영 밀려서 }
 ---
