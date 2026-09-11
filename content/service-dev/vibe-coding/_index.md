@@ -22,4 +22,4 @@ AI가 코드를 대신 써 줘도, 무엇을 시킬지와 결과가 맞는지는
 
 프롬프트(입력 설계) → 컨텍스트(맥락 이해) → 하네스(테스트·안전성) 순으로 이어진다.
 
-(원본: `docs/reference/note-4-vibe-coding-it.png` — 아직 파일로 없다. HANDOFF 10장 참고.)
+(원본: `docs/reference/note-4-vibe-coding-it.png`)
