@@ -64,6 +64,8 @@ export interface ConceptNode extends ConceptMeta {
   flowNext: FlowRef[];
   /** 본문에 `## 심화`가 있는지. 트리 뱃지에 쓴다. */
   hasDeep: boolean;
+  /** 아직 내용을 안 쓴 개념. 열어봤자 "작성 예정"만 있으니 미리 알려준다. */
+  isStub: boolean;
 }
 
 /** 트리 노드가 아닌 용어 사전 항목. */

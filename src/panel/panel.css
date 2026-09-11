@@ -1,5 +1,6 @@
 .panel {
   flex: 0 0 480px;
+  transition: flex-basis 0.25s ease;
   min-width: 0;
   max-height: 100%;
   overflow-y: auto;
@@ -319,4 +320,53 @@ button.term:hover {
     flex: 1 1 auto;
     max-height: none;
   }
+}
+
+/* 읽기 넓게 */
+.panel-wide {
+  flex: 1 1 60%;
+}
+
+.panel-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.panel-back {
+  margin-right: auto;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.panel-wide-toggle {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.stub-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: var(--sp-2);
+  vertical-align: 5px;
+}
+
+.stub-note {
+  margin: 0 0 var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-sunken);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.term-go {
+  margin-top: var(--sp-3);
 }

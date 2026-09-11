@@ -13,10 +13,20 @@
   flex-wrap: wrap;
 }
 
-.bar h1 {
+.bar-home {
+  font: inherit;
   font-size: 17px;
-  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   white-space: nowrap;
+}
+
+.bar-home:hover {
+  color: var(--accent);
 }
 
 .bar-roots {
@@ -77,6 +87,11 @@
   background: var(--accent);
   border-radius: 999px;
   padding: 1px 6px;
+}
+
+/* 읽기에 공간을 더 준 상태. 탐색할 때는 지도, 읽을 때는 설명이 넓어야 한다. */
+.map-wide .tree-wrap {
+  flex: 0 1 40%;
 }
 
 .map {

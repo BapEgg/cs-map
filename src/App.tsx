@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadContent } from './content/load';
-import ConceptPanel from './panel/ConceptPanel';
+import ConceptPanel, { type PanelPlace } from './panel/ConceptPanel';
 import NotesOverview from './panel/NotesOverview';
+import SearchBox from './panel/SearchBox';
 import StartPanel from './panel/StartPanel';
 import { buildTermIndex } from './panel/termIndex';
 import QuizMode from './quiz/QuizMode';
@@ -10,6 +11,7 @@ import { useStudy } from './store/useStudy';
 import TreeCanvas from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
+import VizStage from './viz/VizStage';
 import './App.css';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
@@ -17,6 +19,11 @@ const THEME_LABEL: Record<ThemeMode, string> = {
   dark: '다크',
   system: '시스템',
 };
+
+/** 어디서 어떻게 읽고 있었는지. 돌아가기가 이걸 되살린다. */
+interface Visit extends PanelPlace {
+  id: string;
+}
 
 export default function App() {
   const { mode, cycle } = useTheme();
@@ -30,11 +37,18 @@ export default function App() {
   /** "이 가지만 크게 보기"로 파고든 자취. 마지막이 지금 루트다. */
   const [roots, setRoots] = useState<string[]>([tree.rootId]);
   const root = roots[roots.length - 1];
-  const [overlay, setOverlay] = useState<'quiz' | 'notes' | null>(null);
+  const [overlay, setOverlay] = useState<'quiz' | 'notes' | 'viz' | null>(null);
+  /** 읽기에 공간을 더 줄지. 탐색할 때는 지도, 읽을 때는 설명이 넓어야 한다. */
+  const [wide, setWide] = useState(false);
 
   /** 지난번에 보던 개념. 다시 열었을 때 그 자리로 돌아간다. */
   const lastSeen = study.data.recent.find((id) => tree.byId[id]) ?? null;
   const [selected, setSelected] = useState<string | null>(lastSeen);
+
+  /** 건너뛰기 전에 읽던 자리들. 돌아가기가 여기서 하나씩 꺼낸다. */
+  const [trail, setTrail] = useState<Visit[]>([]);
+  /** 돌아온 직후 한 번만 쓰는 복원 정보. */
+  const [restore, setRestore] = useState<PanelPlace | undefined>();
 
   // 처음부터 과목까지는 펼쳐 둔다. 루트 하나만 있으면 화면이 비어서 뭘 눌러야 할지 모른다.
   const [open, setOpen] = useState<Set<string>>(() => {
@@ -78,14 +92,62 @@ export default function App() {
     [touch],
   );
 
+  /** 지도와 설명을 그 개념에 맞춘다. 어디서 불러도 셋(선택·범위·펼침)이 어긋나지 않게 한 곳에 모았다. */
+  const reveal = useCallback(
+    (id: string) => {
+      if (!tree.byId[id]) return false;
+      const path = pathOf(id);
+      // 갈 수 없는 가지에 갇혀 있으면 범위를 되돌린다.
+      setRoots((prev) => {
+        const kept = prev.filter((rid, i) => i === 0 || path.has(rid));
+        return kept.length ? kept : [tree.rootId];
+      });
+      setOpen(pathOf(tree.byId[id].parentId ?? id));
+      select(id);
+      setOverlay(null);
+      return true;
+    },
+    [pathOf, select, tree.byId, tree.rootId],
+  );
+
+  /** 설명 속 링크로 건너뛴다. 읽던 자리를 남겨 돌아올 수 있게 한다. */
+  const navigate = useCallback(
+    (targetId: string, from: PanelPlace) => {
+      if (!tree.byId[targetId] || targetId === selected) return;
+      if (selected) setTrail((t) => [...t, { id: selected, ...from }]);
+      setRestore(undefined);
+      reveal(targetId);
+    },
+    [reveal, selected, tree.byId],
+  );
+
+  /** 자취 없이 그냥 간다. 지도 클릭·검색·시작 화면처럼 "새로 시작하는" 이동. */
+  const jump = useCallback(
+    (id: string) => {
+      setTrail([]);
+      setRestore(undefined);
+      reveal(id);
+    },
+    [reveal],
+  );
+
+  const back = useCallback(() => {
+    // 업데이터 안에서 다른 state를 건드리면 두 번 실행돼 자취가 제대로 안 줄어든다.
+    const last = trail[trail.length - 1];
+    if (!last) return;
+    setTrail((t) => t.slice(0, -1));
+    setRestore({ tab: last.tab, scroll: last.scroll });
+    reveal(last.id);
+  }, [reveal, trail]);
+
   /**
    * 트리에서 노드 본체를 눌렀을 때. 고르고 그 갈래로 들어간다. **접지는 않는다.**
-   *
-   * 한 층에 한 갈래만 펼친다(아코디언). 형제를 다 펼쳐두면 개념이 늘어날수록
-   * 지도가 옆으로 끝없이 넓어져서 전체를 잃는다.
+   * 한 층에 한 갈래만 펼친다(아코디언).
    */
   const clickNode = useCallback(
     (id: string) => {
+      setTrail([]);
+      setRestore(undefined);
       select(id);
       if (tree.byId[id].childIds.length > 0) setOpen(pathOf(id));
     },
@@ -108,49 +170,39 @@ export default function App() {
     [pathOf],
   );
 
-  /** 그 개념으로 간다. 가는 길의 조상들을 모두 펼쳐 트리에서도 보이게 한다. */
-  const goTo = useCallback(
-    (id: string) => {
-      if (!tree.byId[id]) return;
-      const path = pathOf(id);
-
-      /*
-       * "이 가지만 보기"로 파고든 상태에서 가지 밖 개념으로 건너뛰면, 지도에는 그 개념이
-       * 아예 없어서 설명만 바뀌고 지도는 그대로였다. 갈 수 없는 가지면 범위를 되돌린다.
-       */
-      setRoots((prev) => {
-        const kept = prev.filter((rid, i) => i === 0 || path.has(rid));
-        return kept.length ? kept : [tree.rootId];
-      });
-
-      // 가는 길만 펼친다. 트리에서 누를 때와 같은 규칙이라 지도가 예상대로 움직인다.
-      setOpen(pathOf(tree.byId[id].parentId ?? id));
-      select(id);
-      setOverlay(null);
-    },
-    [pathOf, select, tree.byId, tree.rootId],
-  );
-
-  // Esc: 덮어쓴 화면을 먼저 닫고, 없으면 파고든 가지에서 한 단계 나온다.
+  // Esc: 덮어쓴 화면 → 돌아가기 → 가지 밖으로, 순서대로 한 겹씩 벗긴다.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (overlay) setOverlay(null);
+      else if (trail.length > 0) back();
       else if (roots.length > 1) setRoots((r) => r.slice(0, -1));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [overlay, roots.length]);
+  }, [back, overlay, roots.length, trail.length]);
 
   const node = selected ? tree.byId[selected] : null;
   const canZoomBranch = node && node.childIds.length > 0 && node.id !== root;
+  const backTo = trail.length ? tree.byId[trail[trail.length - 1].id]?.title : undefined;
 
   return (
     <div className="app">
       <header className="bar">
-        <h1>CS 지식 지도</h1>
+        <button
+          className="bar-home"
+          onClick={() => {
+            setSelected(null);
+            setTrail([]);
+            setOverlay(null);
+          }}
+          title="시작 화면으로"
+        >
+          CS 지식 지도
+        </button>
 
-        {/* 가지를 파고들었을 때만 보여준다. 전체를 보고 있을 때는 앱 제목과 같은 말이라 군더더기다. */}
+        <SearchBox tree={tree} onGoTo={jump} />
+
         {roots.length > 1 && (
           <nav className="bar-roots" aria-label="보고 있는 가지">
             {roots.map((rid, i) => (
@@ -203,7 +255,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="map">
+      <main className={`map${wide ? ' map-wide' : ''}`}>
         <TreeCanvas
           byId={tree.byId}
           root={root}
@@ -221,25 +273,34 @@ export default function App() {
             tree={tree}
             index={index}
             id={selected}
-            onGoTo={goTo}
             note={study.data.notes[selected]}
             onNote={(patch) => study.setNote(selected, patch)}
+            onNavigate={navigate}
+            restore={restore}
+            backTo={backTo}
+            onBack={back}
+            onOpenViz={() => setOverlay('viz')}
+            wide={wide}
+            onToggleWide={() => setWide((w) => !w)}
           />
         ) : (
           <StartPanel
             tree={tree}
             data={study.data}
-            onGoTo={goTo}
+            onGoTo={jump}
             onQuiz={() => setOverlay('quiz')}
           />
         )}
 
+        {overlay === 'viz' && node && (
+          <VizStage fromTitle={node.title} onClose={() => setOverlay(null)} />
+        )}
         {overlay === 'quiz' && (
           <QuizMode
             tree={tree}
             onMark={study.setMark}
             onClose={() => setOverlay(null)}
-            onGoTo={goTo}
+            onGoTo={jump}
           />
         )}
         {overlay === 'notes' && (
@@ -247,7 +308,7 @@ export default function App() {
             tree={tree}
             data={study.data}
             onImport={study.importJson}
-            onGoTo={goTo}
+            onGoTo={jump}
             onClose={() => setOverlay(null)}
           />
         )}

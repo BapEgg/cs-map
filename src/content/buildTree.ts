@@ -96,6 +96,8 @@ export function buildTree(files: Record<string, string>): ContentTree {
       path: rel,
       body,
       hasDeep: /^##\s*심화\s*$/m.test(body),
+      // 아직 안 쓴 개념. 열어봤자 "(작성 예정)"만 있으니 미리 알려준다.
+      isStub: /\(작성 예정/.test(body),
       depth: 0,
       parentId: null,
       childIds: [],

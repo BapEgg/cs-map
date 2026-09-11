@@ -1,0 +1,73 @@
+.vizstage {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  overflow-y: auto;
+}
+
+.vizstage-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.vizstage-hint {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.vizstage-body {
+  flex: 1 1 auto;
+  padding: var(--sp-4);
+  display: flex;
+}
+
+.vizstage-body .viz {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 넓은 자리에서는 코드와 그림을 크게 벌려 놓는다. */
+.vizstage-body .viz-body {
+  flex: 1 1 auto;
+  gap: var(--sp-6);
+  align-items: center;
+}
+
+.vizstage-body .viz-code {
+  flex: 0 1 460px;
+  max-width: 460px;
+  font-size: 14px;
+}
+
+.vizstage-body .viz-stage {
+  flex: 0 1 560px;
+  max-width: 560px;
+  min-width: 320px;
+}
+
+.vizstage-body .viz-caption {
+  font-size: 16px;
+  max-width: 78ch;
+}
+
+@media (max-width: 900px) {
+  .vizstage-body {
+    padding: var(--sp-3);
+  }
+
+  .vizstage-body .viz-code,
+  .vizstage-body .viz-stage {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
