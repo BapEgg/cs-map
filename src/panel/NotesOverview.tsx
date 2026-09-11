@@ -43,10 +43,12 @@ export default function NotesOverview({ tree, data, onImport, onGoTo, onClose }:
       <header className="notes-bar">
         <h2>내 메모 {entries.length > 0 && <span>{entries.length}개</span>}</h2>
         <div className="notes-io">
-          <button onClick={download} disabled={entries.length === 0}>
+          <button className="btn btn-secondary" onClick={download} disabled={entries.length === 0}>
             파일로 내보내기
           </button>
-          <button onClick={() => fileRef.current?.click()}>가져오기</button>
+          <button className="btn btn-secondary" onClick={() => fileRef.current?.click()}>
+            가져오기
+          </button>
           <input
             ref={fileRef}
             type="file"
@@ -57,7 +59,7 @@ export default function NotesOverview({ tree, data, onImport, onGoTo, onClose }:
               e.target.value = '';
             }}
           />
-          <button className="notes-close" onClick={onClose}>
+          <button className="btn btn-quiet" onClick={onClose}>
             닫기
           </button>
         </div>

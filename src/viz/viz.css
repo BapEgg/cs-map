@@ -2,7 +2,7 @@
   background: var(--viz-bg);
   border: 1px solid var(--viz-panel-border);
   border-radius: var(--radius-lg);
-  padding: 18px 20px 14px;
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
   color: var(--viz-label);
   outline: none;
 }
@@ -14,8 +14,8 @@
 .viz-head {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
 }
 
 .viz-head h3 {
@@ -26,7 +26,7 @@
 
 .viz-phase {
   font-size: 12px;
-  padding: 2px 9px;
+  padding: 3px var(--sp-2);
   border-radius: 999px;
   border: 1px solid currentColor;
 }
@@ -41,7 +41,7 @@
 
 .viz-body {
   display: flex;
-  gap: 22px;
+  gap: var(--sp-5);
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
@@ -53,7 +53,7 @@
   min-width: 280px;
   max-width: 420px;
   margin: 0;
-  padding: 12px 0;
+  padding: var(--sp-3) 0;
   font-family: 'Consolas', 'D2Coding', ui-monospace, monospace;
   font-size: 13px;
   line-height: 1.9;
@@ -62,7 +62,7 @@
 
 .viz-code code {
   display: block;
-  padding: 0 10px 0 0;
+  padding: 0 var(--sp-2) 0 0;
   white-space: pre;
   color: var(--viz-label-muted);
   border-left: 3px solid transparent;
@@ -82,7 +82,7 @@
   display: inline-block;
   width: 26px;
   text-align: right;
-  margin-right: 12px;
+  margin-right: var(--sp-3);
   color: var(--viz-label-muted);
   opacity: 0.5;
 }
@@ -159,7 +159,7 @@
 }
 
 .viz-caption {
-  margin: 16px 0 14px;
+  margin: var(--sp-4) 0 var(--sp-3);
   min-height: 2.8em;
   font-size: 15px;
   line-height: 1.6;
@@ -181,7 +181,7 @@
 .viz-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 
@@ -192,7 +192,7 @@
   background: transparent;
   border: 1px solid var(--viz-label-muted);
   border-radius: 6px;
-  padding: 5px 10px;
+  padding: var(--sp-1) var(--sp-2);
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -214,8 +214,8 @@
 
 .viz-track {
   display: flex;
-  gap: 3px;
-  margin: 0 6px;
+  gap: var(--sp-1);
+  margin: 0 var(--sp-1);
   flex: 1 1 120px;
 }
 
@@ -246,11 +246,11 @@
 
 .viz-speed {
   display: flex;
-  gap: 3px;
+  gap: var(--sp-1);
 }
 
 .viz-controls .viz-speed button {
-  padding: 4px 7px;
+  padding: var(--sp-1) var(--sp-2);
   font-size: 12px;
   opacity: 0.55;
 }

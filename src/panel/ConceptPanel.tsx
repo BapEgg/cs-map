@@ -60,6 +60,7 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
   };
 
   const richProps = { selfId: id, index, onTerm: openTerm };
+  const hasFullCard = !!(node.card?.analogy || node.card?.keywords?.length);
 
   return (
     <aside className="panel">
@@ -125,11 +126,12 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
         <NoteTab note={note} onChange={onNote} />
       ) : tab === 'basic' ? (
         <div className="panel-body">
-          <div className="card3">
+          {/* 비유·키워드가 아직 없으면 회색 판을 씌우지 않는다. 빈 상자처럼 보인다. */}
+          <div className={hasFullCard ? 'card3' : 'card3 card3-bare'}>
             <p className="card3-line">
               <RichText text={node.card?.one_line ?? ''} {...richProps} />
             </p>
-            {node.card?.analogy && <p className="card3-analogy">🔎 {node.card.analogy}</p>}
+            {node.card?.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
             {!!node.card?.keywords?.length && (
               <p className="card3-keys">
                 {node.card.keywords.map((k) => (
@@ -141,14 +143,14 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
 
           {parsed.why && (
             <section>
-              <h3>왜 나왔나</h3>
+              <h3 className="section-title">왜 나왔나</h3>
               <RichText text={parsed.why} {...richProps} />
             </section>
           )}
 
           {(node.flowPrev.length > 0 || node.flowNext.length > 0) && (
             <section>
-              <h3>흐름</h3>
+              <h3 className="section-title">흐름</h3>
               <ul className="flow">
                 {node.flowPrev.map((f) => (
                   <li key={`p-${f.id}`}>
@@ -174,10 +176,10 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
 
           {node.childIds.length > 0 && (
             <section>
-              <h3>하위 개념</h3>
-              <div className="chips">
+              <h3 className="section-title">하위 개념</h3>
+              <div className="chip-row">
                 {node.childIds.map((cid) => (
-                  <button key={cid} type="button" onClick={() => onGoTo(cid)}>
+                  <button key={cid} type="button" className="chip" onClick={() => onGoTo(cid)}>
                     {tree.byId[cid].title}
                   </button>
                 ))}
@@ -187,10 +189,10 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
 
           {!!node.see_also?.length && (
             <section>
-              <h3>이어 보기</h3>
-              <div className="chips">
+              <h3 className="section-title">이어 보기</h3>
+              <div className="chip-row">
                 {node.see_also.map((sid) => (
-                  <button key={sid} type="button" onClick={() => onGoTo(sid)}>
+                  <button key={sid} type="button" className="chip" onClick={() => onGoTo(sid)}>
                     {tree.byId[sid]?.title ?? sid}
                   </button>
                 ))}
@@ -202,7 +204,7 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
         <div className="panel-body">
           {parsed.deep?.internals.length ? (
             <section>
-              <h3>🔧 내부 구조</h3>
+              <h3 className="section-title">내부 구조</h3>
               {parsed.deep.internals.map((line, i) => (
                 <RichText key={i} text={line} {...richProps} />
               ))}
@@ -211,7 +213,7 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
 
           {parsed.deep?.usage.length ? (
             <section>
-              <h3>🌍 실제 활용</h3>
+              <h3 className="section-title">실제 활용</h3>
               {parsed.deep.usage.map((line, i) => (
                 <RichText key={i} text={line} {...richProps} />
               ))}
@@ -220,7 +222,7 @@ export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: 
 
           {parsed.deep?.interview.length ? (
             <section>
-              <h3>🎤 면접 질문</h3>
+              <h3 className="section-title">면접 질문</h3>
               <p className="hint">먼저 말로 답해보고 나서 펼쳐 보세요.</p>
               {parsed.deep.interview.map((qa, i) => (
                 <div key={i} className="qa">

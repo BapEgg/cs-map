@@ -3,7 +3,7 @@
   min-width: 0;
   max-height: 100%;
   overflow-y: auto;
-  padding: 18px 20px 40px;
+  padding: var(--sp-4) var(--sp-5) var(--sp-6);
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
@@ -15,7 +15,7 @@
   align-items: center;
   gap: 2px;
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
 .panel-path button {
@@ -39,36 +39,37 @@
 }
 
 .panel-path .sep {
-  margin: 0 3px;
+  margin: 0 var(--sp-1);
   opacity: 0.6;
 }
 
 .panel-title {
-  margin: 6px 0 12px;
+  margin: var(--sp-1) 0 var(--sp-3);
   font-size: 22px;
 }
 
 .panel-sim-open {
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
   color: var(--badge-sim);
   background: none;
   border: 1px solid currentColor;
   border-radius: 999px;
-  padding: 5px 14px;
-  margin-bottom: 14px;
+  padding: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-4);
   cursor: pointer;
 }
 
 .panel-sim {
-  margin-bottom: 18px;
+  margin-bottom: var(--sp-5);
 }
 
 .panel-tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--sp-1);
   border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
+  margin-bottom: var(--sp-4);
 }
 
 .panel-tabs button {
@@ -79,7 +80,7 @@
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 8px 12px;
+  padding: var(--sp-2) var(--sp-3);
   margin-bottom: -1px;
   cursor: pointer;
 }
@@ -95,22 +96,21 @@
 }
 
 .panel-body section {
-  margin-bottom: 22px;
-}
-
-.panel-body h3 {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0 0 8px;
-  font-weight: 700;
+  margin-bottom: var(--sp-5);
 }
 
 /* 한 줄 정의 3줄 카드. HANDOFF 5-4. */
 .card3 {
-  padding: 14px 16px;
-  margin-bottom: 22px;
+  padding: var(--sp-4);
+  margin-bottom: var(--sp-5);
   background: var(--surface-sunken);
   border-radius: var(--radius);
+}
+
+/* 비유·키워드가 아직 없을 때. 빈 회색 상자로 보이지 않게 판을 벗긴다. */
+.card3-bare {
+  padding: 0 0 var(--sp-1);
+  background: none;
 }
 
 .card3-line {
@@ -121,7 +121,7 @@
 }
 
 .card3-analogy {
-  margin: 8px 0 0;
+  margin: var(--sp-2) 0 0;
   font-size: 14px;
   color: var(--text-muted);
 }
@@ -129,14 +129,14 @@
 .card3-keys {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0 0;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
 }
 
 .card3-keys em {
   font-style: normal;
   font-size: 12px;
-  padding: 2px 9px;
+  padding: 2px var(--sp-2);
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
@@ -144,7 +144,7 @@
 
 /* 본문: 한 문장 = 한 줄 */
 .rich {
-  margin: 0 0 10px;
+  margin: 0 0 var(--sp-2);
 }
 
 .rich-line {
@@ -192,8 +192,8 @@ button.term:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
 }
 
 .flow button {
@@ -211,36 +211,14 @@ button.term:hover {
   color: var(--connective);
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.chips button {
-  font: inherit;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-
-.chips button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
 .hint {
   font-size: 12px;
-  color: var(--text-faint);
-  margin: -4px 0 10px;
+  color: var(--text-muted);
+  margin: 0 0 var(--sp-3);
 }
 
 .qa {
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-3);
 }
 
 .qa-q {
@@ -253,45 +231,45 @@ button.term:hover {
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 9px 12px;
+  padding: var(--sp-3);
   cursor: pointer;
 }
 
 .qa-a {
-  padding: 10px 12px 2px;
+  padding: var(--sp-3) var(--sp-3) 0;
   font-size: 14px;
 }
 
 .qa-follow {
-  margin: 6px 0 0;
+  margin: var(--sp-2) 0 0;
   font-size: 12.5px;
   color: var(--text-muted);
 }
 
 .checked {
-  font-size: 11.5px;
-  color: var(--text-faint);
+  font-size: 12px;
+  color: var(--text-muted);
   border-top: 1px solid var(--border);
-  padding-top: 10px;
+  padding-top: var(--sp-3);
 }
 
 /* 용어 카드: 페이지를 떠나지 않고 파고든다 */
 .term-stack {
   position: sticky;
   bottom: 0;
-  margin-top: 20px;
+  margin-top: var(--sp-5);
   background: var(--accent-soft);
   border-radius: var(--radius);
-  padding: 12px 14px;
+  padding: var(--sp-3) var(--sp-4);
 }
 
 .term-crumbs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 3px;
+  gap: var(--sp-1);
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-2);
   color: var(--text-muted);
 }
 
@@ -319,6 +297,12 @@ button.term:hover {
 
 .term-body .rich:last-child {
   margin-bottom: 0;
+}
+
+.panel-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
 }
 
 @media (max-width: 900px) {

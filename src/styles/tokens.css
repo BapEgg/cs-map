@@ -14,10 +14,15 @@
 
   --text: #1b2135;
   --text-muted: #5d6478;
-  --text-faint: #8b93a6;
+  /*
+   * 작은 글씨에 쓰는 색. 너무 흐리면 안 읽힌다(대비 4.5:1이 기준).
+   * 덜 중요한 건 색을 흐리게 하지 말고 크기를 줄이거나 여백으로 밀어낸다.
+   */
+  --text-faint: #646b7d;
 
   --accent: #3f5fae;
   --accent-soft: #dbe4f8;
+  --on-accent: #ffffff;
 
   /*
    * 트리 깊이별 색. 노드를 **채우지 않고 테두리로만** 쓴다.
@@ -48,7 +53,7 @@
   --highlight-bg: #fff3bf; /* 형광펜 */
   --highlight-text: #1b2135;
   --term-underline: #7048e8; /* 누를 수 있는 용어 */
-  --connective: #1098ad; /* 그래서/하지만 같은 연결어 */
+  --connective: #0b7285; /* 그래서/하지만 같은 연결어 */
 
   /*
    * 시각화. 역할색은 레퍼런스 영상(배열 최댓값 찾기)에서 뽑았고,
@@ -74,6 +79,18 @@
 
   --radius: 8px;
   --radius-lg: 14px;
+
+  /*
+   * 간격은 4의 배수만 쓴다. 눈대중으로 13px, 18px을 섞으면 "손댄 티"가 난다.
+   * 컴포넌트 안쪽 여백은 3~4, 덩어리 사이는 5~6을 쓴다.
+   */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
 }
 
 :root[data-theme='dark'] {
@@ -87,10 +104,11 @@
 
   --text: #e8ecf5;
   --text-muted: #a3abbd;
-  --text-faint: #737d92;
+  --text-faint: #8d97ab;
 
   --accent: #7da2f0;
   --accent-soft: #223255;
+  --on-accent: #0f1626;
 
   /* 밝을수록 큰 개념으로 뒤집는다. 어두운 배경에서 대비가 유지되도록. */
   --depth-0: #b6d0fd;

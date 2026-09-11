@@ -12,8 +12,8 @@
 .notes-bar {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
@@ -31,33 +31,17 @@
 
 .notes-io {
   display: flex;
-  gap: 6px;
+  gap: var(--sp-1);
   margin-left: auto;
-}
-
-.notes-io button {
-  font: inherit;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 4px 13px;
-  cursor: pointer;
-}
-
-.notes-io button:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 .notes-list {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 18px;
+  padding: var(--sp-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--sp-2);
 }
 
 .notes-empty {
@@ -69,7 +53,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 15px;
+  padding: var(--sp-3) var(--sp-4);
 }
 
 .notes-title {
@@ -83,7 +67,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
 }
 
 .notes-unsure {
@@ -92,16 +76,16 @@
   color: var(--mark-unsure);
   border: 1px solid var(--mark-unsure);
   border-radius: 999px;
-  padding: 1px 8px;
+  padding: 3px var(--sp-2);
 }
 
 .notes-line {
-  margin: 7px 0 0;
+  margin: var(--sp-2) 0 0;
   font-size: 14px;
 }
 
 .notes-text {
-  margin: 6px 0 0;
+  margin: var(--sp-1) 0 0;
   font-size: 13.5px;
   color: var(--text-muted);
   white-space: pre-wrap;
@@ -111,13 +95,13 @@
 .note {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--sp-3);
 }
 
 .note-field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--sp-1);
 }
 
 .note-field span {
@@ -134,7 +118,7 @@
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 9px 11px;
+  padding: var(--sp-2) var(--sp-3);
   resize: vertical;
 }
 
@@ -148,7 +132,7 @@
 .note-unsure {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--sp-2);
   font-size: 14px;
   cursor: pointer;
 }
@@ -165,6 +149,6 @@
   height: 6px;
   border-radius: 50%;
   background: var(--mark-unsure);
-  margin-left: 5px;
+  margin-left: var(--sp-1);
   vertical-align: 2px;
 }

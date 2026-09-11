@@ -55,14 +55,14 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
       <div className="quiz">
         <header className="quiz-bar">
           <h2>퀴즈</h2>
-          <button className="quiz-close" onClick={onClose}>
+          <button className="btn btn-quiet" onClick={onClose}>
             닫기
           </button>
         </header>
 
         <div className="quiz-setup">
           <section>
-            <h3>어디서 낼까요</h3>
+            <h3 className="section-title">어디서 낼까요</h3>
             <div className="quiz-scopes">
               {scopes.map((s) => (
                 <button
@@ -78,7 +78,7 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
           </section>
 
           <section>
-            <h3>무엇을 물을까요</h3>
+            <h3 className="section-title">무엇을 물을까요</h3>
             <div className="quiz-kinds">
               <button
                 className={kind === 'basic' ? 'on' : undefined}
@@ -106,7 +106,11 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
               )}
             </p>
 
-            <button className="quiz-start" onClick={start} disabled={available.length === 0}>
+            <button
+              className="btn btn-primary quiz-start"
+              onClick={start}
+              disabled={available.length === 0}
+            >
               시작하기
             </button>
           </section>
@@ -124,7 +128,7 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
       <div className="quiz">
         <header className="quiz-bar">
           <h2>퀴즈 결과</h2>
-          <button className="quiz-close" onClick={onClose}>
+          <button className="btn btn-quiet" onClick={onClose}>
             닫기
           </button>
         </header>
@@ -134,11 +138,12 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
           </p>
           {unsure.length > 0 && (
             <>
-              <h3>다시 볼 개념 {unsure.length}개</h3>
-              <div className="quiz-again">
+              <h3 className="section-title">다시 볼 개념 {unsure.length}개</h3>
+              <div className="chip-row quiz-again">
                 {[...new Map(unsure.map((q) => [q.id, q])).values()].map((q) => (
                   <button
                     key={q.id}
+                    className="chip chip-warn"
                     onClick={() => {
                       onGoTo(q.id);
                       onClose();
@@ -151,8 +156,12 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
             </>
           )}
           <div className="quiz-actions">
-            <button onClick={start}>다시 풀기</button>
-            <button onClick={() => setDeck(null)}>범위 바꾸기</button>
+            <button className="btn btn-secondary" onClick={start}>
+              다시 풀기
+            </button>
+            <button className="btn btn-secondary" onClick={() => setDeck(null)}>
+              범위 바꾸기
+            </button>
           </div>
         </div>
       </div>
@@ -170,7 +179,7 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
         <div className="quiz-progress">
           <i style={{ width: `${(at / deck.length) * 100}%` }} />
         </div>
-        <button className="quiz-close" onClick={onClose}>
+        <button className="btn btn-quiet" onClick={onClose}>
           닫기
         </button>
       </header>
@@ -187,7 +196,7 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
                 ? '한 줄 정의를 떠올려 보세요.'
                 : '먼저 말로 답해보고 나서 펼치세요.'}
             </p>
-            <button className="quiz-reveal" onClick={() => setShown(true)}>
+            <button className="btn btn-primary quiz-reveal" onClick={() => setShown(true)}>
               떠올렸어요 · 답 보기
             </button>
           </>

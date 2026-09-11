@@ -171,14 +171,27 @@ export default function TreeCanvas({
       </svg>
 
       <div className="tree-tools">
-        <button onClick={() => zoomBy(1.2)} aria-label="확대">
+        <button
+          className="btn btn-secondary btn-icon"
+          onClick={() => fit(layout.bounds)}
+          aria-label="전체가 보이게 맞추기"
+          title="전체가 보이게 맞추기"
+        >
+          ⤢
+        </button>
+        <button
+          className="btn btn-secondary btn-icon"
+          onClick={() => zoomBy(1.2)}
+          aria-label="확대"
+        >
           ＋
         </button>
-        <button onClick={() => zoomBy(1 / 1.2)} aria-label="축소">
+        <button
+          className="btn btn-secondary btn-icon"
+          onClick={() => zoomBy(1 / 1.2)}
+          aria-label="축소"
+        >
           －
-        </button>
-        <button onClick={() => fit(layout.bounds)} aria-label="화면에 맞추기">
-          ⤢
         </button>
       </div>
 

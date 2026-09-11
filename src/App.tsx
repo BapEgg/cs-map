@@ -86,34 +86,56 @@ export default function App() {
       <header className="bar">
         <h1>CS 지식 지도</h1>
 
-        <nav className="bar-roots">
-          📍
-          {roots.map((rid, i) => (
-            <span key={rid}>
-              {i > 0 && <span className="sep">›</span>}
-              {i === roots.length - 1 ? (
-                <b>{tree.byId[rid].title}</b>
-              ) : (
-                <button type="button" onClick={() => setRoots((r) => r.slice(0, i + 1))}>
-                  {tree.byId[rid].title}
-                </button>
-              )}
-            </span>
-          ))}
-        </nav>
+        {/* 가지를 파고들었을 때만 보여준다. 전체를 보고 있을 때는 앱 제목과 같은 말이라 군더더기다. */}
+        {roots.length > 1 && (
+          <nav className="bar-roots" aria-label="보고 있는 가지">
+            {roots.map((rid, i) => (
+              <span key={rid}>
+                {i > 0 && <span className="sep">›</span>}
+                {i === roots.length - 1 ? (
+                  <b>{tree.byId[rid].title}</b>
+                ) : (
+                  <button type="button" onClick={() => setRoots((r) => r.slice(0, i + 1))}>
+                    {tree.byId[rid].title}
+                  </button>
+                )}
+              </span>
+            ))}
+            <button
+              type="button"
+              className="bar-roots-out"
+              onClick={() => setRoots((r) => r.slice(0, -1))}
+            >
+              전체로 (Esc)
+            </button>
+          </nav>
+        )}
 
         <div className="bar-tools">
           {canZoomBranch && (
-            <button onClick={() => setRoots((r) => [...r, node.id])}>이 가지만 보기</button>
+            <button className="btn btn-secondary" onClick={() => setRoots((r) => [...r, node.id])}>
+              이 가지만 보기
+            </button>
           )}
-          <button onClick={() => setOverlay('quiz')}>퀴즈</button>
-          <button onClick={() => setOverlay('notes')}>
-            내 메모{notedIds.size > 0 && ` ${notedIds.size}`}
+          <button className="btn btn-secondary" onClick={() => setOverlay('quiz')}>
+            퀴즈
           </button>
-          <button onClick={() => setOrientation((o) => (o === 'h' ? 'v' : 'h'))}>
+          <button className="btn btn-secondary" onClick={() => setOverlay('notes')}>
+            내 메모
+            {notedIds.size > 0 && <em className="bar-count">{notedIds.size}</em>}
+          </button>
+
+          <span className="bar-divider" aria-hidden="true" />
+
+          <button
+            className="btn btn-quiet"
+            onClick={() => setOrientation((o) => (o === 'h' ? 'v' : 'h'))}
+          >
             {orientation === 'h' ? '좌→우' : '위→아래'}
           </button>
-          <button onClick={cycle}>테마: {THEME_LABEL[mode]}</button>
+          <button className="btn btn-quiet" onClick={cycle}>
+            {THEME_LABEL[mode]}
+          </button>
         </div>
       </header>
 
