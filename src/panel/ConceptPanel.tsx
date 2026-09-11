@@ -164,23 +164,35 @@ export default function ConceptPanel({
         <NoteTab note={note} onChange={onNote} />
       ) : tab === 'basic' ? (
         <div className="panel-body">
+          {/*
+            읽는 순서: **개념 정리 → 왜 나왔나 → 한 문장으로.**
+            무엇인지 먼저 알고, 왜 생겼는지 읽고, 그걸 한 문장으로 외운다.
+            개념 정리는 길어도 된다 — 외우는 건 그 아래 한 문장이 맡는다.
+          */}
           {node.isStub ? (
             <p className="stub-note">
               이 개념은 아직 내용을 쓰지 않았어요. 뼈대만 잡혀 있고, 곧 채울 예정이에요.
             </p>
           ) : (
-            parsed.why && (
-              <section>
-                <h3 className="section-title">왜 나왔나</h3>
-                <RichText text={parsed.why} {...richProps} />
-              </section>
-            )
+            <>
+              {parsed.concept && (
+                <section>
+                  <h3 className="section-title">개념 정리</h3>
+                  <RichText text={parsed.concept} {...richProps} />
+                </section>
+              )}
+              {parsed.why && (
+                <section>
+                  <h3 className="section-title">왜 나왔나</h3>
+                  <RichText text={parsed.why} {...richProps} />
+                </section>
+              )}
+            </>
           )}
 
           {/*
-            외울 한 문장. **설명 뒤에** 둔다.
-            맨 위에 두면 아직 배경을 모르는 채로 읽어 눈에 안 들어오고, 설명을 읽고 나면 다시
-            올라가 보지 않는다. 배경을 이해한 직후에 나와야 "아, 그래서 이 말이구나"가 된다.
+            외울 한 문장. 설명(개념 정리·왜 나왔나)을 다 읽은 **뒤에** 둔다.
+            배경을 이해한 직후에 나와야 "아, 그래서 이 말이구나"가 된다.
             면접에서 그대로 튀어나올 수 있게 앞뒤가 맞는 완전한 문장으로 쓴다(HANDOFF 5-4).
           */}
           {node.card?.one_line && (

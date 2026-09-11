@@ -1,6 +1,6 @@
 /**
  * 개념 마크다운 본문을 탭별로 가른다.
- * 형식은 HANDOFF 5-2를 따른다: `## 왜 나왔나`, `## 심화` 아래 `### 내부 구조 / 실제 활용 / 면접 질문`.
+ * 형식은 HANDOFF 5-2를 따른다: `## 개념`, `## 왜 나왔나`, `## 심화` 아래 `### 내부 구조 / 실제 활용 / 면접 질문`.
  */
 
 export interface InterviewQuestion {
@@ -17,6 +17,8 @@ export interface DeepSection {
 }
 
 export interface ParsedBody {
+  /** 기초 탭 맨 위. 무엇이고 어떻게 도는지. 길어도 된다. */
+  concept: string;
   /** 기초 탭의 "왜 나왔나". */
   why: string;
   deep: DeepSection | null;
@@ -44,6 +46,7 @@ export function parseBody(body: string): ParsedBody {
     return lines.slice(start, end);
   };
 
+  let concept = '';
   let why = '';
   const deep: DeepSection = { internals: [], usage: [], interview: [] };
   let sawDeep = false;
@@ -52,7 +55,9 @@ export function parseBody(body: string): ParsedBody {
     const { level, title } = heads[i];
     const chunk = sliceAfter(i);
 
-    if (level === 2 && title === '왜 나왔나') {
+    if (level === 2 && title === '개념') {
+      concept = chunk.join('\n').trim();
+    } else if (level === 2 && title === '왜 나왔나') {
       why = chunk.join('\n').trim();
     } else if (level === 2 && title === '심화') {
       sawDeep = true;
@@ -74,5 +79,5 @@ export function parseBody(body: string): ParsedBody {
   }
 
   const hasDeep = sawDeep && (deep.internals.length || deep.usage.length || deep.interview.length);
-  return { why, deep: hasDeep ? deep : null };
+  return { concept, why, deep: hasDeep ? deep : null };
 }
