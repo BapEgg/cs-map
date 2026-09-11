@@ -1,6 +1,6 @@
 import type { ConceptNode } from '../content/types';
 
-/** 좌→우(h)가 기본. 위→아래(v)로 바꿀 수 있다. */
+/** 가로(h)가 기본. 세로(v)로 바꿀 수 있다. */
 export type Orientation = 'h' | 'v';
 
 export interface Point {
@@ -39,9 +39,9 @@ export interface Layout {
 
 export const NODE_H = 40;
 
-const ROW_H = 54; // 좌→우에서 형제 한 칸. 노드 높이보다 커야 서로 안 붙는다.
-const GAP_X = 28; // 형제 사이 틈(위→아래) / 열 사이 틈(좌→우)
-const LEV_H = 116; // 위→아래에서 깊이 한 칸
+const ROW_H = 54; // 가로에서 형제 한 칸. 노드 높이보다 커야 서로 안 붙는다.
+const GAP_X = 28; // 형제 사이 틈(세로) / 열 사이 틈(가로)
+const LEV_H = 116; // 세로에서 깊이 한 칸
 
 const MIN_W = 76;
 const MAX_W = 264;
@@ -95,7 +95,7 @@ export function fitTitle(title: string, space: number) {
 }
 
 /**
- * 트리를 좌표로 펼친다. `x`는 좌→우에서 왼쪽 끝, 위→아래에서 가로 가운데다. `y`는 세로 가운데.
+ * 트리를 좌표로 펼친다. 가로 배치에서 `x`는 노드의 왼쪽 끝, 세로 배치에서는 가운데다. `y`는 언제나 가운데.
  *
  * 접힌 노드도 목록에 넣되 **가장 가까운 보이는 조상의 자리**에 겹쳐 두고 `hidden`으로 표시한다.
  * 그리는 쪽이 그걸 투명하게 그리면, 펼치기는 "부모에서 자기 자리로 이동",
@@ -244,7 +244,7 @@ function boundsOf(visible: string[], byId: Record<string, Placed>, orientation: 
 }
 
 /**
- * 부모에서 자식으로 가는 연결선. 좌→우는 부드러운 곡선, 위→아래는 직각(엘보).
+ * 부모에서 자식으로 가는 연결선. 가로는 부드러운 곡선, 세로는 직각(엘보).
  * 노드와 같은 속도로 움직여야 해서 CSS로 `d`를 전환한다. 명령 구조가 같아야 보간된다.
  */
 export function linkPath(a: Placed, b: Placed, orientation: Orientation): string {
@@ -273,17 +273,32 @@ export function fitCamera(
   view: { w: number; h: number },
   { min = 0.55, max = 1, focus }: { min?: number; max?: number; focus?: Box } = {},
 ) {
-  const pad = 40;
+  /*
+   * 여백은 두 값을 쓴다.
+   *
+   * 배율을 정할 때는 **최소 여백만** 요구한다. 40px을 고정으로 요구하면
+   * "80px만 더 있으면 다 들어가는데" 하는 상황에서 통째로 포기해 버린다
+   * (1000×800에서 19개 중 2개가 그렇게 잘렸다).
+   * 자리를 잡을 때는 남는 만큼 여백을 주되 40px을 넘기지 않는다.
+   */
+  const PAD = 40;
+  const MIN_PAD = 8;
   if (bounds.w <= 0 || bounds.h <= 0 || view.w <= 0 || view.h <= 0) {
-    return { x: pad, y: Math.max(0, view.h) / 2, k: 1 };
+    return { x: PAD, y: Math.max(0, view.h) / 2, k: 1 };
   }
-  const raw = Math.min(max, (view.w - pad * 2) / bounds.w, (view.h - pad * 2) / bounds.h);
-  const k = Math.max(min, raw);
+  /*
+   * 넉넉한 여백으로 들어가면 그대로 쓴다. **바닥에 걸릴 때만** 여백을 깎아 본다.
+   * 늘 최소 여백으로 재면 넓은 화면에서도 가장자리까지 꽉 채워 버려 답답해진다.
+   */
+  const fitWith = (pad: number) =>
+    Math.min(max, (view.w - pad * 2) / bounds.w, (view.h - pad * 2) / bounds.h);
+  const roomy = fitWith(PAD);
+  const k = roomy >= min ? roomy : Math.max(min, fitWith(MIN_PAD));
   /*
    * 들어가면 가운데.
    *
    * 안 들어가면 **관심 있는 데를 가운데**에 놓되, 내용 바깥까지 밀려나지 않게 잡아 둔다.
-   * 관심 자리가 없으면 시작점에 붙인다 — 양쪽을 똑같이 잘라 버리면 좌→우 트리의
+   * 관심 자리가 없으면 시작점에 붙인다 — 양쪽을 똑같이 잘라 버리면 가로 트리의
    * 뿌리와 과목 열이 화면 밖으로 사라져서, 어디서 뻗어 나온 가지인지 모른 채 보게 된다.
    */
   const place = (
@@ -292,8 +307,10 @@ export function fitCamera(
     origin: number,
     at?: { from: number; size: number },
   ) => {
+    const drawn = size * k;
+    const pad = Math.min(PAD, Math.max(MIN_PAD, (span - drawn) / 2));
     const room = span - pad * 2;
-    if (size * k <= room) return pad + (room - size * k) / 2 - origin * k;
+    if (drawn <= room) return pad + (room - drawn) / 2 - origin * k;
     if (!at) return pad - origin * k;
     const centered = span / 2 - (at.from + at.size / 2) * k;
     const atStart = pad - origin * k;

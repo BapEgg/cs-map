@@ -79,6 +79,63 @@
   margin: 0 var(--sp-1);
 }
 
+/* 좁은 화면의 접은 도구 모음 */
+.tools-menu {
+  position: relative;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.tools-menu-open {
+  min-width: 44px;
+  min-height: 40px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.tools-menu-list {
+  position: absolute;
+  top: calc(100% + var(--sp-1));
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 168px;
+  padding: var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.tools-menu-list button {
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  /* 손가락으로 누른다. 목록 안에서도 44px을 지킨다. */
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.tools-menu-list button.quiet {
+  color: var(--text-muted);
+}
+
+.tools-menu-list button:hover {
+  background: var(--surface-sunken);
+}
+
+.tools-menu-sep {
+  height: 1px;
+  margin: var(--sp-1) var(--sp-2);
+  background: var(--border);
+}
+
 .bar-count {
   font-style: normal;
   font-size: 11px;
@@ -182,27 +239,10 @@
   }
 
   /*
-   * 도구가 가로로 넘쳐서 잘리던 걸 옆으로 밀어 볼 수 있게 한다.
-   * 줄바꿈으로 쌓으면 지도 볼 자리를 그만큼 잃는다.
-   *
-   * 스크롤바를 숨겼으니 **오른쪽 끝을 흐리게** 해서 더 있다는 걸 알린다.
-   * 390px에서 6개가 459px을 차지해 마지막 둘(방향·테마)이 잘리는데,
-   * 표시가 없으면 그런 게 있는 줄도 모른 채 못 쓴다.
+   * 도구는 줄로 펼치지 않고 ⋯ 안에 접는다(ToolsMenu). 머리말이 세 줄에서 두 줄이 되고
+   * 그만큼 지도가 커진다. 옆으로 밀어 보게 하던 예전 방식은 가려진 게 있다는 걸
+   * 알아채기 어려웠다.
    */
-  .bar-tools {
-    width: 100%;
-    margin-left: 0;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-  }
-
-  .bar-tools::-webkit-scrollbar {
-    display: none;
-  }
-
   .search {
     flex: 1 1 auto;
   }

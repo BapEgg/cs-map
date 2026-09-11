@@ -37,7 +37,7 @@ describe('layoutTree', () => {
     expect(byId.a1.y).toBe(byId.a.y);
   });
 
-  it('깊이가 깊을수록 오른쪽에 놓인다 (좌→우)', () => {
+  it('깊이가 깊을수록 오른쪽에 놓인다 (가로)', () => {
     const { byId } = layoutTree(tree.byId, 'root', new Set(['root', 'a']), 'h');
     expect(byId.root.x).toBeLessThan(byId.a.x);
     expect(byId.a.x).toBeLessThan(byId.a1.x);
@@ -74,7 +74,7 @@ describe('layoutTree', () => {
     expect(opened.bounds.w).toBeGreaterThan(closed.bounds.w);
   });
 
-  it('위→아래에서는 깊이가 y로 간다', () => {
+  it('세로에서는 깊이가 y로 간다', () => {
     const { byId } = layoutTree(tree.byId, 'root', new Set(['root', 'a']), 'v');
     expect(byId.root.y).toBeLessThan(byId.a.y);
     expect(byId.a.y).toBeLessThan(byId.a1.y);
@@ -141,10 +141,24 @@ describe('fitCamera', () => {
 
   it('안 들어가면 가운데가 아니라 시작점에 붙인다', () => {
     // 넘치는데 가운데에 두면 양쪽이 잘려서 뿌리와 과목 열이 화면 밖으로 사라진다.
+    // 넘칠 때 여백은 최소값(8)까지 줄어든다 — 남는 자리가 없으니 더 줄 수도 없다.
     const bounds = { x: 0, y: 0, w: 4000, h: 300 };
     const cam = fitCamera(bounds, view, { min: 0.85, max: 1 });
     expect(cam.k).toBe(0.85);
-    expect(cam.x).toBe(40);
+    expect(cam.x).toBe(8);
+  });
+
+  it('조금 모자랄 때는 여백을 줄여서라도 다 담는다', () => {
+    /*
+     * 40px 여백을 고정으로 요구하면 "조금만 더 있으면 들어가는데" 하고 통째로 포기한다.
+     * 1000×800에서 19개 중 2개가 그렇게 잘렸다.
+     */
+    // 여백 40을 고집하면 배율이 0.81까지 내려가야 해서 바닥(0.85)에 걸리고 아래가 잘린다.
+    const bounds = { x: 0, y: 0, w: 400, h: 640 };
+    const cam = fitCamera(bounds, { w: 800, h: 600 }, { min: 0.85, max: 1 });
+    expect(cam.k).toBeGreaterThanOrEqual(0.85);
+    expect(cam.y).toBeGreaterThanOrEqual(0);
+    expect(cam.y + bounds.h * cam.k).toBeLessThanOrEqual(600);
   });
 
   it('배율 아래 한계를 지켜 글씨가 얼룩이 되지 않게 한다', () => {
@@ -172,14 +186,14 @@ describe('fitCamera · 다 안 들어갈 때', () => {
 
   it('관심 자리가 끝에 있어도 내용 바깥으로 밀려나지 않는다', () => {
     const atStart = fitCamera(bounds, view, { ...opts, focus: { x: 0, y: 0, w: 80, h: 40 } });
-    expect(atStart.x).toBe(40);
+    expect(atStart.x).toBe(8);
 
     const atEnd = fitCamera(bounds, view, { ...opts, focus: { x: 3920, y: 0, w: 80, h: 40 } });
-    expect(atEnd.x).toBeCloseTo(view.w - 40 - bounds.w * atEnd.k);
+    expect(atEnd.x).toBeCloseTo(view.w - 8 - bounds.w * atEnd.k);
   });
 
   it('관심 자리가 없으면 시작점에 붙인다', () => {
-    expect(fitCamera(bounds, view, opts).x).toBe(40);
+    expect(fitCamera(bounds, view, opts).x).toBe(8);
   });
 });
 

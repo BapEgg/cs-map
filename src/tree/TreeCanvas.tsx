@@ -34,6 +34,11 @@ interface Props {
   onNodeClick: (id: string) => void;
   /** 펼침 표시를 눌렀을 때. 접기·펴기만 한다. */
   onToggle: (id: string) => void;
+  /**
+   * 지금 화면에 자리를 갖고 있는지. 폰에서 설명만 볼 때는 false다.
+   * 숨어 있는 동안 미뤄 둔 카메라 이동을 다시 보일 때 처리하려면 이 신호가 필요하다.
+   */
+  visible?: boolean;
   /** 카메라를 떠 두고 되돌리기 위한 손잡이. */
   handleRef?: React.RefObject<TreeHandle | null>;
 }
@@ -68,6 +73,7 @@ export default function TreeCanvas({
   noted,
   onNodeClick,
   onToggle,
+  visible = true,
   handleRef,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -121,7 +127,8 @@ export default function TreeCanvas({
     const first = lastFit.current === '';
     lastFit.current = key;
     fit(layout.bounds, !first, focusBox(layout, selected));
-  }, [orientation, root, layout, selected, fit, hasSize, focusBox]);
+    // visible: 숨어 있는 동안 건너뛴 첫 맞춤을 다시 보일 때 하기 위해.
+  }, [orientation, root, layout, selected, visible, fit, hasSize, focusBox]);
 
   /**
    * 방금 펼친 노드. 본체 클릭·＋/－·키보드 어느 길로 펼쳐도 여기 기록된다.
@@ -180,23 +187,19 @@ export default function TreeCanvas({
 
   /**
    * 지도가 **숨었다가 다시 보일 때**(폰에서 설명을 보다 지도로 돌아옴).
+   * 적어 둔 자리를 여기서 비운다.
    *
-   * 전에는 ResizeObserver가 0 크기를 거쳐 갔는지로만 판단했는데, 관측이 다시 걸리는 시점에 따라
-   * 그 0을 못 보고 지나가면 고른 노드가 화면 밖에 남았다. 이제는 위에서 적어 둔 자리를
-   * **크기가 잡히는 대로 비운다.** 적어 둔 게 없으면 보던 자리를 그대로 둔다.
+   * ResizeObserver로는 못 잡는다. `display: none`이 된 요소는 관측에서 아예 빠지고,
+   * 다시 보일 때 **크기가 전과 같으면 콜백이 한 번도 안 온다**(366×708 → 숨김 → 366×708).
+   * 그래서 보이는지 아닌지를 밖에서 받아 쓴다.
    */
   useEffect(() => {
-    const el = svgRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(() => {
-      const box = pending.current;
-      if (!box || el.clientWidth <= 0 || el.clientHeight <= 0) return;
-      pending.current = null;
-      ensureVisible(box);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [ensureVisible]);
+    if (!visible || !hasSize()) return;
+    const box = pending.current;
+    if (!box) return;
+    pending.current = null;
+    ensureVisible(box);
+  }, [visible, ensureVisible, hasSize]);
 
   /**
    * 흐리게 하지 않을 노드: 고른 개념, 거기까지 가는 길, 그 아래 자식, 그리고 형제.
@@ -312,7 +315,7 @@ export default function TreeCanvas({
             const isOpen = open.has(p.id);
             const icon = p.depth === 1;
             const statuses = statusesOf(p.id, node, noted, marks);
-            // 좌→우는 왼쪽 끝이 기준, 위→아래는 가운데가 기준이다.
+            // 가로는 왼쪽 끝이 기준, 세로는 가운데가 기준이다.
             const x = orientation === 'h' ? p.x : p.x - p.w / 2;
             const y = p.y - NODE_H / 2;
 

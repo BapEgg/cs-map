@@ -11,6 +11,7 @@ import { useStudy } from './store/useStudy';
 import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
+import ToolsMenu, { type Tool } from './ui/ToolsMenu';
 import { ONE_PANE, useMedia } from './ui/media';
 import VizStage from './viz/VizStage';
 import './App.css';
@@ -19,6 +20,15 @@ const THEME_LABEL: Record<ThemeMode, string> = {
   light: '라이트',
   dark: '다크',
   system: '시스템',
+};
+
+/**
+ * 지도가 뻗는 방향. 버튼은 **지금 상태**를 보여준다(테마 버튼과 같은 규칙).
+ * "좌→우 / 위→아래"는 화살표가 눈에 먼저 들어와서 무슨 버튼인지보다 기호를 먼저 읽게 됐다.
+ */
+const ORIENTATION_LABEL: Record<Orientation, string> = {
+  h: '가로',
+  v: '세로',
 };
 
 /** 어디서 어떻게 보고 있었는지 통째로. 돌아가기가 이걸 그대로 되살린다. */
@@ -254,6 +264,48 @@ export default function App() {
   const canZoomBranch = node && node.childIds.length > 0 && node.id !== root;
   const backTo = trail.length ? tree.byId[trail[trail.length - 1].id]?.title : undefined;
 
+  /**
+   * 머리말 도구. 넓은 화면에서는 줄로 펼치고 좁은 화면에서는 접는다.
+   * 같은 목록을 두 곳이 나눠 쓴다 — 한쪽에만 버튼이 생기는 일이 없도록.
+   */
+  const tools: Tool[] = [
+    ...(canZoomBranch
+      ? [
+          {
+            key: 'branch',
+            label: '이 가지만 보기',
+            onClick: () => setRoots((r) => [...r, node.id]),
+          },
+        ]
+      : []),
+    { key: 'quiz', label: '퀴즈', onClick: () => setOverlay('quiz') },
+    {
+      key: 'notes',
+      label: (
+        <>
+          내 메모
+          {notedIds.size > 0 && <em className="bar-count">{notedIds.size}</em>}
+        </>
+      ),
+      onClick: () => setOverlay('notes'),
+    },
+    { key: 'sep', separator: true },
+    {
+      key: 'orientation',
+      label: ORIENTATION_LABEL[orientation],
+      title: `지도가 뻗는 방향 — 지금은 ${ORIENTATION_LABEL[orientation]}`,
+      quiet: true,
+      onClick: () => setOrientation((o) => (o === 'h' ? 'v' : 'h')),
+    },
+    {
+      key: 'theme',
+      label: THEME_LABEL[mode],
+      title: `화면 밝기 — 지금은 ${THEME_LABEL[mode]}`,
+      quiet: true,
+      onClick: cycle,
+    },
+  ];
+
   return (
     <div className="app">
       <header className="bar">
@@ -295,32 +347,30 @@ export default function App() {
           </nav>
         )}
 
-        <div className="bar-tools">
-          {canZoomBranch && (
-            <button className="btn btn-secondary" onClick={() => setRoots((r) => [...r, node.id])}>
-              이 가지만 보기
-            </button>
-          )}
-          <button className="btn btn-secondary" onClick={() => setOverlay('quiz')}>
-            퀴즈
-          </button>
-          <button className="btn btn-secondary" onClick={() => setOverlay('notes')}>
-            내 메모
-            {notedIds.size > 0 && <em className="bar-count">{notedIds.size}</em>}
-          </button>
-
-          <span className="bar-divider" aria-hidden="true" />
-
-          <button
-            className="btn btn-quiet"
-            onClick={() => setOrientation((o) => (o === 'h' ? 'v' : 'h'))}
-          >
-            {orientation === 'h' ? '좌→우' : '위→아래'}
-          </button>
-          <button className="btn btn-quiet" onClick={cycle}>
-            {THEME_LABEL[mode]}
-          </button>
-        </div>
+        {/*
+          좁은 화면에서는 도구를 접는다. 머리말 한 줄이 통째로 사라지고 그만큼 지도가 커진다.
+          넓은 화면에서는 그대로 펼쳐 둔다 — 자리가 있는데 한 번 더 누르게 만들 이유가 없다.
+        */}
+        {narrow ? (
+          <ToolsMenu tools={tools} count={notedIds.size} />
+        ) : (
+          <div className="bar-tools">
+            {tools.map((t) =>
+              'separator' in t ? (
+                <span key={t.key} className="bar-divider" aria-hidden="true" />
+              ) : (
+                <button
+                  key={t.key}
+                  className={`btn ${t.quiet ? 'btn-quiet' : 'btn-secondary'}`}
+                  title={t.title}
+                  onClick={t.onClick}
+                >
+                  {t.label}
+                </button>
+              ),
+            )}
+          </div>
+        )}
       </header>
 
       {narrow && (
@@ -355,6 +405,7 @@ export default function App() {
           noted={notedIds}
           onNodeClick={clickNode}
           onToggle={toggle}
+          visible={!narrow || phoneView === 'map'}
           handleRef={treeRef}
         />
         {selected ? (
