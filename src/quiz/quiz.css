@@ -123,7 +123,44 @@
 .quiz-count {
   font-size: 13.5px;
   color: var(--text-muted);
+  margin: 0 0 var(--sp-2);
+}
+
+/* 왜 이 문제가 나오는지. 순서를 알면 "왜 또 이게 나와?"가 안 생긴다. */
+.quiz-policy {
+  font-size: 12.5px;
+  color: var(--text-faint);
   margin: 0 0 var(--sp-3);
+}
+
+/*
+ * 단축키 표시. 손을 자판에서 떼지 않고 풀 수 있다는 걸 알려준다.
+ * 터치 화면에는 자판이 없으니 감춘다.
+ */
+kbd {
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 5px;
+  margin-right: 2px;
+}
+
+.quiz-keyhint {
+  font-size: 12.5px;
+  color: var(--text-faint);
+  margin: var(--sp-3) 0 0;
+}
+
+@media (pointer: coarse) {
+  kbd,
+  .quiz-keyhint {
+    display: none;
+  }
 }
 
 .quiz-start {

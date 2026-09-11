@@ -11,6 +11,9 @@ import { useStudy } from './store/useStudy';
 import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
+import Splitter from './ui/Splitter';
+import { usePanelWidth } from './ui/panelWidth';
+import { useReadSize } from './ui/readSize';
 import ToolsMenu, { type Tool } from './ui/ToolsMenu';
 import { ONE_PANE, useMedia } from './ui/media';
 import VizStage from './viz/VizStage';
@@ -61,8 +64,13 @@ export default function App() {
   const [roots, setRoots] = useState<string[]>([tree.rootId]);
   const root = roots[roots.length - 1];
   const [overlay, setOverlay] = useState<'quiz' | 'notes' | 'viz' | null>(null);
-  /** 읽기에 공간을 더 줄지. 탐색할 때는 지도, 읽을 때는 설명이 넓어야 한다. */
-  const [wide, setWide] = useState(false);
+  /**
+   * 설명 패널 너비. 사람마다·화면마다 편한 비율이 달라서 **끌어서 정하게** 둔다.
+   * (전에는 "설명 넓게" 버튼으로 두 단계만 오갔다.)
+   */
+  const { width: panelWidth, set: setPanelWidth } = usePanelWidth();
+  /** 읽는 글씨 크기. 화면 전체를 확대하면 지도가 좁아지니 읽는 글만 키운다. */
+  const read = useReadSize();
 
   /**
    * 좁은 화면에서는 지도와 설명을 한 화면에 같이 못 둔다. 세로로 쌓으면 둘 다 반쪽이 된다.
@@ -298,6 +306,13 @@ export default function App() {
       onClick: () => setOrientation((o) => (o === 'h' ? 'v' : 'h')),
     },
     {
+      key: 'read',
+      label: `글씨 ${read.label}`,
+      title: `설명 글씨 크기 — 지금은 ${read.label}`,
+      quiet: true,
+      onClick: read.cycle,
+    },
+    {
       key: 'theme',
       label: THEME_LABEL[mode],
       title: `화면 밝기 — 지금은 ${THEME_LABEL[mode]}`,
@@ -394,7 +409,15 @@ export default function App() {
         </div>
       )}
 
-      <main className={`map${wide ? ' map-wide' : ''}${narrow ? ` phone-${phoneView}` : ''}`}>
+      <main
+        className={`map${narrow ? ` phone-${phoneView}` : ''}`}
+        style={
+          {
+            ['--read-scale' as string]: read.size,
+            ...(narrow ? {} : { ['--panel-w' as string]: `${panelWidth}px` }),
+          } as React.CSSProperties
+        }
+      >
         <TreeCanvas
           byId={tree.byId}
           root={root}
@@ -408,6 +431,8 @@ export default function App() {
           visible={!narrow || phoneView === 'map'}
           handleRef={treeRef}
         />
+        {!narrow && <Splitter width={panelWidth} onChange={setPanelWidth} />}
+
         {selected ? (
           <ConceptPanel
             key={selected}
@@ -421,8 +446,6 @@ export default function App() {
             backTo={backTo}
             onBack={back}
             onOpenViz={() => setOverlay('viz')}
-            wide={wide}
-            onToggleWide={() => setWide((w) => !w)}
           />
         ) : (
           <StartPanel
@@ -439,6 +462,7 @@ export default function App() {
         {overlay === 'quiz' && (
           <QuizMode
             tree={tree}
+            marks={study.data.marks}
             onMark={study.setMark}
             onClose={() => setOverlay(null)}
             onGoTo={jump}

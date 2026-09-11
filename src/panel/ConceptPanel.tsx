@@ -29,9 +29,6 @@ interface Props {
   backTo?: string;
   onBack: () => void;
   onOpenViz: () => void;
-  /** 넓게 읽기 토글. */
-  wide: boolean;
-  onToggleWide: () => void;
 }
 
 /** 용어를 눌러 펼친 짧은 설명. 개념이든 용어든 **항상 이걸 먼저 보여준다.** */
@@ -53,8 +50,6 @@ export default function ConceptPanel({
   backTo,
   onBack,
   onOpenViz,
-  wide,
-  onToggleWide,
 }: Props) {
   const node = tree.byId[id];
   const [tab, setTab] = useState<Tab>(restore?.tab ?? 'basic');
@@ -108,22 +103,14 @@ export default function ConceptPanel({
   const top = cards[cards.length - 1];
 
   return (
-    <aside className={`panel${wide ? ' panel-wide' : ''}`} ref={scroller}>
-      <div className="panel-top">
-        {backTo && (
+    <aside className="panel" ref={scroller}>
+      {backTo && (
+        <div className="panel-top">
           <button className="btn btn-quiet panel-back" onClick={onBack}>
             ← {backTo}
           </button>
-        )}
-        <button
-          className="btn btn-quiet btn-icon panel-wide-toggle"
-          onClick={onToggleWide}
-          aria-label={wide ? '설명 좁게' : '설명 넓게'}
-          title={wide ? '설명 좁게' : '설명 넓게'}
-        >
-          {wide ? '⇥' : '⇤'}
-        </button>
-      </div>
+        </div>
+      )}
 
       <nav className="panel-path">
         {path.map((pid, i) => (

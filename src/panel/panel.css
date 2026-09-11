@@ -1,6 +1,9 @@
+/*
+ * 너비는 사용자가 끌어서 정한다(--panel-w, Splitter). 전환은 걸지 않는다 —
+ * 끄는 동안 뒤늦게 따라오면 손과 화면이 어긋나 잡고 있다는 느낌이 사라진다.
+ */
 .panel {
-  flex: 0 0 480px;
-  transition: flex-basis 0.25s ease;
+  flex: 0 0 var(--panel-w, 480px);
   min-width: 0;
   max-height: 100%;
   overflow-y: auto;
@@ -8,16 +11,6 @@
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
-}
-
-/*
- * 좁은 데스크톱. 480px을 고정으로 떼 주면 1000px 화면에서 지도에 476px밖에 안 남아
- * 둘 다 좁아진다. 설명은 400px이면 한 줄에 40자쯤 들어가 아직 읽을 만하다.
- */
-@media (max-width: 1300px) and (min-width: 1101px) {
-  .panel {
-    flex: 0 0 400px;
-  }
 }
 
 .panel-path {
@@ -56,7 +49,9 @@
 
 .panel-title {
   margin: var(--sp-1) 0 var(--sp-3);
-  font-size: 22px;
+  font-size: calc(22px * var(--read-scale, 1));
+  /* 제목 마지막 줄에 한 낱말만 남는 걸 막는다. */
+  text-wrap: balance;
 }
 
 .panel-sim-open {
@@ -126,9 +121,10 @@
 
 .card3-line {
   margin: 0;
-  font-size: 19px;
+  font-size: calc(19px * var(--read-scale, 1));
   font-weight: 700;
   line-height: 1.5;
+  text-wrap: balance;
 }
 
 /*
@@ -145,7 +141,7 @@
 
 .card3-analogy {
   margin: var(--sp-2) 0 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--read-scale, 1));
   color: var(--text-muted);
 }
 
@@ -172,10 +168,17 @@
   opacity: 0.5;
 }
 
-/* 본문: 한 문장 = 한 줄 */
+/*
+ * 본문: 한 문장 = 한 줄.
+ *
+ * `max-width`로 **한 줄 길이를 묶는다.** 패널을 끌어서 넓히면 글자가 커지는 게 아니라
+ * 한 줄이 길어지는데, 줄이 길수록 다음 줄 첫 글자를 찾기 어려워진다.
+ * 40자 안팎이 한글에서 눈이 한 번에 훑는 길이다. 남는 폭은 여백으로 둔다.
+ */
 .rich {
   margin: 0 0 var(--sp-3);
-  font-size: 16px;
+  max-width: 40em;
+  font-size: calc(16px * var(--read-scale, 1));
   line-height: 1.75;
 }
 
@@ -184,11 +187,19 @@
   margin-bottom: var(--sp-3);
 }
 
-.rich mark {
+.rich mark,
+.card3-line mark {
   background: var(--highlight-bg);
   color: var(--highlight-text);
   padding: 0 3px;
   border-radius: 3px;
+  /*
+   * 형광펜이 줄을 넘어갈 때 **양쪽 끝을 각각 마감한다.**
+   * 기본값(slice)은 한 상자를 칼로 자른 모양이라 첫 줄 오른쪽·둘째 줄 왼쪽이
+   * 각지게 끊겨 낙서처럼 보인다.
+   */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .rich .conn {
@@ -255,7 +266,7 @@ button.term:hover {
 
 .qa-q {
   font: inherit;
-  font-size: 14px;
+  font-size: calc(14px * var(--read-scale, 1));
   font-weight: 600;
   text-align: left;
   width: 100%;
@@ -269,7 +280,7 @@ button.term:hover {
 
 .qa-a {
   padding: var(--sp-3) var(--sp-3) 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--read-scale, 1));
 }
 
 .qa-follow {
@@ -324,7 +335,7 @@ button.term:hover {
 }
 
 .term-body {
-  font-size: 14px;
+  font-size: calc(14px * var(--read-scale, 1));
 }
 
 .term-body .rich:last-child {
@@ -345,11 +356,6 @@ button.term:hover {
   }
 }
 
-/* 읽기 넓게 */
-.panel-wide {
-  flex: 1 1 60%;
-}
-
 .panel-top {
   display: flex;
   align-items: center;
@@ -363,11 +369,6 @@ button.term:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
-}
-
-.panel-wide-toggle {
-  margin-left: auto;
-  flex: 0 0 auto;
 }
 
 .stub-badge {

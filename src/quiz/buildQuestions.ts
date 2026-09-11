@@ -96,3 +96,42 @@ export function shuffle<T>(list: T[], random: () => number = Math.random): T[] {
   }
   return out;
 }
+
+/** 한 번에 푸는 문제 수. 72문제를 끝까지 밀면 중간에 그만두게 된다. */
+export const SESSION = 10;
+
+/**
+ * 이번에 낼 문제를 고른다. **모르는 것부터 낸다.**
+ *
+ * 섞기만 하면 이미 외운 것과 한 번도 못 본 것이 같은 확률로 나온다.
+ * 공부에 쓰는 시간이 한정돼 있으니 순서를 정한다:
+ *
+ *   1. 헷갈렸다고 표시한 것
+ *   2. 아직 한 번도 안 나온 것
+ *   3. 기억났던 것 — 오래된 것부터 (시간이 지나면 다시 흐려진다)
+ *
+ * 같은 칸 안에서는 섞는다. 순서로 외워버리지 않게.
+ *
+ * @param marks 누적 기록. 화면 쪽 자료구조를 그대로 받는다.
+ */
+export function pickSession(
+  all: Question[],
+  marks: Record<string, { known: boolean; at: string }>,
+  size = SESSION,
+  random: () => number = Math.random,
+): Question[] {
+  const unsure: Question[] = [];
+  const fresh: Question[] = [];
+  const known: Question[] = [];
+  for (const q of all) {
+    const m = marks[q.id];
+    if (!m) fresh.push(q);
+    else if (!m.known) unsure.push(q);
+    else known.push(q);
+  }
+  // 기억났던 건 오래된 것부터. 같은 시각이면 섞인 순서를 따른다.
+  const byAge = shuffle(known, random).sort((a, b) =>
+    (marks[a.id]?.at ?? '').localeCompare(marks[b.id]?.at ?? ''),
+  );
+  return [...shuffle(unsure, random), ...shuffle(fresh, random), ...byAge].slice(0, size);
+}

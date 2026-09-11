@@ -146,9 +146,44 @@
   padding: 1px 6px;
 }
 
-/* 읽기에 공간을 더 준 상태. 탐색할 때는 지도, 읽을 때는 설명이 넓어야 한다. */
-.map-wide .tree-wrap {
-  flex: 0 1 40%;
+/*
+ * 지도와 설명 사이 손잡이. 폭은 넉넉히(잡기 쉽게) 두고 **선만 가늘게** 보인다.
+ * 버튼 두 단계로 오가던 걸 대신한다 — 편한 비율은 화면 크기마다 다르다.
+ */
+.splitter {
+  flex: 0 0 10px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 calc(var(--sp-3) * -0.5);
+  cursor: col-resize;
+  background: none;
+  border: none;
+  outline: none;
+  touch-action: none;
+}
+
+.splitter-grip {
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--border);
+  transition:
+    background var(--move-fast) ease,
+    height var(--move-fast) ease;
+}
+
+.splitter:hover .splitter-grip,
+.splitter.dragging .splitter-grip {
+  background: var(--accent);
+  height: 72px;
+}
+
+.splitter:focus-visible .splitter-grip {
+  background: var(--accent);
+  height: 100%;
+  width: 3px;
 }
 
 .map {

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildTree } from '../content/buildTree';
-import { buildQuestions, descendants, shuffle } from './buildQuestions';
+import { buildQuestions, descendants, pickSession, shuffle, type Question } from './buildQuestions';
 
 function readAll(dir: string, prefix = '', out: Record<string, string> = {}) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -60,5 +60,48 @@ describe('퀴즈 문제 만들기', () => {
     const mixed = shuffle(qs, rand);
     expect(mixed).toHaveLength(qs.length);
     expect(new Set(mixed.map((q) => q.id))).toEqual(new Set(qs.map((q) => q.id)));
+  });
+});
+
+describe('pickSession', () => {
+  const q = (id: string): Question => ({
+    id,
+    kind: 'basic',
+    title: id,
+    path: [],
+    prompt: '',
+    answer: 'a',
+    keywords: [],
+    follow: [],
+  });
+  const never = () => 0.5;
+
+  it('헷갈린 것 → 안 본 것 → 기억난 것 순으로 낸다', () => {
+    const all = [q('known'), q('fresh'), q('unsure')];
+    const marks = {
+      known: { known: true, at: '2026-01-01T00:00:00.000Z' },
+      unsure: { known: false, at: '2026-01-01T00:00:00.000Z' },
+    };
+    expect(pickSession(all, marks, 3, never).map((x) => x.id)).toEqual([
+      'unsure',
+      'fresh',
+      'known',
+    ]);
+  });
+
+  it('기억난 것끼리는 오래된 순으로', () => {
+    const all = [q('new'), q('old')];
+    const marks = {
+      new: { known: true, at: '2026-09-01T00:00:00.000Z' },
+      old: { known: true, at: '2026-01-01T00:00:00.000Z' },
+    };
+    expect(pickSession(all, marks, 2, never).map((x) => x.id)).toEqual(['old', 'new']);
+  });
+
+  it('한 번에 정해진 개수만 낸다', () => {
+    const all = Array.from({ length: 40 }, (_, i) => q(`q${i}`));
+    expect(pickSession(all, {}, 10, never)).toHaveLength(10);
+    // 낼 게 모자라면 있는 만큼만
+    expect(pickSession(all.slice(0, 3), {}, 10, never)).toHaveLength(3);
   });
 });

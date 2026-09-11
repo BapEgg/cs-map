@@ -10,7 +10,7 @@ card:
 flow:
   prev: { id: program-dev, reason: 이렇게 만든 코드를 서비스로 내놓으려면 }
   next: { id: vibe-coding, reason: 이 흐름을 AI에게 시키려면 }
-see_also: [program-dev]
+see_also: [program-dev, vibe-coding]
 ---
 
 ## 왜 나왔나
