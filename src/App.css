@@ -137,17 +137,89 @@
   color: var(--text-muted);
 }
 
+/* 좁은 화면: 지도와 설명 중 하나만 본다 */
+.phone-switch {
+  display: flex;
+  gap: var(--sp-1);
+  padding: var(--sp-1);
+  background: var(--surface-sunken);
+  border-radius: 999px;
+}
+
+.phone-switch button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 var(--sp-3);
+}
+
+.phone-switch button.on {
+  color: var(--accent);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+
 @media (max-width: 900px) {
   .app {
-    height: auto;
+    height: 100%;
+    padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  }
+
+  .bar {
+    gap: var(--sp-2);
+  }
+
+  /*
+   * 도구가 가로로 넘쳐서 잘리던 걸 옆으로 밀어 볼 수 있게 한다.
+   * 줄바꿈으로 쌓으면 지도 볼 자리를 그만큼 잃는다.
+   */
+  .bar-tools {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .bar-tools::-webkit-scrollbar {
+    display: none;
+  }
+
+  .search {
+    flex: 1 1 auto;
   }
 
   .map {
     flex-direction: column;
+    min-height: 0;
   }
 
-  .tree-wrap {
-    height: 55vh;
-    flex: 0 0 auto;
+  /* 한 번에 하나만 보여준다 */
+  .map.phone-map .panel,
+  .map.phone-read .tree-wrap {
+    display: none;
+  }
+
+  .map.phone-map .tree-wrap,
+  .map.phone-read .panel {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .panel {
+    max-height: none;
   }
 }

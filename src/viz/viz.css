@@ -32,11 +32,11 @@
 }
 
 .viz-phase-stage {
-  color: var(--viz-current);
+  color: var(--viz-current-text);
 }
 
 .viz-phase-run {
-  color: var(--viz-done);
+  color: var(--viz-done-text);
 }
 
 .viz-body {
@@ -219,14 +219,21 @@
   flex: 1 1 120px;
 }
 
+/*
+ * 단계 이동 막대. 보이는 선은 얇게 두되 누르는 자리는 넉넉해야 한다.
+ * 6px짜리 막대를 정확히 겨냥하게 만들면 아무도 못 누른다.
+ */
 .viz-controls .viz-tick {
   flex: 1 1 auto;
   min-width: 0;
-  height: 6px;
-  padding: 0;
+  height: 24px;
+  min-height: 24px;
+  padding: 9px 0;
   border: none;
-  border-radius: 2px;
-  background: var(--viz-label-muted);
+  border-radius: 0;
+  background: none;
+  background-clip: content-box;
+  background-color: var(--viz-label-muted);
   opacity: 0.3;
 }
 
@@ -235,12 +242,12 @@
 }
 
 .viz-controls .viz-tick-stage.on {
-  background: var(--viz-current);
+  background-color: var(--viz-current);
   opacity: 1;
 }
 
 .viz-controls .viz-tick-run.on {
-  background: var(--viz-done);
+  background-color: var(--viz-done);
   opacity: 1;
 }
 
@@ -257,8 +264,8 @@
 
 .viz-controls .viz-speed button.on {
   opacity: 1;
-  border-color: var(--viz-current);
-  color: var(--viz-current);
+  border-color: var(--viz-current-text);
+  color: var(--viz-current-text);
 }
 
 @media (max-width: 720px) {

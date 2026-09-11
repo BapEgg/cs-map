@@ -115,14 +115,63 @@ export default function TreeCanvas({
     onNodeClick(id);
   };
 
+  /**
+   * 지도를 키보드로도 돌아다닐 수 있게 한다. 마우스 없이는 아예 못 쓰던 화면이었다.
+   * ↑↓ 로 화면에 보이는 순서대로, → 로 펼치고 들어가고, ← 로 접거나 부모로 나온다.
+   */
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const list = layout.visible;
+    if (!list.length) return;
+    const here = selected && list.includes(selected) ? list.indexOf(selected) : -1;
+    const move = (to: number) => {
+      e.preventDefault();
+      onNodeClick(list[Math.max(0, Math.min(list.length - 1, to))]);
+    };
+
+    switch (e.key) {
+      case 'ArrowDown':
+        return move(here + 1);
+      case 'ArrowUp':
+        return move(here === -1 ? 0 : here - 1);
+      case 'ArrowRight': {
+        if (here === -1) return move(0);
+        const node = byId[list[here]];
+        if (!node.childIds.length) return;
+        e.preventDefault();
+        if (!open.has(node.id)) onToggle(node.id);
+        else onNodeClick(node.childIds[0]);
+        return;
+      }
+      case 'ArrowLeft': {
+        if (here === -1) return;
+        const node = byId[list[here]];
+        e.preventDefault();
+        if (open.has(node.id) && node.childIds.length) onToggle(node.id);
+        else if (node.parentId && list.includes(node.parentId)) onNodeClick(node.parentId);
+        return;
+      }
+      case 'Enter':
+      case ' ':
+        if (here !== -1) {
+          e.preventDefault();
+          onToggle(list[here]);
+        }
+        return;
+      default:
+        return;
+    }
+  };
+
   return (
     <div className="tree-wrap">
       <svg
         ref={svgRef}
         className={`tree-svg${dragging ? ' dragging' : ''}`}
         onPointerDown={onPointerDown}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
         role="tree"
-        aria-label="개념 지도"
+        aria-label="개념 지도. 화살표 키로 옮겨 다닐 수 있어요"
       >
         <g
           className="tree-cam"
@@ -205,10 +254,25 @@ export default function TreeCanvas({
                     </text>
                   </g>
                 )}
+                {/*
+                 * 상태 점은 화면 배율을 거슬러 크기를 고정한다.
+                 * 안 그러면 축소했을 때 1px짜리 얼룩이 되어 아무것도 못 알린다.
+                 * 테두리를 둘러 어떤 바탕에서도 형태가 남게 한다.
+                 */}
                 {dots.length > 0 && (
-                  <g transform={`translate(${titleX} ${NODE_H - 1})`}>
+                  <g
+                    className="tree-badges"
+                    transform={`translate(${titleX} ${NODE_H - 1}) scale(${1 / cam.k})`}
+                  >
                     {dots.map((color, i) => (
-                      <circle key={color} cx={i * 8} r={2.6} fill={color} />
+                      <circle
+                        key={color}
+                        cx={i * 10}
+                        r={3.4}
+                        fill={color}
+                        stroke="var(--surface)"
+                        strokeWidth={1.2}
+                      />
                     ))}
                   </g>
                 )}

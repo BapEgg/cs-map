@@ -8,7 +8,8 @@ export interface Camera {
   k: number;
 }
 
-const MIN_K = 0.35;
+/** 이보다 작아지면 노드 글씨를 못 읽는다. 다 안 들어가면 밀어서 보는 게 낫다. */
+const MIN_K = 0.55;
 const MAX_K = 2.2;
 const clampK = (k: number) => Math.min(MAX_K, Math.max(MIN_K, k));
 
@@ -40,8 +41,7 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
 
   const fit = useCallback(
     (bounds: Box, animate = true) => {
-      const next = fitCamera(bounds, viewSize());
-      setCam({ ...next, k: clampK(next.k) }, animate);
+      setCam(fitCamera(bounds, viewSize(), { min: MIN_K, max: MAX_K }), animate);
     },
     [setCam, viewSize],
   );

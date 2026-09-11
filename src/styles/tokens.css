@@ -45,9 +45,9 @@
 
   /* 노드 뱃지 */
   --badge-deep: #5f3dc4; /* 심화 있음 */
-  --badge-sim: #0c8599; /* 시각화 있음 */
-  --mark-known: #2f9e44; /* 퀴즈: 기억났음 */
-  --mark-unsure: #e8590c; /* 퀴즈: 헷갈렸음 */
+  --badge-sim: #0b7285; /* 시각화 있음 */
+  --mark-known: #2b7a3b; /* 퀴즈: 기억났음 */
+  --mark-unsure: #c2410c; /* 퀴즈: 헷갈렸음 */
 
   /* 본문 */
   --highlight-bg: #fff3bf; /* 형광펜 */
@@ -74,6 +74,13 @@
   --viz-on-role: #1b2135; /* 역할색 위에 얹는 글씨 */
   --viz-label: #1b2135;
   --viz-label-muted: #5d6478;
+  /*
+   * 같은 역할색이라도 **글씨로 쓸 때는 더 진해야 한다.**
+   * 밝은 판에서 올리브(#d9cb3d)를 글씨로 쓰면 대비가 1.67:1로 사실상 안 보인다.
+   */
+  --viz-current-text: #6d6404;
+  --viz-done-text: #2c6b45;
+  --viz-compare-text: #a33c3a;
 
   --shadow-panel: 0 1px 3px rgb(27 33 53 / 0.08), 0 8px 24px rgb(27 33 53 / 0.06);
 
@@ -146,6 +153,10 @@
   --viz-on-role: #10151d;
   --viz-label: #f2f4f8;
   --viz-label-muted: #9aa3b4;
+  /* 판이 어두우니 채움색을 그대로 글씨로 써도 대비가 넉넉하다. */
+  --viz-current-text: var(--viz-current);
+  --viz-done-text: var(--viz-done);
+  --viz-compare-text: var(--viz-compare);
 
   --shadow-panel: 0 1px 3px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.3);
 }

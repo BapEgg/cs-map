@@ -171,11 +171,23 @@ export function linkPath(
   return `M ${a.x} ${y1} V ${mid} H ${b.x} V ${y2}`;
 }
 
-/** 화면에 딱 맞는 배율과 위치. */
-export function fitCamera(bounds: Box, view: { w: number; h: number }, maxScale = 1) {
-  const pad = 48;
+/**
+ * 화면에 맞는 배율과 위치.
+ *
+ * 배율에 **아래쪽 한계**를 둔다. 좁은 화면에서 트리 전체를 욱여넣으면 글씨가 6px이 되어
+ * 지도가 아니라 얼룩이 된다. 다 안 들어가면 차라리 밀어서 보는 게 낫다.
+ * 한계에 걸린 배율로 위치까지 다시 계산해야 가운데가 맞는다(전에는 위치를 자르기 전
+ * 배율로 계산해서 어긋났다).
+ */
+export function fitCamera(
+  bounds: Box,
+  view: { w: number; h: number },
+  { min = 0.55, max = 1 }: { min?: number; max?: number } = {},
+) {
+  const pad = 40;
   if (bounds.w <= 0 || bounds.h <= 0) return { x: pad, y: view.h / 2, k: 1 };
-  const k = Math.min(maxScale, (view.w - pad * 2) / bounds.w, (view.h - pad * 2) / bounds.h);
+  const raw = Math.min(max, (view.w - pad * 2) / bounds.w, (view.h - pad * 2) / bounds.h);
+  const k = Math.max(min, raw);
   return {
     k,
     x: pad + (view.w - pad * 2 - bounds.w * k) / 2 - bounds.x * k,

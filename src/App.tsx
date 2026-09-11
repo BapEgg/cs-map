@@ -41,6 +41,22 @@ export default function App() {
   /** 읽기에 공간을 더 줄지. 탐색할 때는 지도, 읽을 때는 설명이 넓어야 한다. */
   const [wide, setWide] = useState(false);
 
+  /**
+   * 좁은 화면에서는 지도와 설명을 한 화면에 같이 못 둔다. 세로로 쌓으면 둘 다 반쪽이 된다.
+   * 그래서 한 번에 하나만 보여주고, 개념을 고르면 설명으로 넘어간다.
+   */
+  const [narrow, setNarrow] = useState(
+    () => typeof matchMedia !== 'undefined' && matchMedia('(max-width: 900px)').matches,
+  );
+  const [phoneView, setPhoneView] = useState<'map' | 'read'>('map');
+  useEffect(() => {
+    if (typeof matchMedia === 'undefined') return;
+    const mq = matchMedia('(max-width: 900px)');
+    const onChange = () => setNarrow(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   /** 지난번에 보던 개념. 다시 열었을 때 그 자리로 돌아간다. */
   const lastSeen = study.data.recent.find((id) => tree.byId[id]) ?? null;
   const [selected, setSelected] = useState<string | null>(lastSeen);
@@ -105,6 +121,7 @@ export default function App() {
       setOpen(pathOf(tree.byId[id].parentId ?? id));
       select(id);
       setOverlay(null);
+      setPhoneView('read'); // 좁은 화면에서는 고르는 순간 설명으로 넘어간다
       return true;
     },
     [pathOf, select, tree.byId, tree.rootId],
@@ -150,6 +167,7 @@ export default function App() {
       setRestore(undefined);
       select(id);
       if (tree.byId[id].childIds.length > 0) setOpen(pathOf(id));
+      else setPhoneView('read'); // 더 펼칠 게 없으면 읽으러 가는 뜻이다
     },
     [pathOf, select, tree.byId],
   );
@@ -255,7 +273,28 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`map${wide ? ' map-wide' : ''}`}>
+      {narrow && (
+        <div className="phone-switch" role="tablist" aria-label="보기 전환">
+          <button
+            role="tab"
+            aria-selected={phoneView === 'map'}
+            className={phoneView === 'map' ? 'on' : undefined}
+            onClick={() => setPhoneView('map')}
+          >
+            지도
+          </button>
+          <button
+            role="tab"
+            aria-selected={phoneView === 'read'}
+            className={phoneView === 'read' ? 'on' : undefined}
+            onClick={() => setPhoneView('read')}
+          >
+            {node ? node.title : '시작'}
+          </button>
+        </div>
+      )}
+
+      <main className={`map${wide ? ' map-wide' : ''}${narrow ? ` phone-${phoneView}` : ''}`}>
         <TreeCanvas
           byId={tree.byId}
           root={root}
