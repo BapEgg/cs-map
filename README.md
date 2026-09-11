@@ -2,6 +2,8 @@
 
 CS 기초부터 실무까지를 하나의 지도로 모아, 클릭해서 파고들고 애니메이션으로 동작을 보며 외우는 웹앱.
 
+**→ https://cs-map.vercel.app**
+
 - **전체 맥락**: [`docs/HANDOFF.md`](docs/HANDOFF.md)
 - **작업 지침**: [`CLAUDE.md`](CLAUDE.md)
 - **원본 손필기**: `docs/reference/`
