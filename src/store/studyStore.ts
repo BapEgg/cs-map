@@ -25,14 +25,19 @@ export interface StudyData {
   version: 1;
   notes: Record<string, ConceptNote>;
   marks: Record<string, QuizMark>;
+  /** 최근에 본 개념. 최신이 앞. 다시 열었을 때 보던 자리로 돌아가는 데 쓴다. */
+  recent: string[];
 }
+
+/** 최근 목록에 남기는 개수. 이보다 길면 "최근"이 아니다. */
+export const RECENT_MAX = 12;
 
 export interface StudyStore {
   load(): StudyData;
   save(data: StudyData): void;
 }
 
-export const EMPTY: StudyData = { version: 1, notes: {}, marks: {} };
+export const EMPTY: StudyData = { version: 1, notes: {}, marks: {}, recent: [] };
 
 export const emptyNote = (): ConceptNote => ({
   text: '',
@@ -67,7 +72,10 @@ export function normalize(raw: unknown): StudyData {
     if (typeof m.known !== 'boolean') continue;
     marks[id] = { known: m.known, at: typeof m.at === 'string' ? m.at : new Date().toISOString() };
   }
-  return { version: 1, notes, marks };
+  const recent = Array.isArray(data.recent)
+    ? data.recent.filter((x): x is string => typeof x === 'string').slice(0, RECENT_MAX)
+    : [];
+  return { version: 1, notes, marks, recent };
 }
 
 const KEY = 'csmap.study.v1';

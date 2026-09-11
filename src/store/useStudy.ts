@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import {
+  RECENT_MAX,
   emptyNote,
   localStore,
   normalize,
@@ -65,6 +66,17 @@ export function useStudy(store: StudyStore = localStore) {
     [update],
   );
 
+  /** 방금 본 개념으로 기록한다. 이미 있으면 맨 앞으로 끌어올린다. */
+  const touch = useCallback(
+    (id: string) =>
+      update((prev) =>
+        prev.recent[0] === id
+          ? prev
+          : { ...prev, recent: [id, ...prev.recent.filter((x) => x !== id)].slice(0, RECENT_MAX) },
+      ),
+    [update],
+  );
+
   /** 가져오기. 같은 개념이 양쪽에 있으면 더 최근에 고친 쪽을 남긴다. */
   const importJson = useCallback(
     (raw: unknown) =>
@@ -75,10 +87,15 @@ export function useStudy(store: StudyStore = localStore) {
           const mine = notes[id];
           if (!mine || note.updatedAt > mine.updatedAt) notes[id] = note;
         }
-        return { version: 1, notes, marks: { ...prev.marks, ...incoming.marks } };
+        return {
+          version: 1,
+          notes,
+          marks: { ...prev.marks, ...incoming.marks },
+          recent: prev.recent,
+        };
       }),
     [update],
   );
 
-  return { data, setNote, setMark, clearMarks, importJson };
+  return { data, setNote, setMark, clearMarks, importJson, touch };
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadContent } from './content/load';
 import ConceptPanel from './panel/ConceptPanel';
 import NotesOverview from './panel/NotesOverview';
+import StartPanel from './panel/StartPanel';
 import { buildTermIndex } from './panel/termIndex';
 import QuizMode from './quiz/QuizMode';
 import { isBlank } from './store/studyStore';
@@ -22,14 +23,29 @@ export default function App() {
   const tree = useMemo(() => loadContent(), []);
   const index = useMemo(() => buildTermIndex(tree), [tree]);
 
+  const study = useStudy();
+  const { touch } = study;
+
   const [orientation, setOrientation] = useState<Orientation>('h');
-  const [selected, setSelected] = useState<string | null>(null);
   /** "이 가지만 크게 보기"로 파고든 자취. 마지막이 지금 루트다. */
   const [roots, setRoots] = useState<string[]>([tree.rootId]);
   const root = roots[roots.length - 1];
-  const [open, setOpen] = useState<Set<string>>(() => new Set([tree.rootId]));
   const [overlay, setOverlay] = useState<'quiz' | 'notes' | null>(null);
-  const study = useStudy();
+
+  /** 지난번에 보던 개념. 다시 열었을 때 그 자리로 돌아간다. */
+  const lastSeen = study.data.recent.find((id) => tree.byId[id]) ?? null;
+  const [selected, setSelected] = useState<string | null>(lastSeen);
+
+  // 처음부터 과목까지는 펼쳐 둔다. 루트 하나만 있으면 화면이 비어서 뭘 눌러야 할지 모른다.
+  const [open, setOpen] = useState<Set<string>>(() => {
+    const set = new Set<string>([tree.rootId, ...(tree.byId[tree.rootId]?.childIds ?? [])]);
+    let cursor = lastSeen ? tree.byId[lastSeen].parentId : null;
+    while (cursor) {
+      set.add(cursor);
+      cursor = tree.byId[cursor].parentId;
+    }
+    return set;
+  });
 
   const notedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -48,6 +64,15 @@ export default function App() {
     });
   }, []);
 
+  /** 개념을 고른다. 본 기록을 남겨 다음에 열었을 때 이어서 볼 수 있게 한다. */
+  const select = useCallback(
+    (id: string) => {
+      setSelected(id);
+      touch(id);
+    },
+    [touch],
+  );
+
   /** 그 개념으로 간다. 가는 길의 조상들을 모두 펼쳐 트리에서도 보이게 한다. */
   const goTo = useCallback(
     (id: string) => {
@@ -61,10 +86,10 @@ export default function App() {
         }
         return next;
       });
-      setSelected(id);
+      select(id);
       setOverlay(null);
     },
-    [tree.byId],
+    [select, tree.byId],
   );
 
   // Esc: 덮어쓴 화면을 먼저 닫고, 없으면 파고든 가지에서 한 단계 나온다.
@@ -149,7 +174,7 @@ export default function App() {
           marks={study.data.marks}
           noted={notedIds}
           onToggle={toggle}
-          onSelect={setSelected}
+          onSelect={select}
         />
         {selected ? (
           <ConceptPanel
@@ -162,13 +187,12 @@ export default function App() {
             onNote={(patch) => study.setNote(selected, patch)}
           />
         ) : (
-          <aside className="panel panel-empty">
-            <p>왼쪽 지도에서 개념을 누르면 여기에 설명이 열립니다.</p>
-            <p className="muted">
-              드래그로 이동, 휠로 스크롤, Ctrl+휠로 확대. 설명 속 밑줄 친 용어를 누르면 그 자리에서
-              뜻을 볼 수 있어요.
-            </p>
-          </aside>
+          <StartPanel
+            tree={tree}
+            data={study.data}
+            onGoTo={goTo}
+            onQuiz={() => setOverlay('quiz')}
+          />
         )}
 
         {overlay === 'quiz' && (

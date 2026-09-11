@@ -1,0 +1,39 @@
+.start {
+  display: flex;
+  flex-direction: column;
+}
+
+.start-title {
+  font-size: 20px;
+  margin: 0 0 var(--sp-3);
+}
+
+.start-lead {
+  margin: 0 0 var(--sp-5);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.start section {
+  margin-bottom: var(--sp-5);
+}
+
+.start-quiz {
+  margin-top: var(--sp-3);
+}
+
+.start-tip {
+  margin: auto 0 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-faint);
+}
+
+.start-count {
+  margin: var(--sp-2) 0 0;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}

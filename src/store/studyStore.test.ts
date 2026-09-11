@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyNote, isBlank, normalize, type StudyData } from './studyStore';
+import { RECENT_MAX, emptyNote, isBlank, normalize, type StudyData } from './studyStore';
 
 describe('메모 저장소', () => {
   it('빈 메모를 알아본다', () => {
@@ -12,8 +12,14 @@ describe('메모 저장소', () => {
 
   it('망가진 입력을 받아도 빈 상태로 돌아간다', () => {
     for (const bad of [null, undefined, 42, 'x', []]) {
-      expect(normalize(bad)).toEqual({ version: 1, notes: {}, marks: {} });
+      expect(normalize(bad)).toEqual({ version: 1, notes: {}, marks: {}, recent: [] });
     }
+  });
+
+  it('최근 본 목록에서 문자열이 아닌 건 버리고 길이를 자른다', () => {
+    const many = Array.from({ length: 30 }, (_, i) => `n${i}`);
+    expect(normalize({ recent: [...many, 42, null] }).recent).toHaveLength(RECENT_MAX);
+    expect(normalize({ recent: ['a', 7, 'b'] }).recent).toEqual(['a', 'b']);
   });
 
   it('가져온 JSON에서 쓸 수 있는 것만 남긴다', () => {
