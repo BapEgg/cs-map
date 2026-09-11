@@ -67,7 +67,16 @@
   pointer-events: none;
 }
 
+/*
+ * 손가락이 닿는 자리. 보이지 않지만 눌린다.
+ * 마우스에서는 보이는 상자와 똑같이 두고, **터치 화면에서만** 위아래로 넓힌다(아래 media).
+ */
+.tree-node-hit {
+  fill: transparent;
+}
+
 .tree-node-box {
+  pointer-events: none;
   fill: var(--surface);
   fill-opacity: 0.6;
   stroke: var(--depth-3);
@@ -149,9 +158,9 @@
 }
 
 /*
- * 선택은 강조색 테두리 + **얕은 배경**으로 알린다.
- * 깊이별 색이 파랑 계열이라 선택은 그와 겹치지 않는 색을 쓴다
- * (시각화의 '지금 보고 있는 것'과 같은 계열이라 앱 전체가 한 언어를 쓴다).
+ * 선택은 **앱 강조색 테두리 + 옅은 배경** 둘로만 알린다.
+ * 제목 색은 건드리지 않는다 — 노랑 테두리에 노랑 글자를 쓰던 때는 선택된 노드 하나만
+ * 다른 앱에서 온 것처럼 보였고, 글자색이 바뀌니 읽는 눈이 한 번 더 적응해야 했다.
  */
 .tree-node.selected .tree-node-box {
   stroke: var(--node-select);
@@ -161,7 +170,7 @@
 }
 
 .tree-node.selected .tree-node-title {
-  fill: var(--node-select-text);
+  fill: var(--text);
 }
 
 .tree-node.selected .tree-icon {
@@ -261,6 +270,34 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
+}
+
+/*
+ * ── 터치 화면 ──
+ * 손가락은 마우스보다 뭉툭하다. 보이는 크기는 그대로 두고 **닿는 자리만** 넓힌다.
+ *
+ * 세로 한계는 형제 간격이다. 좌→우 배치에서 형제는 54만큼 떨어져 있으니
+ * 52까지는 넓혀도 위아래 노드와 겹치지 않는다(배율 0.85에서 44px — 권장 크기).
+ * 토글은 노드 오른쪽 끝 36×52를 가져가고, 나머지는 노드 본체가 받는다.
+ */
+@media (pointer: coarse) {
+  .tree-node-hit {
+    y: -6px;
+    height: 52px;
+  }
+
+  .tree-toggle-hit {
+    x: -18px;
+    y: -26px;
+    width: 36px;
+    height: 52px;
+    rx: 10px;
+  }
+
+  /* 손가락에는 hover가 눌린 뒤 남는다. 넓힌 판이 회색으로 번쩍이면 뭘 눌렀는지 헷갈린다. */
+  .tree-toggle:hover .tree-toggle-hit {
+    fill: transparent;
+  }
 }
 
 /* 움직임을 줄여 달라고 한 사람에게는 자리만 바꾸고 끝낸다. */

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { SPEEDS, type Scene, type Speed } from './types';
+import { useNarrow } from './useNarrow';
 import { usePlayer } from './usePlayer';
 import './viz.css';
 
@@ -26,13 +27,21 @@ export default function Player<S>({ scene, render, stage }: Props<S>) {
     next,
     seek,
   } = usePlayer(scene, { stage });
+  const narrow = useNarrow();
 
   return (
     <div className="viz" ref={containerRef} tabIndex={0} aria-label={scene.title}>
       <div className="viz-head">
         <h3>{scene.title}</h3>
+        {/* 폰에서는 짧게. 긴 문구가 두 줄로 접히면 그림 높이를 그만큼 먹는다. */}
         <span className={`viz-phase viz-phase-${step.phase}`}>
-          {step.phase === 'stage' ? '1 · 공간 살펴보기' : '2 · 그 위에서 돌려보기'}
+          {step.phase === 'stage'
+            ? narrow
+              ? '1 · 공간'
+              : '1 · 공간 살펴보기'
+            : narrow
+              ? '2 · 돌려보기'
+              : '2 · 그 위에서 돌려보기'}
         </span>
       </div>
 

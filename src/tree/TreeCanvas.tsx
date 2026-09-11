@@ -99,6 +99,16 @@ export default function TreeCanvas({
     [byId, root, open, orientation, widthOf],
   );
 
+  /**
+   * 다 들어가지 않을 때 화면 가운데에 둘 자리. 고른 노드가 있으면 그것.
+   * 좁은 화면에서는 **전부 담는 것보다 지금 보는 데에 닿는 게** 중요하다.
+   */
+  const focusBox = useCallback((lay: typeof layout, id: string | null) => {
+    const p = id ? lay.byId[id] : null;
+    if (!p || p.hidden) return undefined;
+    return { x: p.x, y: p.y - NODE_H / 2, w: p.w, h: NODE_H };
+  }, []);
+
   /*
    * 방향을 바꾸거나 가지를 갈아타면 화면에 맞춘다. 첫 화면은 애니메이션 없이 바로.
    * 지도가 숨겨져 있으면(모바일에서 설명만 보는 중) 크기가 0이라 맞출 수 없다. 건너뛴다.
@@ -109,40 +119,51 @@ export default function TreeCanvas({
     if (lastFit.current === key || !hasSize()) return;
     const first = lastFit.current === '';
     lastFit.current = key;
-    fit(layout.bounds, !first);
-  }, [orientation, root, layout, fit, hasSize]);
+    fit(layout.bounds, !first, focusBox(layout, selected));
+  }, [orientation, root, layout, selected, fit, hasSize, focusBox]);
 
   /**
-   * 방금 펼친 노드. 새 자식이 화면 밖이면 그만큼만 민다.
-   * 본체 클릭·＋/－·키보드 어느 길로 펼쳐도 같은 규칙이 걸리도록 한 곳에서 기록한다.
+   * 방금 펼친 노드. 본체 클릭·＋/－·키보드 어느 길로 펼쳐도 여기 기록된다.
    */
   const justOpened = useRef<string | null>(null);
-  useEffect(() => {
-    const id = justOpened.current;
-    if (!id || !open.has(id) || !hasSize()) return;
-    justOpened.current = null;
-    const kids = (byId[id]?.childIds ?? []).map((k) => layout.byId[k]).filter(Boolean);
-    if (!kids.length) return;
-    const xs = kids.map((p) => p.x);
-    const right = Math.max(...kids.map((p) => p.x + p.w));
-    const ys = kids.map((p) => p.y);
-    ensureVisible({
-      x: Math.min(...xs),
-      y: Math.min(...ys) - NODE_H / 2,
-      w: right - Math.min(...xs),
-      h: Math.max(...ys) - Math.min(...ys) + NODE_H,
-    });
-  }, [byId, open, layout, ensureVisible, hasSize]);
-
-  // 다른 개념으로 건너뛰면 트리도 그쪽을 비춘다. 이미 보이면 움직이지 않는다.
   const lastSelected = useRef<string | null>(null);
+
+  /**
+   * 카메라를 움직이는 곳은 **여기 한 군데뿐이다.**
+   *
+   * 전에는 "방금 펼친 가지 보여주기"와 "고른 노드 따라가기"가 각자 카메라를 밀었다.
+   * 본체를 누르면 둘 다 한 번에 일어나는데, 뒤에 도는 쪽이 앞의 이동을 되돌려서
+   * 폰에서는 방금 펼친 자식들이 오른쪽에 잘린 채 남았다.
+   *
+   * 그래서 한 번만 민다. 펼침이 있었으면 **부모와 새 자식을 함께** 담은 자리를 목표로 잡고,
+   * 없으면 고른 노드만 본다.
+   */
   useEffect(() => {
-    if (!selected || selected === lastSelected.current || !hasSize()) return;
-    lastSelected.current = selected;
+    if (!hasSize()) return;
+    const opened = justOpened.current;
+    const selectionMoved = selected !== null && selected !== lastSelected.current;
+    if (selected !== null) lastSelected.current = selected;
+
+    if (opened && open.has(opened)) {
+      justOpened.current = null;
+      const parent = layout.byId[opened];
+      const kids = (byId[opened]?.childIds ?? []).map((k) => layout.byId[k]).filter(Boolean);
+      if (kids.length) {
+        const spots = parent && !parent.hidden ? [parent, ...kids] : kids;
+        const x0 = Math.min(...spots.map((p) => p.x));
+        const x1 = Math.max(...spots.map((p) => p.x + p.w));
+        const y0 = Math.min(...spots.map((p) => p.y)) - NODE_H / 2;
+        const y1 = Math.max(...spots.map((p) => p.y)) + NODE_H / 2;
+        ensureVisible({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+        return;
+      }
+    }
+
+    if (!selectionMoved || selected === null) return;
     const p = layout.byId[selected];
     if (!p || p.hidden) return;
     ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
-  }, [selected, layout, ensureVisible, hasSize]);
+  }, [byId, open, selected, layout, ensureVisible, hasSize]);
 
   /**
    * 지도가 **숨었다가 다시 보일 때**(모바일에서 설명을 보다 지도로 돌아옴).
@@ -167,13 +188,13 @@ export default function TreeCanvas({
         const p = sel ? lay.byId[sel] : null;
         if (p && !p.hidden)
           ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
-        else fit(lay.bounds, false);
+        else fit(lay.bounds, false, focusBox(lay, sel));
       }
       had = now;
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [ensureVisible, fit]);
+  }, [ensureVisible, fit, focusBox]);
 
   /**
    * 흐리게 하지 않을 노드: 고른 개념, 거기까지 가는 길, 그 아래 자식, 그리고 형제.
@@ -317,6 +338,12 @@ export default function TreeCanvas({
                 aria-selected={p.id === selected}
                 aria-hidden={p.hidden || undefined}
               >
+                {/*
+                 * 손가락이 닿는 자리. 보이는 상자보다 위아래로 넓다(터치 화면에서만).
+                 * 노드 높이 40에 배율 0.85면 34px이라 손가락으로는 잘 안 눌린다.
+                 * 형제 간격이 54라 52까지는 넓혀도 옆 노드와 겹치지 않는다 — 실제 크기는 tree.css.
+                 */}
+                <rect className="tree-node-hit" y={0} width={p.w} height={NODE_H} />
                 <rect className="tree-node-box" width={p.w} height={NODE_H} rx={10} />
                 {icon && <SubjectIcon id={p.id} x={PAD_L} y={(NODE_H - 16) / 2} />}
                 <text
@@ -340,11 +367,16 @@ export default function TreeCanvas({
 
                 {/*
                  * 펼침 표시. 셰브런이 열림/닫힘 방향을 그대로 보여준다.
-                 * 호버 영역은 노드 높이 전체가 아니라 표시 주변의 둥근 자리로 둔다.
+                 *
+                 * 표시 중심으로 g를 옮겨 놓고 안쪽은 0,0 기준으로 그린다. 그래야 닿는 자리를
+                 * 노드 폭과 무관하게 CSS에서 키울 수 있다(터치 화면에서만 넓힌다).
+                 * 마우스에서는 보이는 둥근 자리 그대로 — 안 보이는 큰 판을 누르게 되면
+                 * 노드로 들어가려던 클릭이 접기로 새어 나간다.
                  */}
                 {hasKids && (
                   <g
                     className="tree-toggle"
+                    transform={`translate(${p.w - TOGGLE_W / 2 - 2} ${NODE_H / 2})`}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (!didDrag()) expand(p.id);
@@ -354,15 +386,15 @@ export default function TreeCanvas({
                   >
                     <rect
                       className="tree-toggle-hit"
-                      x={p.w - TOGGLE_W - 2}
-                      y={(NODE_H - 26) / 2}
+                      x={-13}
+                      y={-13}
                       width={26}
                       height={26}
                       rx={8}
                     />
                     <path
                       className="tree-toggle-mark"
-                      transform={`translate(${p.w - TOGGLE_W / 2 - 2} ${NODE_H / 2}) rotate(${isOpen ? 90 : 0})`}
+                      transform={`rotate(${isOpen ? 90 : 0})`}
                       d="M-2.5 -5 L2.5 0 L-2.5 5"
                     />
                   </g>
@@ -376,7 +408,7 @@ export default function TreeCanvas({
       <div className="tree-tools">
         <button
           className="btn btn-secondary btn-icon"
-          onClick={() => fit(layout.bounds)}
+          onClick={() => fit(layout.bounds, true, focusBox(layout, selected))}
           aria-label="전체가 보이게 맞추기"
           title="전체가 보이게 맞추기"
         >

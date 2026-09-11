@@ -206,7 +206,31 @@ export function layoutTree(
     }
   }
 
+  /*
+   * 그리는 차례를 **펼침 상태와 무관하게** 고정한다.
+   *
+   * walk는 펼쳤을 때 자식을 먼저, 접었을 때 부모를 먼저 넣는다. 그대로 내보내면
+   * 접을 때 React가 DOM 요소를 앞뒤로 옮기고, 옮겨진 요소는 시작값을 잃어 전환이 아예 안 걸린다.
+   * (접기가 스르륵이 아니라 툭 사라지던 원인. 펼치기만 멀쩡해 보여서 놓치기 쉽다.)
+   */
+  const order = orderOf(byIdSource, root);
+  nodes.sort((a, b) => (order[a.id] ?? 0) - (order[b.id] ?? 0));
+
   return { nodes, byId, visible, links, bounds: boundsOf(visible, byId, orientation) };
+}
+
+/** 펼침과 상관없이 트리 전체를 한 번 훑어 매기는 차례. 그리는 순서를 고정하는 데만 쓴다. */
+function orderOf(byIdSource: Record<string, ConceptNode>, root: string): Record<string, number> {
+  const out: Record<string, number> = {};
+  let n = 0;
+  const walk = (id: string) => {
+    const node = byIdSource[id];
+    if (!node || id in out) return;
+    out[id] = n++;
+    for (const child of node.childIds) walk(child);
+  };
+  walk(root);
+  return out;
 }
 
 function boundsOf(visible: string[], byId: Record<string, Placed>, orientation: Orientation): Box {
@@ -240,11 +264,14 @@ export function linkPath(a: Placed, b: Placed, orientation: Orientation): string
  *
  * 배율에 **아래쪽 한계**를 둔다. 좁은 화면에서 트리 전체를 욱여넣으면 글씨가 6px이 되어
  * 지도가 아니라 얼룩이 된다. 다 안 들어가면 차라리 밀어서 보는 게 낫다.
+ *
+ * @param focus 다 안 들어갈 때 **꼭 보여야 하는 자리**(고른 노드, 방금 펼친 가지).
+ *   전부를 담는 게 목적이 아니다. 읽히는 크기를 지키면서 지금 관심 있는 데를 보여 준다.
  */
 export function fitCamera(
   bounds: Box,
   view: { w: number; h: number },
-  { min = 0.55, max = 1 }: { min?: number; max?: number } = {},
+  { min = 0.55, max = 1, focus }: { min?: number; max?: number; focus?: Box } = {},
 ) {
   const pad = 40;
   if (bounds.w <= 0 || bounds.h <= 0 || view.w <= 0 || view.h <= 0) {
@@ -253,18 +280,29 @@ export function fitCamera(
   const raw = Math.min(max, (view.w - pad * 2) / bounds.w, (view.h - pad * 2) / bounds.h);
   const k = Math.max(min, raw);
   /*
-   * 들어가면 가운데, **안 들어가면 시작점에 붙인다.**
-   * 넘치는데도 가운데에 두면 양쪽이 똑같이 잘려서, 좌→우 트리의 뿌리와 과목 열이
-   * 화면 왼쪽 밖으로 사라진다. 어디서부터 뻗어 나온 가지인지 모른 채 보게 된다.
-   * 잘릴 거라면 잎 쪽이 잘려야 한다 — 그쪽은 밀어서 따라가면 되니까.
+   * 들어가면 가운데.
+   *
+   * 안 들어가면 **관심 있는 데를 가운데**에 놓되, 내용 바깥까지 밀려나지 않게 잡아 둔다.
+   * 관심 자리가 없으면 시작점에 붙인다 — 양쪽을 똑같이 잘라 버리면 좌→우 트리의
+   * 뿌리와 과목 열이 화면 밖으로 사라져서, 어디서 뻗어 나온 가지인지 모른 채 보게 된다.
    */
-  const place = (view: number, size: number, origin: number) =>
-    size * k <= view - pad * 2
-      ? pad + (view - pad * 2 - size * k) / 2 - origin * k
-      : pad - origin * k;
+  const place = (
+    span: number,
+    size: number,
+    origin: number,
+    at?: { from: number; size: number },
+  ) => {
+    const room = span - pad * 2;
+    if (size * k <= room) return pad + (room - size * k) / 2 - origin * k;
+    if (!at) return pad - origin * k;
+    const centered = span / 2 - (at.from + at.size / 2) * k;
+    const atStart = pad - origin * k;
+    const atEnd = span - pad - (origin + size) * k;
+    return Math.min(atStart, Math.max(atEnd, centered));
+  };
   return {
     k,
-    x: place(view.w, bounds.w, bounds.x),
-    y: place(view.h, bounds.h, bounds.y),
+    x: place(view.w, bounds.w, bounds.x, focus && { from: focus.x, size: focus.w }),
+    y: place(view.h, bounds.h, bounds.y, focus && { from: focus.y, size: focus.h }),
   };
 }

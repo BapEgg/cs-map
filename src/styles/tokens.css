@@ -42,10 +42,14 @@
   /* 과목(0~1단계)은 옅게 채워서 '큰 묶음'으로 보이게 한다. 글씨 색은 안 건드린다. */
   --depth-fill: #e6ecf8;
 
-  /* 지금 보고 있는 노드. 시각화의 '현재' 색과 같은 계열로 묶는다. */
-  --node-select: #a07a06;
-  --node-select-text: #3d2d04;
-  --node-select-bg: #fdf6dd;
+  /*
+   * 지금 보고 있는 노드. **앱 강조색 하나로 간다.**
+   * 노랑 테두리에 노랑 글자를 쓰던 때는 선택된 노드만 다른 앱에서 온 것처럼 튀었고,
+   * 글자색까지 바꾸니 제목을 읽는 눈이 두 번 적응해야 했다.
+   * 테두리와 옅은 배경이 '여기'를 말하고, 제목은 다른 노드와 같은 색으로 둔다.
+   */
+  --node-select: var(--accent);
+  --node-select-bg: #dbe4f8;
 
   /* 노드 뱃지 */
   --badge-deep: #5f3dc4; /* 심화 있음 */
@@ -144,9 +148,9 @@
   --depth-5: #57647b;
   --depth-fill: #1e2a42;
 
-  --node-select: #c8c23a;
-  --node-select-text: #f4f2d2;
-  --node-select-bg: #35331a;
+  /* 라이트와 같은 규칙: 강조색 테두리 + 옅은 배경, 제목은 일반 글자색. */
+  --node-select: var(--accent);
+  --node-select-bg: #223255;
 
   --badge-deep: #b197fc;
   --badge-sim: #66d9e8;

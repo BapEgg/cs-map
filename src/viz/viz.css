@@ -158,6 +158,22 @@
   fill: var(--viz-label-muted);
 }
 
+/*
+ * 폰 배치(MemoryLayoutView의 metricsOf). 무대가 좁아진 만큼 **글씨는 키운다.**
+ * viewBox 단위라 화면 배율(≈0.9)을 곱한 값이 실제 크기다 — 아래 값들은 10~13px로 찍힌다.
+ * 예전에는 데스크톱 치수를 0.68배로 줄여서 7.5~9.5px이 나왔다.
+ */
+.viz-compact .viz-region-title,
+.viz-compact .viz-box-text {
+  font-size: 15px;
+}
+
+.viz-compact .viz-addr,
+.viz-compact .viz-free-text,
+.viz-compact .viz-band-text {
+  font-size: 12.5px;
+}
+
 .viz-caption {
   margin: var(--sp-4) 0 var(--sp-3);
   min-height: 2.8em;

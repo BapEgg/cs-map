@@ -59,9 +59,10 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
   }, [viewSize]);
 
   const fit = useCallback(
-    (bounds: Box, animate = true) => {
+    /** @param focus 다 안 들어갈 때 가운데에 둘 자리(고른 노드). */
+    (bounds: Box, animate = true, focus?: Box) => {
       const view = viewSize();
-      setCam(fitCamera(bounds, view, { min: fitFloor(view.w), max: MAX_K }), animate);
+      setCam(fitCamera(bounds, view, { min: fitFloor(view.w), max: MAX_K, focus }), animate);
     },
     [setCam, viewSize],
   );
@@ -86,23 +87,30 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
    */
   const holdUntil = useRef(0);
 
-  /** 그 자리가 화면 안에 오도록 살짝 밀어준다. 노드를 펼치거나 다른 개념으로 건너뛸 때 쓴다. */
+  /**
+   * 그 자리가 화면 안에 오도록 살짝 밀어준다. 노드를 펼치거나 다른 개념으로 건너뛸 때 쓴다.
+   *
+   * 여백은 **들어갈 만큼만** 잡는다. 80px을 고정으로 요구하면 폰에서 방금 펼친 가지처럼
+   * 넓은 자리는 아무리 밀어도 조건을 못 맞춰 오른쪽이 잘린 채 남는다.
+   */
   const ensureVisible = useCallback(
     (box: Box) => {
       if (Date.now() < holdUntil.current) return;
       const { w, h } = viewSize();
       if (w <= 0 || h <= 0) return; // 숨겨진 지도를 움직이면 다시 보여줄 때 빈 화면이 된다
       const c = camRef.current;
-      const pad = 80;
+      const padOf = (view: number, size: number) => Math.min(80, Math.max(8, (view - size) / 2));
+      const padX = padOf(w, box.w * c.k);
+      const padY = padOf(h, box.h * c.k);
       const left = box.x * c.k + c.x;
       const right = (box.x + box.w) * c.k + c.x;
       const top = box.y * c.k + c.y;
       const bottom = (box.y + box.h) * c.k + c.y;
       let { x, y } = c;
-      if (right > w - pad) x -= right - (w - pad);
-      else if (left < pad) x += pad - left;
-      if (bottom > h - pad) y -= bottom - (h - pad);
-      else if (top < pad) y += pad - top;
+      if (right > w - padX) x -= right - (w - padX);
+      else if (left < padX) x += padX - left;
+      if (bottom > h - padY) y -= bottom - (h - padY);
+      else if (top < padY) y += padY - top;
       if (x === c.x && y === c.y) return;
       setCam({ ...c, x, y }, true);
     },

@@ -156,3 +156,47 @@ describe('fitCamera', () => {
     expect(fitCamera({ x: 0, y: 0, w: 400, h: 300 }, { w: 0, h: 0 }).k).toBe(1);
   });
 });
+
+describe('fitCamera · 다 안 들어갈 때', () => {
+  const view = { w: 800, h: 600 };
+  const bounds = { x: 0, y: 0, w: 4000, h: 300 };
+  const opts = { min: 0.85, max: 1 };
+
+  it('관심 자리를 주면 그걸 가운데에 놓는다', () => {
+    // 좁은 화면에서는 전부 담는 것보다 지금 보는 노드에 닿는 게 중요하다.
+    const focus = { x: 2000, y: 0, w: 100, h: 40 };
+    const cam = fitCamera(bounds, view, { ...opts, focus });
+    const middle = (focus.x + focus.w / 2) * cam.k + cam.x;
+    expect(middle).toBeCloseTo(view.w / 2);
+  });
+
+  it('관심 자리가 끝에 있어도 내용 바깥으로 밀려나지 않는다', () => {
+    const atStart = fitCamera(bounds, view, { ...opts, focus: { x: 0, y: 0, w: 80, h: 40 } });
+    expect(atStart.x).toBe(40);
+
+    const atEnd = fitCamera(bounds, view, { ...opts, focus: { x: 3920, y: 0, w: 80, h: 40 } });
+    expect(atEnd.x).toBeCloseTo(view.w - 40 - bounds.w * atEnd.k);
+  });
+
+  it('관심 자리가 없으면 시작점에 붙인다', () => {
+    expect(fitCamera(bounds, view, opts).x).toBe(40);
+  });
+});
+
+describe('그리는 차례', () => {
+  it('펼치든 접든 순서가 같다', () => {
+    /*
+     * 순서가 바뀌면 React가 DOM 요소를 앞뒤로 옮기고, 옮겨진 요소는 시작값을 잃어
+     * 전환이 아예 안 걸린다. 접기가 스르륵이 아니라 툭 사라지던 원인이다.
+     */
+    const closed = layoutTree(tree.byId, 'root', new Set(), 'h').nodes.map((n) => n.id);
+    const open = layoutTree(tree.byId, 'root', new Set(['a', 'b']), 'h').nodes.map((n) => n.id);
+    expect(open).toEqual(closed);
+  });
+
+  it('부모가 자식보다 먼저 온다', () => {
+    const ids = layoutTree(tree.byId, 'root', new Set(['a']), 'h').nodes.map((n) => n.id);
+    expect(ids.indexOf('a')).toBeLessThan(ids.indexOf('a1'));
+    expect(ids.indexOf('root')).toBe(0);
+  });
+});
