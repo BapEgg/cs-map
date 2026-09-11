@@ -19,22 +19,24 @@
   --accent: #3f5fae;
   --accent-soft: #dbe4f8;
 
-  /* 트리 깊이별 색. 진할수록 큰 개념. 6단계(루트 > 과목묶음 > 과목 > ... > 잎) */
-  --depth-0: #1c2b4a;
+  /*
+   * 트리 깊이별 색. 노드를 **채우지 않고 테두리로만** 쓴다.
+   * 채우면 색이 화면을 다 먹어서 개념이 많아질수록 어지럽다. 진할수록 큰 개념.
+   * 과목 구분은 색을 늘리지 않고 아이콘이 맡는다(SubjectIcon).
+   */
+  --depth-0: #1f3b6b;
   --depth-1: #2f4e96;
-  --depth-2: #5a82cc;
-  --depth-3: #8fb0e6;
-  --depth-4: #bcd3f5;
-  --depth-5: #e3edfc;
-  --depth-text-on-dark: #ffffff;
-  --depth-text-on-light: #1f2a44;
-  /* 0~2는 어두워서 흰 글씨, 3~5는 밝아서 검은 글씨 */
-  --depth-0-text: var(--depth-text-on-dark);
-  --depth-1-text: var(--depth-text-on-dark);
-  --depth-2-text: var(--depth-text-on-dark);
-  --depth-3-text: var(--depth-text-on-light);
-  --depth-4-text: var(--depth-text-on-light);
-  --depth-5-text: var(--depth-text-on-light);
+  --depth-2: #5d7399;
+  --depth-3: #78879f;
+  --depth-4: #8f9bb0;
+  --depth-5: #a5aebd;
+  /* 과목(0~1단계)은 옅게 채워서 '큰 묶음'으로 보이게 한다. 글씨 색은 안 건드린다. */
+  --depth-fill: #e6ecf8;
+
+  /* 지금 보고 있는 노드. 시각화의 '현재' 색과 같은 계열로 묶는다. */
+  --node-select: #a07a06;
+  --node-select-text: #453305;
+  --node-select-ring: rgb(217 203 61 / 0.3);
 
   /* 노드 뱃지 */
   --badge-deep: #5f3dc4; /* 심화 있음 */
@@ -91,20 +93,17 @@
   --accent-soft: #223255;
 
   /* 밝을수록 큰 개념으로 뒤집는다. 어두운 배경에서 대비가 유지되도록. */
-  --depth-0: #9cc0fb;
-  --depth-1: #7da2f0;
-  --depth-2: #5a82cc;
-  --depth-3: #3f63a8;
-  --depth-4: #2e4a7d;
-  --depth-5: #223655;
-  --depth-text-on-dark: #e8eefc;
-  --depth-text-on-light: #0f1626;
-  --depth-0-text: var(--depth-text-on-light);
-  --depth-1-text: var(--depth-text-on-light);
-  --depth-2-text: var(--depth-text-on-light);
-  --depth-3-text: var(--depth-text-on-dark);
-  --depth-4-text: var(--depth-text-on-dark);
-  --depth-5-text: var(--depth-text-on-dark);
+  --depth-0: #b6d0fd;
+  --depth-1: #9cc0fb;
+  --depth-2: #6f8bb8;
+  --depth-3: #5b6883;
+  --depth-4: #4e586d;
+  --depth-5: #444c5e;
+  --depth-fill: #1e2a42;
+
+  --node-select: #c8c23a;
+  --node-select-text: #f0eec4;
+  --node-select-ring: rgb(200 194 58 / 0.16);
 
   --badge-deep: #b197fc;
   --badge-sim: #66d9e8;

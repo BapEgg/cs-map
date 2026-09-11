@@ -43,6 +43,24 @@ describe('layoutTree', () => {
     expect(new Set(ys).size).toBe(ys.length);
   });
 
+  it('이름이 길수록 칸도 길다', () => {
+    const long = buildTree({
+      '_index.md': md('id: root\ntitle: 루트'),
+      'short.md': md('id: short\ntitle: CPU'),
+      'longer.md': md('id: longer\ntitle: 다단계 피드백 큐'),
+    });
+    const { width } = layoutTree(long.byId, 'root', new Set(['root']), 'h');
+    expect(width.short).toBeLessThan(width.longer);
+    expect(width.short).toBeGreaterThanOrEqual(62); // 너무 작아지지는 않는다
+  });
+
+  it('위→아래에서는 형제가 실제 길이만큼 떨어진다', () => {
+    const { pos, width } = layoutTree(tree.byId, 'root', new Set(['root', 'a']), 'v');
+    const [a1, a2] = ['a1', 'a2'];
+    const gap = pos[a2].x - width[a2] / 2 - (pos[a1].x + width[a1] / 2);
+    expect(gap).toBeGreaterThan(0); // 겹치지 않는다
+  });
+
   it('위→아래에서는 깊이가 y로 간다', () => {
     const { pos } = layoutTree(tree.byId, 'root', new Set(['root', 'a']), 'v');
     expect(pos.root.y).toBeLessThan(pos.a.y);

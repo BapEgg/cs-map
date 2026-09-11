@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { ConceptNode } from '../content/types';
-import { NODE_H, NODE_W, layoutTree, linkPath, type Orientation } from './layout';
+import SubjectIcon from './SubjectIcon';
+import { NODE_H, TITLE_SIZE, layoutTree, linkPath, textWidth, type Orientation } from './layout';
 import { useCamera } from './useCamera';
 import './tree.css';
 
@@ -18,23 +19,6 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-/** 글자 폭 어림. 한글은 넓고 영문은 좁다. 정확할 필요는 없고 줄바꿈 판단에만 쓴다. */
-function textWidth(text: string, size: number) {
-  let w = 0;
-  for (const ch of text) w += ch.codePointAt(0)! > 0x2e80 ? size * 0.98 : size * 0.55;
-  return w;
-}
-
-/** 길면 가운데 공백에서 두 줄로 자른다. */
-function splitTitle(title: string, size: number): string[] {
-  if (textWidth(title, size) <= NODE_W - 40) return [title];
-  const spaces = [...title.matchAll(/ /g)].map((m) => m.index!);
-  if (!spaces.length) return [title];
-  const mid = title.length / 2;
-  const at = spaces.reduce((a, b) => (Math.abs(b - mid) < Math.abs(a - mid) ? b : a));
-  return [title.slice(0, at), title.slice(at + 1)];
-}
-
 export default function TreeCanvas({
   byId,
   root,
@@ -47,8 +31,8 @@ export default function TreeCanvas({
   onSelect,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const cameraApi = useCamera(svgRef);
-  const { cam, smooth, dragging, didDrag, onPointerDown, fit, zoomBy, ensureVisible } = cameraApi;
+  const { cam, smooth, dragging, didDrag, onPointerDown, fit, zoomBy, ensureVisible } =
+    useCamera(svgRef);
 
   const layout = useMemo(
     () => layoutTree(byId, root, open, orientation),
@@ -76,7 +60,7 @@ export default function TreeCanvas({
     ensureVisible({
       x: Math.min(...xs),
       y: Math.min(...ys) - NODE_H / 2,
-      w: Math.max(...xs) - Math.min(...xs) + NODE_W,
+      w: Math.max(...xs) - Math.min(...xs) + 160,
       h: Math.max(...ys) - Math.min(...ys) + NODE_H,
     });
     lastOpened.current = null;
@@ -89,7 +73,8 @@ export default function TreeCanvas({
     lastSelected.current = selected;
     const p = layout.pos[selected];
     if (!p) return;
-    ensureVisible({ x: p.x - 40, y: p.y - NODE_H, w: NODE_W + 80, h: NODE_H * 2 });
+    const w = layout.width[selected] ?? 120;
+    ensureVisible({ x: p.x - 30, y: p.y - NODE_H, w: w + 60, h: NODE_H * 2 });
   }, [selected, layout, ensureVisible]);
 
   const handleNode = (id: string) => {
@@ -121,7 +106,7 @@ export default function TreeCanvas({
             {layout.links.map(({ from, to }) => (
               <path
                 key={`${from}-${to}`}
-                d={linkPath(layout.pos[from], layout.pos[to], orientation)}
+                d={linkPath(layout.pos[from], layout.pos[to], layout.width[from], orientation)}
                 fill="none"
               />
             ))}
@@ -130,20 +115,31 @@ export default function TreeCanvas({
           {layout.visible.map((id) => {
             const node = byId[id];
             const p = layout.pos[id];
+            const w = layout.width[id];
             const depth = Math.min(node.depth, 5);
             const hasKids = node.childIds.length > 0;
             const isOpen = open.has(id);
+            const icon = node.depth === 1;
             // 좌→우는 왼쪽 끝이 기준, 위→아래는 가운데가 기준이다.
-            const x = orientation === 'h' ? p.x : p.x - NODE_W / 2;
+            const x = orientation === 'h' ? p.x : p.x - w / 2;
             const y = p.y - NODE_H / 2;
-            const size = 14;
-            const lines = splitTitle(node.title, size);
-            const fs = lines.length > 1 || textWidth(node.title, size) > NODE_W - 26 ? 12 : size;
+
+            const dots = [
+              node.hasDeep && 'var(--badge-deep)',
+              node.sim && 'var(--badge-sim)',
+              noted.has(id) && 'var(--accent)',
+              id in marks && (marks[id].known ? 'var(--mark-known)' : 'var(--mark-unsure)'),
+            ].filter((c): c is string => typeof c === 'string');
+
+            // 아이콘·제목·＋를 왼쪽부터 차례로 놓는다.
+            const padL = 11;
+            const titleX = padL + (icon ? 22 : 0);
+            const fs = textWidth(node.title, TITLE_SIZE) > w - titleX - 22 ? 11.5 : TITLE_SIZE;
 
             return (
               <g
                 key={id}
-                className={`tree-node${id === selected ? ' selected' : ''}`}
+                className={`tree-node depth-${depth}${id === selected ? ' selected' : ''}`}
                 transform={`translate(${x} ${y})`}
                 onClick={() => handleNode(id)}
                 role="treeitem"
@@ -151,49 +147,23 @@ export default function TreeCanvas({
                 aria-selected={id === selected}
                 tabIndex={-1}
               >
-                <rect
-                  width={NODE_W}
-                  height={NODE_H}
-                  rx={9}
-                  fill={`var(--depth-${depth})`}
-                  className="tree-node-box"
-                />
-                <text
-                  x={NODE_W / 2}
-                  y={lines.length > 1 ? NODE_H / 2 - 5 : NODE_H / 2 + 5}
-                  textAnchor="middle"
-                  fontSize={fs}
-                  fill={`var(--depth-${depth}-text)`}
-                  className="tree-node-title"
-                >
-                  {lines.map((line, i) => (
-                    <tspan key={i} x={NODE_W / 2} dy={i === 0 ? 0 : 15}>
-                      {line}
-                    </tspan>
-                  ))}
+                <rect className="tree-node-box" width={w} height={NODE_H} rx={8} />
+                {icon && <SubjectIcon id={id} x={padL} y={(NODE_H - 16) / 2} />}
+                <text className="tree-node-title" x={titleX} y={NODE_H / 2 + 4.5} fontSize={fs}>
+                  {node.title}
                 </text>
-
                 {hasKids && (
-                  <g className="tree-toggle">
-                    <circle cx={NODE_W - 13} cy={NODE_H / 2} r={8.5} />
-                    <text x={NODE_W - 13} y={NODE_H / 2 + 4} textAnchor="middle">
-                      {isOpen ? '−' : '+'}
-                    </text>
+                  <text className="tree-toggle" x={w - 11} y={NODE_H / 2 + 5} textAnchor="middle">
+                    {isOpen ? '−' : '+'}
+                  </text>
+                )}
+                {dots.length > 0 && (
+                  <g transform={`translate(${titleX} ${NODE_H - 1})`}>
+                    {dots.map((color, i) => (
+                      <circle key={color} cx={i * 8} r={2.6} fill={color} />
+                    ))}
                   </g>
                 )}
-
-                <g className="tree-badges" transform={`translate(6 ${NODE_H - 5})`}>
-                  {[
-                    node.hasDeep && 'var(--badge-deep)',
-                    node.sim && 'var(--badge-sim)',
-                    noted.has(id) && 'var(--accent)',
-                    id in marks && (marks[id].known ? 'var(--mark-known)' : 'var(--mark-unsure)'),
-                  ]
-                    .filter((c): c is string => typeof c === 'string')
-                    .map((color, i) => (
-                      <circle key={color} cx={i * 10} r={3.5} fill={color} />
-                    ))}
-                </g>
               </g>
             );
           })}
@@ -213,16 +183,10 @@ export default function TreeCanvas({
       </div>
 
       <div className="tree-legend">
-        <span>큰 개념</span>
-        {[0, 1, 2, 3, 4, 5].map((d) => (
-          <i key={d} style={{ background: `var(--depth-${d})` }} />
-        ))}
-        <span>작은 개념</span>
-        <em>
-          <i className="dot" style={{ background: 'var(--badge-deep)' }} /> 심화
-          <i className="dot" style={{ background: 'var(--badge-sim)' }} /> 눈으로 보기
-          <i className="dot" style={{ background: 'var(--accent)' }} /> 내 메모
-        </em>
+        <i className="dot" style={{ background: 'var(--badge-deep)' }} /> 심화
+        <i className="dot" style={{ background: 'var(--badge-sim)' }} /> 눈으로 보기
+        <i className="dot" style={{ background: 'var(--accent)' }} /> 내 메모
+        <i className="dot" style={{ background: 'var(--mark-known)' }} /> 퀴즈
       </div>
     </div>
   );
