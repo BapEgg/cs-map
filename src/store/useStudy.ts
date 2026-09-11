@@ -15,13 +15,17 @@ import {
  */
 export function useStudy(store: StudyStore = localStore) {
   const [data, setData] = useState<StudyData>(() => store.load());
+  /** 저장이 막혀 있는지. 적은 게 안 남는다는 걸 사용자가 알아야 한다. */
+  const [saveFailed, setSaveFailed] = useState(false);
 
   /** 상태를 바꾸면서 같은 값을 저장소에도 넘긴다. */
   const update = useCallback(
     (fn: (prev: StudyData) => StudyData) => {
       setData((prev) => {
         const next = fn(prev);
-        store.save(next);
+        const ok = store.save(next);
+        // 렌더 중에 다른 state를 건드리지 않도록 다음 틱으로 미룬다.
+        if (!ok) queueMicrotask(() => setSaveFailed(true));
         return next;
       });
     },
@@ -97,5 +101,5 @@ export function useStudy(store: StudyStore = localStore) {
     [update],
   );
 
-  return { data, setNote, setMark, clearMarks, importJson, touch };
+  return { data, saveFailed, setNote, setMark, clearMarks, importJson, touch };
 }

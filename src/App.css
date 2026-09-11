@@ -87,6 +87,16 @@
   min-height: 0;
 }
 
+.save-failed {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--mark-unsure);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
 .problems {
   max-height: 160px;
   overflow-y: auto;

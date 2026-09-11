@@ -1,14 +1,11 @@
 import { useMemo, useState } from 'react';
 import type { ContentTree } from '../content/types';
-import type { StudyData } from '../store/studyStore';
-import { buildQuestions, descendants, shuffle, type QuizKind } from './buildQuestions';
+import { buildQuestions, shuffle, type QuizKind } from './buildQuestions';
 import './quiz.css';
 
 interface Props {
   tree: ContentTree;
-  marks: StudyData['marks'];
   onMark: (id: string, known: boolean | null) => void;
-  onClearMarks: (ids: string[]) => void;
   onClose: () => void;
   onGoTo: (id: string) => void;
 }
@@ -26,25 +23,33 @@ function scopeOptions(tree: ContentTree) {
   return out;
 }
 
-export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, onGoTo }: Props) {
+export default function QuizMode({ tree, onMark, onClose, onGoTo }: Props) {
   const scopes = useMemo(() => scopeOptions(tree), [tree]);
   const [scope, setScope] = useState(tree.rootId);
   const [kind, setKind] = useState<QuizKind>('basic');
   const [deck, setDeck] = useState<ReturnType<typeof buildQuestions> | null>(null);
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
+  /**
+   * 이번 회차에 어떻게 답했는지. 누적 기록(marks)과 따로 둔다.
+   * 예전에는 시작할 때 그 범위의 누적 기록을 통째로 지웠는데, 퀴즈를 한 번 켜기만 해도
+   * 지금까지 쌓은 표시가 날아갔다.
+   */
+  const [answers, setAnswers] = useState<Record<number, boolean>>({});
 
   const available = useMemo(() => buildQuestions(tree, scope, kind), [tree, scope, kind]);
 
   const start = () => {
-    onClearMarks(descendants(tree, scope));
     setDeck(shuffle(available));
     setAt(0);
     setShown(false);
+    setAnswers({});
   };
 
   const answer = (known: boolean) => {
-    onMark(deck![at].id, known);
+    const q = deck![at];
+    onMark(q.id, known); // 누적 기록
+    setAnswers((prev) => ({ ...prev, [at]: known })); // 이번 회차
     setAt((i) => i + 1);
     setShown(false);
   };
@@ -121,9 +126,8 @@ export default function QuizMode({ tree, marks, onMark, onClearMarks, onClose, o
 
   // ── 결과 ──
   if (at >= deck.length) {
-    const asked = deck.map((q) => q.id);
-    const known = asked.filter((id) => marks[id]?.known).length;
-    const unsure = deck.filter((q) => marks[q.id] && !marks[q.id].known);
+    const known = Object.values(answers).filter(Boolean).length;
+    const unsure = deck.filter((_, i) => answers[i] === false);
     return (
       <div className="quiz">
         <header className="quiz-bar">

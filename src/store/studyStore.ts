@@ -34,7 +34,8 @@ export const RECENT_MAX = 12;
 
 export interface StudyStore {
   load(): StudyData;
-  save(data: StudyData): void;
+  /** 저장에 성공했는지. 사생활 보호 모드나 용량 초과로 실패할 수 있고, 그건 사용자가 알아야 한다. */
+  save(data: StudyData): boolean;
 }
 
 export const EMPTY: StudyData = { version: 1, notes: {}, marks: {}, recent: [] };
@@ -93,8 +94,10 @@ export const localStore: StudyStore = {
   save(data) {
     try {
       localStorage.setItem(KEY, JSON.stringify(data));
+      return true;
     } catch {
-      // 저장을 못 해도 이번 세션 동안은 쓸 수 있어야 한다.
+      // 저장을 못 해도 이번 세션 동안은 쓸 수 있어야 한다. 다만 조용히 넘어가지는 않는다.
+      return false;
     }
   },
 };

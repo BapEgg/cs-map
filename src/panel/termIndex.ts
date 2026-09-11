@@ -59,6 +59,37 @@ export function buildTermIndex(tree: ContentTree): TermIndex {
   return { pattern, byName, pathTo };
 }
 
+/**
+ * 낱말 안에 파묻힌 글자를 용어로 잘못 잡는 걸 막는다.
+ *
+ * 한국어는 조사가 붙어 쓰이므로(페이징은, 프레임을) 뒤에 글자가 온다고 무조건 거를 수 없다.
+ * 대신 **조사·어미로 시작하는 글자만 허용**한다. 그러면 "프레임워크"의 '워'는 걸리고
+ * "프레임을"의 '을'은 통과한다.
+ */
+const PARTICLE_HEAD = new Set(
+  (
+    '은는이가을를의에와과도만로으랑나라든부까처보마조밖뿐요야들임입서고며면지' + '한했하되된다세'
+  ).split(''),
+);
+
+const HANGUL = /\p{Script=Hangul}/u;
+const WORDISH = /[\p{Script=Hangul}A-Za-z0-9]/u;
+
+/** 이 자리의 매치가 낱말 하나로 온전히 떨어지는지. */
+export function standsAlone(text: string, start: number, end: number): boolean {
+  const before = start > 0 ? text[start - 1] : '';
+  const after = end < text.length ? text[end] : '';
+
+  // 앞에 글자가 붙어 있으면 합성어 안이다. "페이지프레임"에서 "프레임"을 잡지 않는다.
+  if (before && WORDISH.test(before)) return false;
+
+  if (!after) return true;
+  if (HANGUL.test(after)) return PARTICLE_HEAD.has(after);
+  // 영문·숫자가 이어지면 더 긴 낱말의 일부다. "APIs"의 s 정도는 봐준다.
+  if (/[A-Za-z0-9]/.test(after)) return after === 's' && !/[A-Za-z0-9]/.test(text[end + 1] ?? '');
+  return true;
+}
+
 /** 두 노드가 트리에서 얼마나 가까운지. 공통 조상이 깊을수록 크다. 없으면 -1. */
 function closeness(index: TermIndex, a: string, b: string): number {
   const pa = index.pathTo.get(a);

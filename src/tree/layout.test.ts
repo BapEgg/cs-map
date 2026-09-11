@@ -43,6 +43,18 @@ describe('layoutTree', () => {
     expect(new Set(ys).size).toBe(ys.length);
   });
 
+  it('긴 이름이 다음 열을 침범하지 않는다', () => {
+    const long = buildTree({
+      '_index.md': md('id: root\ntitle: 루트'),
+      'big/_index.md': md('id: big\ntitle: 아주아주아주 긴 이름을 가진 개념입니다'),
+      'big/kid.md': md('id: kid\ntitle: 짧음'),
+    });
+    const { pos, width } = layoutTree(long.byId, 'root', new Set(['root', 'big']), 'h');
+    // 부모의 오른쪽 끝이 자식의 왼쪽 끝을 넘지 않아야 한다
+    expect(pos.big.x + width.big).toBeLessThanOrEqual(pos.kid.x);
+    expect(pos.root.x + width.root).toBeLessThanOrEqual(pos.big.x);
+  });
+
   it('이름이 길수록 칸도 길다', () => {
     const long = buildTree({
       '_index.md': md('id: root\ntitle: 루트'),

@@ -26,9 +26,8 @@ export interface Layout {
 
 export const NODE_H = 34;
 
-const COL_W = 190; // 좌→우에서 깊이 한 칸
 const ROW_H = 46; // 좌→우에서 형제 한 칸. 노드 높이보다 커야 서로 안 붙는다.
-const GAP_X = 26; // 위→아래에서 형제 사이 틈
+const GAP_X = 26; // 형제 사이 틈(위→아래) / 열 사이 틈(좌→우)
 const LEV_H = 104; // 위→아래에서 깊이 한 칸
 
 const MIN_W = 62;
@@ -74,12 +73,15 @@ export function layoutTree(
 ): Layout {
   const pos: Record<string, Point> = {};
   const width: Record<string, number> = {};
+  const depthOf: Record<string, number> = {};
   const visible: string[] = [];
   const links: { from: string; to: string }[] = [];
 
   // 좌→우는 칸 번호로, 위→아래는 실제 길이를 쌓아서 자리를 잡는다.
   let lane = 0;
   let cursorX = 0;
+  /** 깊이별로 가장 긴 노드. 열 위치는 이걸 쌓아서 정한다. */
+  const widestAt: number[] = [];
 
   const walk = (id: string, depth: number): number => {
     const node = byId[id];
@@ -87,6 +89,8 @@ export function layoutTree(
     visible.push(id);
     const w = nodeWidth(node);
     width[id] = w;
+    depthOf[id] = depth;
+    widestAt[depth] = Math.max(widestAt[depth] ?? 0, w);
 
     const expanded = open.has(id) && node.childIds.length > 0;
     let center: number;
@@ -104,12 +108,26 @@ export function layoutTree(
       cursorX += w + GAP_X;
     }
 
-    pos[id] =
-      orientation === 'h' ? { x: depth * COL_W, y: center } : { x: center, y: depth * LEV_H };
+    pos[id] = orientation === 'h' ? { x: 0, y: center } : { x: center, y: depth * LEV_H };
     return center;
   };
 
   walk(root, 0);
+
+  if (orientation === 'h') {
+    /*
+     * 열 간격을 고정값으로 두면 긴 이름이 다음 열을 침범한다.
+     * (전에는 열 간격 190px인데 노드는 최대 240px이라 겹쳤다.)
+     * 그래서 각 깊이에서 가장 긴 노드만큼 자리를 내주고 그 뒤에 다음 열을 놓는다.
+     */
+    const colX: number[] = [];
+    let x = 0;
+    for (let d = 0; d < widestAt.length; d++) {
+      colX[d] = x;
+      x += (widestAt[d] ?? 0) + GAP_X * 2;
+    }
+    for (const id of visible) pos[id] = { x: colX[depthOf[id]], y: pos[id].y };
+  }
 
   return { pos, width, visible, links, bounds: boundsOf(pos, width, orientation) };
 }

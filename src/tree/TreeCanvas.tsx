@@ -41,13 +41,21 @@ export default function TreeCanvas({
     [byId, root, open, orientation],
   );
 
-  // 방향을 바꾸거나 가지를 갈아타면 화면에 맞춘다. 첫 화면은 애니메이션 없이 바로.
-  const firstFit = useRef(true);
+  /*
+   * 방향을 바꾸거나 가지를 갈아타면 화면에 맞춘다. 첫 화면은 애니메이션 없이 바로.
+   *
+   * 맞출 범위는 **지금 화면에 그려진 배치**여야 한다. 전에는 "루트만 펼친 상태"를
+   * 따로 계산해서 맞췄는데, 실제로는 과목까지 펼쳐져 있어서 카메라가 트리보다
+   * 좁은 범위를 기준으로 잡혔다.
+   */
+  const lastFit = useRef('');
   useEffect(() => {
-    fit(layoutTree(byId, root, new Set([root]), orientation).bounds, !firstFit.current);
-    firstFit.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orientation, root]);
+    const key = `${orientation}:${root}`;
+    if (lastFit.current === key) return;
+    const first = lastFit.current === '';
+    lastFit.current = key;
+    fit(layout.bounds, !first);
+  }, [orientation, root, layout, fit]);
 
   // 펼친 노드의 새 자식이 화면 밖이면 카메라가 따라간다.
   const lastOpened = useRef<string | null>(null);

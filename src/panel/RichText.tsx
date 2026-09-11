@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
-import { resolveTerm, type TermIndex, type TermTarget } from './termIndex';
+import { resolveTerm, standsAlone, type TermIndex, type TermTarget } from './termIndex';
 
 /** 문장을 이어주는 말. 눈에 띄게 해두면 "문제 → 그래서 해결" 구조가 보인다. */
 const CONNECTIVES = /^(그래서|하지만|대신|다만|즉|결국|그런데|반대로|따라서)\s*/;
@@ -40,6 +40,8 @@ function renderInline(
       const name = m[0];
       const at = m.index!;
       if (used.has(name)) continue;
+      // "프레임워크"의 '프레임'처럼 낱말 안에 파묻힌 건 건너뛴다
+      if (!standsAlone(chunk, at, at + name.length)) continue;
       const target = resolveTerm(index, name, selfId);
       if (!target) continue;
       used.add(name);

@@ -112,12 +112,23 @@ export default function App() {
   const goTo = useCallback(
     (id: string) => {
       if (!tree.byId[id]) return;
+      const path = pathOf(id);
+
+      /*
+       * "이 가지만 보기"로 파고든 상태에서 가지 밖 개념으로 건너뛰면, 지도에는 그 개념이
+       * 아예 없어서 설명만 바뀌고 지도는 그대로였다. 갈 수 없는 가지면 범위를 되돌린다.
+       */
+      setRoots((prev) => {
+        const kept = prev.filter((rid, i) => i === 0 || path.has(rid));
+        return kept.length ? kept : [tree.rootId];
+      });
+
       // 가는 길만 펼친다. 트리에서 누를 때와 같은 규칙이라 지도가 예상대로 움직인다.
       setOpen(pathOf(tree.byId[id].parentId ?? id));
       select(id);
       setOverlay(null);
     },
-    [pathOf, select, tree.byId],
+    [pathOf, select, tree.byId, tree.rootId],
   );
 
   // Esc: 덮어쓴 화면을 먼저 닫고, 없으면 파고든 가지에서 한 단계 나온다.
@@ -226,9 +237,7 @@ export default function App() {
         {overlay === 'quiz' && (
           <QuizMode
             tree={tree}
-            marks={study.data.marks}
             onMark={study.setMark}
-            onClearMarks={study.clearMarks}
             onClose={() => setOverlay(null)}
             onGoTo={goTo}
           />
@@ -243,6 +252,13 @@ export default function App() {
           />
         )}
       </main>
+
+      {study.saveFailed && (
+        <p className="save-failed" role="status">
+          이 브라우저에 저장이 막혀 있어요. 지금 적는 메모와 퀴즈 기록은{' '}
+          <b>창을 닫으면 사라집니다.</b> 사생활 보호 창이라면 일반 창에서 열어 주세요.
+        </p>
+      )}
 
       {tree.problems.length > 0 && (
         <div className="problems">

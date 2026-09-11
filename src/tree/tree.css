@@ -130,12 +130,35 @@
   stroke: var(--node-select);
 }
 
+/*
+ * 접기·펴기. 투명한 사각형이 클릭을 받는다.
+ * 여기에 pointer-events:none을 주면 그 사각형까지 죽어서 클릭이 노드 본체로 새어 나간다.
+ * 글자에만 준다.
+ */
 .tree-toggle {
+  cursor: pointer;
+}
+
+.tree-toggle text {
   font-size: 15px;
   font-weight: 700;
-  fill: var(--text-faint);
+  fill: var(--text-muted);
   pointer-events: none;
   user-select: none;
+}
+
+.tree-toggle:hover rect {
+  fill: var(--surface-sunken);
+}
+
+.tree-toggle:hover text {
+  fill: var(--text);
+}
+
+.tree-toggle:focus-visible rect {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
 }
 
 .tree-tools {
