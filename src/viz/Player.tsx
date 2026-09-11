@@ -6,9 +6,11 @@ import './viz.css';
 interface Props<S> {
   scene: Scene<S>;
   render: (state: S) => ReactNode;
+  /** 전체 화면 무대로 열 때. 초점을 이 안으로 가져오고, 기다리지 않고 바로 재생한다. */
+  stage?: boolean;
 }
 
-export default function Player<S>({ scene, render }: Props<S>) {
+export default function Player<S>({ scene, render, stage }: Props<S>) {
   const {
     containerRef,
     index,
@@ -23,7 +25,7 @@ export default function Player<S>({ scene, render }: Props<S>) {
     prev,
     next,
     seek,
-  } = usePlayer(scene);
+  } = usePlayer(scene, { stage });
 
   return (
     <div className="viz" ref={containerRef} tabIndex={0} aria-label={scene.title}>

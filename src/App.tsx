@@ -20,12 +20,20 @@ const THEME_LABEL: Record<ThemeMode, string> = {
   system: '시스템',
 };
 
-/** 어디서 어떻게 읽고 있었는지. 돌아가기가 이걸 되살린다. */
+/** 어디서 어떻게 보고 있었는지 통째로. 돌아가기가 이걸 그대로 되살린다. */
 interface Visit extends PanelPlace {
   id: string;
   /** 그때 지도를 보던 자리와 배율. */
   cam?: { x: number; y: number; k: number };
+  /** 그때 펼쳐져 있던 가지. */
+  open: Set<string>;
+  /** 그때 보던 범위("이 가지만 보기" 자취). */
+  roots: string[];
+  orientation: Orientation;
 }
+
+/** 이력이 끝없이 쌓이지 않게 한다. 그보다 멀리 간 건 "직전 맥락"이 아니다. */
+const TRAIL_MAX = 30;
 
 export default function App() {
   const { mode, cycle } = useTheme();
@@ -131,45 +139,76 @@ export default function App() {
     [pathOf, select, tree.byId, tree.rootId],
   );
 
+  /**
+   * 지금 자리를 이력에 쌓는다. 어디로 가든(지도·검색·설명 링크) 같은 규칙을 쓴다.
+   *
+   * 스냅샷은 **여기서** 찍는다. setTrail 업데이터 안에서 찍으면 업데이터가 나중에
+   * 실행되면서 이미 옮겨간 카메라를 떠 버린다.
+   */
+  const pushTrail = useCallback(
+    (from?: PanelPlace) => {
+      if (!selected) return;
+      const cam = treeRef.current?.snapshot();
+      const here: Visit = {
+        id: selected,
+        tab: from?.tab ?? 'basic',
+        scroll: from?.scroll ?? 0,
+        cam,
+        open: new Set(open),
+        roots: [...roots],
+        orientation,
+      };
+      setTrail((t) => [...t, here].slice(-TRAIL_MAX));
+      setRestore(undefined);
+    },
+    [open, orientation, roots, selected],
+  );
+
   /** 설명 속 링크로 건너뛴다. 읽던 자리를 남겨 돌아올 수 있게 한다. */
   const navigate = useCallback(
     (targetId: string, from: PanelPlace) => {
       if (!tree.byId[targetId] || targetId === selected) return;
-      // 스냅샷은 **여기서** 찍는다. setTrail 업데이터 안에서 찍으면 업데이터가 나중에
-      // 실행되면서 이미 옮겨간 카메라를 떠 버린다.
-      const cam = treeRef.current?.snapshot();
-      if (selected) setTrail((t) => [...t, { id: selected, ...from, cam }]);
-      setRestore(undefined);
+      pushTrail(from);
       reveal(targetId);
     },
-    [reveal, selected, tree.byId],
+    [pushTrail, reveal, selected, tree.byId],
   );
 
-  /** 자취 없이 그냥 간다. 지도 클릭·검색·시작 화면처럼 "새로 시작하는" 이동. */
+  /** 검색·시작 화면·퀴즈 결과에서 건너뛴다. 이력 규칙은 같다. */
   const jump = useCallback(
     (id: string) => {
-      setTrail([]);
-      setRestore(undefined);
+      if (id === selected) return;
+      pushTrail();
       reveal(id);
     },
-    [reveal],
+    [pushTrail, reveal, selected],
   );
 
+  /**
+   * 직전 맥락으로 돌아간다. 개념뿐 아니라 **펼침 상태·보던 범위·방향·카메라·탭·스크롤**을
+   * 그때 그대로 되살린다. 하나라도 빠지면 "돌아왔다"는 느낌이 깨진다.
+   */
   const back = useCallback(() => {
     // 업데이터 안에서 다른 state를 건드리면 두 번 실행돼 자취가 제대로 안 줄어든다.
     const last = trail[trail.length - 1];
     if (!last) return;
     setTrail((t) => t.slice(0, -1));
     setRestore({ tab: last.tab, scroll: last.scroll });
-    reveal(last.id);
+
+    setRoots(last.roots);
+    setOrientation(last.orientation);
+    setOpen(new Set(last.open));
+    setSelected(last.id);
+    setOverlay(null);
+    setPhoneView('read');
+
     /*
-     * 지도도 그때 보던 자리·배율로 되돌린다.
-     * 여기서 바로 부른다. requestAnimationFrame으로 미루면 탭이 안 보일 때 아예 안 돌아
-     * 복원이 통째로 건너뛰어진다. restore가 "잠깐 자동 이동 금지"를 걸어두므로,
-     * 뒤이어 도는 reveal의 따라가기 효과가 이 자리를 덮어쓰지 못한다.
+     * 카메라는 여기서 바로 되돌린다. requestAnimationFrame으로 미루면 탭이 안 보일 때
+     * 아예 안 돌아 복원이 통째로 건너뛰어진다. restore가 "잠깐 자동 이동 금지"를
+     * 걸어두므로, 뒤이어 도는 따라가기 효과가 이 자리를 덮어쓰지 못한다.
      */
     if (last.cam) treeRef.current?.restore(last.cam);
-  }, [reveal, trail]);
+  }, [trail]);
 
   /**
    * 트리에서 노드 본체를 눌렀을 때. 고르고 그 갈래로 들어간다. **접지는 않는다.**
@@ -177,13 +216,18 @@ export default function App() {
    */
   const clickNode = useCallback(
     (id: string) => {
-      setTrail([]);
-      setRestore(undefined);
+      if (id === selected) return;
+      /*
+       * 지도에서 옮겨 다닌 것도 이력에 남긴다.
+       * 전에는 지도 클릭이 이력을 비워서, 설명 링크로 간 건 뒤로 갈 수 있고 지도로 간 건
+       * 못 가는 두 가지 규칙이 생겼다. "뒤로 = 직전 맥락"으로 하나만 둔다.
+       */
+      pushTrail();
       select(id);
       if (tree.byId[id].childIds.length > 0) setOpen(pathOf(id));
       else setPhoneView('read'); // 더 펼칠 게 없으면 읽으러 가는 뜻이다
     },
-    [pathOf, select, tree.byId],
+    [pathOf, pushTrail, select, selected, tree.byId],
   );
 
   /** ＋/－ 를 눌렀을 때. 접기·펴기만 한다. */

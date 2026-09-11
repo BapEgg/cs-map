@@ -178,9 +178,13 @@ export default function ConceptPanel({
       ) : tab === 'basic' ? (
         <div className="panel-body">
           <div className={hasFullCard ? 'card3' : 'card3 card3-bare'}>
-            <p className="card3-line">
+            {/*
+              div로 감싼다. RichText가 문단마다 <p>를 내보내는데 <p> 안의 <p>는
+              브라우저가 바깥 <p>를 먼저 닫아 버려서 구조가 통째로 어긋난다.
+            */}
+            <div className="card3-line">
               <RichText text={node.card?.one_line ?? ''} {...richProps} />
-            </p>
+            </div>
             {node.card?.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
             {!!node.card?.keywords?.length && (
               <p className="card3-keys">

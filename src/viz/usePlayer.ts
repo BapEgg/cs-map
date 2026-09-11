@@ -6,6 +6,17 @@ export type PlayState = 'waiting' | 'playing' | 'paused';
 interface Options {
   /** 화면에 들어오면 알아서 재생한다. 페이지를 열자마자가 아니라, 눈에 보일 때. */
   autoPlay?: boolean;
+  /**
+   * 전체 화면 무대로 열렸는지. 켜면 두 가지가 달라진다.
+   *
+   * 1. **초점을 이 안으로 가져온다.** 바깥 상자에 두면 안 된다 — ←/→/Space 처리기가
+   *    이 안(containerRef)에 붙어 있고 keydown은 위로만 올라가서, 바깥에서 누른 키는
+   *    여기까지 내려오지 않는다. 안내에 "← → 한 단계씩"이라 써 놓고 아무 일도
+   *    안 일어나던 게 그 때문이었다.
+   * 2. **기다리지 않고 바로 재생한다.** 화면을 덮고 열리니 "보일 때까지 기다리기"가
+   *    필요 없고, 그 기다림이 풀리지 않으면 자동 재생이 통째로 멈춰 버린다.
+   */
+  stage?: boolean;
 }
 
 /**
@@ -14,13 +25,14 @@ interface Options {
  *
  * 다만 끝까지 가면 멈춘다. 옆에서 계속 움직이면 글을 못 읽는다.
  */
-export function usePlayer<S>(scene: Scene<S>, { autoPlay = true }: Options = {}) {
+export function usePlayer<S>(scene: Scene<S>, { autoPlay = true, stage = false }: Options = {}) {
   const [index, setIndex] = useState(0);
   const [speed, setSpeed] = useState<Speed>(1);
   const [play, setPlay] = useState<PlayState>(() => {
     if (!autoPlay) return 'paused';
-    // IntersectionObserver가 없는 환경이면 기다릴 방법이 없으니 그냥 재생한다.
-    return typeof IntersectionObserver === 'undefined' ? 'playing' : 'waiting';
+    // 무대는 화면을 덮고 열린다. IntersectionObserver가 없는 환경도 기다릴 방법이 없다.
+    if (stage || typeof IntersectionObserver === 'undefined') return 'playing';
+    return 'waiting';
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +56,14 @@ export function usePlayer<S>(scene: Scene<S>, { autoPlay = true }: Options = {})
   const toggle = useCallback(() => {
     setPlay((s) => (s === 'playing' ? 'paused' : 'playing'));
   }, []);
+
+  // 열릴 때 키보드를 데려오고, 닫힐 때 열었던 자리로 돌려준다.
+  useEffect(() => {
+    if (!stage) return;
+    const opener = document.activeElement as HTMLElement | null;
+    containerRef.current?.focus();
+    return () => opener?.focus?.();
+  }, [stage]);
 
   // 화면에 들어올 때 재생을 시작한다. 안 보이는 동안 혼자 다 돌아버리면 의미가 없다.
   useEffect(() => {

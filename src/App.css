@@ -183,6 +183,10 @@
   /*
    * 도구가 가로로 넘쳐서 잘리던 걸 옆으로 밀어 볼 수 있게 한다.
    * 줄바꿈으로 쌓으면 지도 볼 자리를 그만큼 잃는다.
+   *
+   * 스크롤바를 숨겼으니 **오른쪽 끝을 흐리게** 해서 더 있다는 걸 알린다.
+   * 390px에서 6개가 459px을 차지해 마지막 둘(방향·테마)이 잘리는데,
+   * 표시가 없으면 그런 게 있는 줄도 모른 채 못 쓴다.
    */
   .bar-tools {
     width: 100%;
@@ -191,6 +195,7 @@
     flex-wrap: nowrap;
     scrollbar-width: none;
     padding-bottom: 2px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
   }
 
   .bar-tools::-webkit-scrollbar {

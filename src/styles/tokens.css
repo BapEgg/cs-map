@@ -28,20 +28,24 @@
    * 트리 깊이별 색. 노드를 **채우지 않고 테두리로만** 쓴다.
    * 채우면 색이 화면을 다 먹어서 개념이 많아질수록 어지럽다. 진할수록 큰 개념.
    * 과목 구분은 색을 늘리지 않고 아이콘이 맡는다(SubjectIcon).
+   *
+   * 아래로 갈수록 옅어지되 **바탕(--surface-sunken) 대비 3:1 아래로는 내려가지 않는다.**
+   * 테두리가 노드의 유일한 경계라서, 더 옅게 두면 깊은 노드가 바탕에 녹아 사라진다.
+   * (측정값: 4단계 3.4:1, 5단계 3.1:1. 예전 #8f9bb0/#a5aebd는 2.3/2.0이었다.)
    */
   --depth-0: #1f3b6b;
   --depth-1: #2f4e96;
-  --depth-2: #5d7399;
-  --depth-3: #78879f;
-  --depth-4: #8f9bb0;
-  --depth-5: #a5aebd;
+  --depth-2: #4a628e;
+  --depth-3: #5f7392;
+  --depth-4: #6d8098;
+  --depth-5: #78879f;
   /* 과목(0~1단계)은 옅게 채워서 '큰 묶음'으로 보이게 한다. 글씨 색은 안 건드린다. */
   --depth-fill: #e6ecf8;
 
   /* 지금 보고 있는 노드. 시각화의 '현재' 색과 같은 계열로 묶는다. */
   --node-select: #a07a06;
-  --node-select-text: #453305;
-  --node-select-ring: rgb(217 203 61 / 0.3);
+  --node-select-text: #3d2d04;
+  --node-select-bg: #fdf6dd;
 
   /* 노드 뱃지 */
   --badge-deep: #5f3dc4; /* 심화 있음 */
@@ -128,18 +132,21 @@
   --accent-soft: #223255;
   --on-accent: #0f1626;
 
-  /* 밝을수록 큰 개념으로 뒤집는다. 어두운 배경에서 대비가 유지되도록. */
+  /*
+   * 밝을수록 큰 개념으로 뒤집는다. 라이트와 같은 규칙 — 바탕 대비 3:1이 바닥이다.
+   * (측정값: 4단계 3.4:1, 5단계 3.1:1. 예전 #4e586d/#444c5e는 2.7/2.2라 깊은 노드가 배경에 묻혔다.)
+   */
   --depth-0: #b6d0fd;
   --depth-1: #9cc0fb;
   --depth-2: #6f8bb8;
-  --depth-3: #5b6883;
-  --depth-4: #4e586d;
-  --depth-5: #444c5e;
+  --depth-3: #64748f;
+  --depth-4: #5c6a83;
+  --depth-5: #57647b;
   --depth-fill: #1e2a42;
 
   --node-select: #c8c23a;
-  --node-select-text: #f0eec4;
-  --node-select-ring: rgb(200 194 58 / 0.16);
+  --node-select-text: #f4f2d2;
+  --node-select-bg: #35331a;
 
   --badge-deep: #b197fc;
   --badge-sim: #66d9e8;

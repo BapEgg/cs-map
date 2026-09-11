@@ -10,6 +10,16 @@
   box-shadow: var(--shadow-panel);
 }
 
+/*
+ * 좁은 데스크톱. 480px을 고정으로 떼 주면 1000px 화면에서 지도에 476px밖에 안 남아
+ * 둘 다 좁아진다. 설명은 400px이면 한 줄에 40자쯤 들어가 아직 읽을 만하다.
+ */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .panel {
+    flex: 0 0 400px;
+  }
+}
+
 .panel-path {
   display: flex;
   flex-wrap: wrap;
@@ -119,6 +129,18 @@
   font-size: 19px;
   font-weight: 700;
   line-height: 1.5;
+}
+
+/*
+ * 한 줄 카드 안의 문단은 카드 글씨를 그대로 쓴다.
+ * RichText가 <p class="rich">를 내보내는데 그게 16px·아래 여백을 도로 끌고 들어온다.
+ */
+.card3-line .rich,
+.card3-line .rich-line {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .card3-analogy {

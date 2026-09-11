@@ -8,10 +8,18 @@ export interface Camera {
   k: number;
 }
 
-/** 이보다 작아지면 노드 글씨를 못 읽는다. 다 안 들어가면 밀어서 보는 게 낫다. */
+/** 손으로 줄일 수 있는 한계. 전체 모양을 훑어보려고 일부러 줄이는 건 막지 않는다. */
 const MIN_K = 0.55;
 const MAX_K = 2.2;
 const clampK = (k: number) => Math.min(MAX_K, Math.max(MIN_K, k));
+
+/**
+ * **자동** 맞춤이 내려갈 수 있는 바닥. 손으로 줄이는 것과 다른 값이다.
+ *
+ * 폰(366px)에서 전체를 맞추면 0.55까지 내려가 14px 제목이 7.7px이 된다. 지도가 아니라 얼룩이다.
+ * 좁은 화면에서는 다 담으려 하지 말고 읽을 수 있는 크기를 지키고 밀어서 보게 한다.
+ */
+const fitFloor = (viewW: number) => (viewW < 620 ? 0.85 : MIN_K);
 
 /**
  * 드래그로 이동, 휠로 스크롤, Ctrl+휠로 확대. 가로 스크롤바는 쓰지 않는다.
@@ -34,14 +42,26 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     setCamState(value);
   }, []);
 
+  /**
+   * 지도의 실제 크기. 숨겨져 있으면(모바일에서 설명만 보는 중) 0이 나온다.
+   * 전에는 0일 때 임의의 800×600으로 때워서, 숨은 동안 카메라가 엉뚱한 자리로 옮겨졌다가
+   * 다시 보여줄 때 빈 화면이 됐다. 이제 0을 그대로 돌려주고 부르는 쪽이 건너뛴다.
+   */
   const viewSize = useCallback(() => {
     const el = svgRef.current;
-    return { w: el?.clientWidth ?? 800, h: el?.clientHeight ?? 600 };
+    return { w: el?.clientWidth ?? 0, h: el?.clientHeight ?? 0 };
   }, [svgRef]);
+
+  /** 지금 지도가 화면에 자리를 갖고 있는지. 카메라를 건드리기 전에 확인한다. */
+  const hasSize = useCallback(() => {
+    const { w, h } = viewSize();
+    return w > 0 && h > 0;
+  }, [viewSize]);
 
   const fit = useCallback(
     (bounds: Box, animate = true) => {
-      setCam(fitCamera(bounds, viewSize(), { min: MIN_K, max: MAX_K }), animate);
+      const view = viewSize();
+      setCam(fitCamera(bounds, view, { min: fitFloor(view.w), max: MAX_K }), animate);
     },
     [setCam, viewSize],
   );
@@ -71,6 +91,7 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     (box: Box) => {
       if (Date.now() < holdUntil.current) return;
       const { w, h } = viewSize();
+      if (w <= 0 || h <= 0) return; // 숨겨진 지도를 움직이면 다시 보여줄 때 빈 화면이 된다
       const c = camRef.current;
       const pad = 80;
       const left = box.x * c.k + c.x;
@@ -168,5 +189,6 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     ensureVisible,
     snapshot,
     restore,
+    hasSize,
   };
 }

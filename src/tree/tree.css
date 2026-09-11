@@ -19,81 +19,76 @@
   cursor: grabbing;
 }
 
-/* 키보드로 지도에 들어왔을 때 어디에 있는지 보이게 한다. */
+/* 키보드로 지도에 들어왔을 때. 지도 전체에 한 번만 그린다. */
 .tree-svg:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
+/*
+ * 연결선은 노드와 **같은 시간·같은 곡선**으로 움직여야 한 덩어리로 읽힌다.
+ * `d` 전환은 명령 구조가 같을 때만 보간된다(linkPath가 그렇게 그린다).
+ */
 .tree-links path {
   stroke: var(--depth-4);
-  stroke-width: 1.2;
-  opacity: 0.7;
-}
-
-.tree-node {
-  cursor: pointer;
-  transition: opacity 0.25s ease;
-}
-
-/*
- * 고른 개념의 길에서 벗어난 노드는 뒤로 물린다.
- *
- * 노드 전체에 opacity를 걸면 **글씨까지 흐려져 읽을 수 없다.** 지도는 옆 가지에
- * 뭐가 있는지 읽히는 게 값어치인데 그걸 잃는다.
- * 그래서 글자는 본문보다 한 단계 연한 색으로만 두고, 강조 차이는 테두리와 연결선으로 낸다.
- */
-.tree-node.dim .tree-node-box {
-  stroke: var(--border);
-  fill-opacity: 0.2;
-}
-
-.tree-node.dim .tree-node-title {
-  fill: var(--text-muted);
-}
-
-.tree-node.dim .tree-icon,
-.tree-node.dim .tree-toggle text {
-  stroke: var(--border-strong);
-  fill: var(--border-strong);
-}
-
-.tree-node.dim .tree-badges {
-  opacity: 0.55;
-}
-
-.tree-node.dim:hover .tree-node-box {
-  stroke: var(--border-strong);
-  fill-opacity: 0.6;
-}
-
-.tree-node.dim:hover .tree-node-title {
-  fill: var(--text);
+  stroke-width: 1.4;
+  opacity: 0.75;
+  transition:
+    d var(--move) var(--ease-out),
+    opacity var(--move) var(--ease-out);
 }
 
 .tree-links path.dim {
   opacity: 0.3;
 }
 
+/* 접힌 가지의 선. 길이가 0이라 안 보이지만 자리를 지키고 있다. */
+.tree-links path.gone {
+  opacity: 0;
+}
+
 /*
- * 노드는 채우지 않고 테두리로만 그린다. 깊이는 테두리 색의 진하기로 나타낸다.
- * 채우면 색이 화면을 다 먹어서 개념이 많아질수록 어지럽다.
+ * 노드의 자리 이동을 CSS transform으로 한다. 그래야 본체·제목·상태·토글이
+ * 한 요소 안에서 같은 진행률로 함께 움직인다.
  */
+.tree-node {
+  cursor: pointer;
+  transition:
+    transform var(--move) var(--ease-out),
+    opacity var(--move) var(--ease-out);
+}
+
+/*
+ * 접힌 노드. 지우지 않고 부모 자리에 겹쳐 투명하게 둔다.
+ * 펼치기는 "부모에서 자기 자리로", 접기는 그 반대가 되어 양쪽 다 이어진다.
+ */
+.tree-node.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .tree-node-box {
   fill: var(--surface);
-  fill-opacity: 0.55;
+  fill-opacity: 0.6;
   stroke: var(--depth-3);
   stroke-width: 1.4;
   transition:
-    stroke 0.18s ease,
-    fill-opacity 0.18s ease;
+    stroke var(--move-fast) ease,
+    stroke-width var(--move-fast) ease,
+    fill var(--move-fast) ease,
+    fill-opacity var(--move-fast) ease;
 }
 
+/*
+ * 제목. 굵은 작은 글씨를 반복하지 않는다.
+ * 위계는 글씨 굵기가 아니라 테두리 진하기와 과목 채움이 맡는다.
+ */
 .tree-node-title {
-  font-weight: 600;
+  font-weight: 500;
   fill: var(--text);
   pointer-events: none;
   user-select: none;
+  transition: fill var(--move-fast) ease;
 }
 
 .tree-icon {
@@ -103,8 +98,10 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
+  transition: stroke var(--move-fast) ease;
 }
 
+/* 깊이는 테두리 진하기로만 나타낸다. */
 .depth-0 .tree-node-box,
 .depth-0 .tree-icon {
   stroke: var(--depth-0);
@@ -126,32 +123,41 @@
   stroke: var(--depth-5);
 }
 
-/*
- * 과목은 옅게 채워서 '큰 묶음'임을 알린다.
- * 글씨 색으로 위계를 주려다 실패했다 — 깊은 노드가 본문색(가장 밝음)이라 오히려 더 도드라졌다.
- * 글씨는 전부 같은 색으로 두고, 테두리 진하기 + 채움 + 아이콘이 위계를 맡는다.
- */
+/* 과목은 옅게 채워 '큰 묶음'임을 알린다. 글씨 색은 안 건드린다. */
 .depth-0 .tree-node-box,
 .depth-1 .tree-node-box {
   fill: var(--depth-fill);
   fill-opacity: 1;
 }
 
+/* ── 네 가지 상태: 기본 / 호버 / 선택 / 키보드 초점 ── */
+
+/*
+ * 호버는 **테두리 색까지** 바꾼다. 채움만 짙게 하면 어두운 테마에서 차이가
+ * 채널당 5~7밖에 안 나서 커서가 어디 있는지 알 수 없었다.
+ * 깊이색(파랑 계열)과 확실히 갈리는 중성색이라 라이트·다크 양쪽에서 같은 크기로 읽힌다.
+ */
 .tree-node:hover .tree-node-box {
   fill-opacity: 1;
+  stroke: var(--text-muted);
+  stroke-width: 1.8;
 }
 
-/* 선택은 테두리로만 알린다. 색을 바꿔버리면 깊이별 색이 뜻을 잃는다. */
-.tree-svg:focus-visible .tree-node.selected .tree-node-box {
-  stroke-width: 2.5;
+/* 선택된 노드 위에 커서가 와도 선택 표시가 이긴다. */
+.tree-node.selected:hover .tree-node-box {
+  stroke: var(--node-select);
 }
 
+/*
+ * 선택은 강조색 테두리 + **얕은 배경**으로 알린다.
+ * 깊이별 색이 파랑 계열이라 선택은 그와 겹치지 않는 색을 쓴다
+ * (시각화의 '지금 보고 있는 것'과 같은 계열이라 앱 전체가 한 언어를 쓴다).
+ */
 .tree-node.selected .tree-node-box {
   stroke: var(--node-select);
   stroke-width: 2;
+  fill: var(--node-select-bg);
   fill-opacity: 1;
-  filter: drop-shadow(0 0 0 var(--node-select-ring));
-  paint-order: stroke;
 }
 
 .tree-node.selected .tree-node-title {
@@ -163,34 +169,89 @@
 }
 
 /*
- * 접기·펴기. 투명한 사각형이 클릭을 받는다.
- * 여기에 pointer-events:none을 주면 그 사각형까지 죽어서 클릭이 노드 본체로 새어 나간다.
- * 글자에만 준다.
+ * 흐리게. 노드 전체에 opacity를 걸면 글씨까지 흐려져 옆 가지를 못 읽는다.
+ * 글자는 읽히는 색으로 두고 테두리·연결선으로만 차이를 낸다.
+ */
+.tree-node.dim .tree-node-box {
+  stroke: var(--border);
+  fill-opacity: 0.25;
+}
+
+.tree-node.dim .tree-node-title {
+  fill: var(--text-muted);
+}
+
+.tree-node.dim .tree-icon {
+  stroke: var(--border-strong);
+}
+
+.tree-node.dim .status {
+  opacity: 0.5;
+}
+
+.tree-node.dim:hover .tree-node-box {
+  stroke: var(--border-strong);
+  fill-opacity: 0.7;
+}
+
+.tree-node.dim:hover .tree-node-title {
+  fill: var(--text);
+}
+
+/*
+ * 상태 표시는 노드 **안쪽**에 놓는다. 아래 테두리에 걸치면 잘려 보이고
+ * 축소하면 얼룩이 된다. 색만이 아니라 모양이 뜻을 담아 범례를 외우지 않아도 되게 한다.
+ */
+.status {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* 재생 삼각형은 면으로 그려야 뜻이 보인다. */
+.status-sim {
+  fill: currentColor;
+  stroke-width: 0.8;
+}
+
+/*
+ * 펼침 표시. 셰브런이 열림/닫힘 방향을 그대로 보여준다.
+ * 호버 영역은 노드 높이 전체가 아니라 표시 주변의 둥근 자리다.
  */
 .tree-toggle {
   cursor: pointer;
 }
 
-.tree-toggle text {
-  font-size: 15px;
-  font-weight: 700;
-  fill: var(--text-muted);
-  pointer-events: none;
-  user-select: none;
+.tree-toggle-hit {
+  fill: transparent;
+  transition: fill var(--move-fast) ease;
 }
 
-.tree-toggle:hover rect {
-  fill: var(--surface-sunken);
+.tree-toggle:hover .tree-toggle-hit {
+  fill: color-mix(in srgb, var(--text) 12%, transparent);
 }
 
-.tree-toggle:hover text {
-  fill: var(--text);
-}
-
-.tree-toggle:focus-visible rect {
+.tree-toggle-mark {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 2;
+  stroke: var(--text-muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition:
+    transform var(--move) var(--ease-out),
+    stroke var(--move-fast) ease;
+}
+
+.tree-toggle:hover .tree-toggle-mark {
+  stroke: var(--text);
+}
+
+.tree-node.dim .tree-toggle-mark {
+  stroke: var(--border-strong);
 }
 
 .tree-tools {
@@ -202,59 +263,11 @@
   gap: var(--sp-1);
 }
 
-.tree-legend {
-  position: absolute;
-  left: var(--sp-3);
-  bottom: var(--sp-3);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: var(--sp-1) var(--sp-3);
-  font-size: 11px;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  pointer-events: none;
-}
-
-.tree-legend i.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-left: var(--sp-2);
-}
-
-.tree-legend i.dot:first-child {
-  margin-left: 0;
-}
-
-/*
- * 펼쳤을 때 새 자식이 부모 자리에서 나오는 느낌.
- * 전체를 다시 배치하거나 줌을 건드리지 않고, 새로 생긴 것만 짧게 움직인다.
- * 바운스 같은 장식은 넣지 않는다. 방향만 알려주면 된다.
- */
-@keyframes node-in {
-  from {
-    opacity: 0;
-    transform: translate(var(--from-x, 0), var(--from-y, 0));
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.node-in {
-  animation: node-in var(--move) var(--ease-out);
-}
-
-/* 움직임을 줄여 달라고 한 사람에게는 위치만 바꾸고 끝낸다. */
+/* 움직임을 줄여 달라고 한 사람에게는 자리만 바꾸고 끝낸다. */
 @media (prefers-reduced-motion: reduce) {
-  .node-in {
-    animation: none;
-  }
-
+  .tree-node,
+  .tree-links path,
+  .tree-toggle-mark,
   .tree-cam {
     transition: none !important;
   }

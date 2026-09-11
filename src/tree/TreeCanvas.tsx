@@ -1,7 +1,21 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ConceptNode } from '../content/types';
+import StatusMark, { type StatusKind } from './StatusMark';
 import SubjectIcon from './SubjectIcon';
-import { NODE_H, TITLE_SIZE, layoutTree, linkPath, textWidth, type Orientation } from './layout';
+import {
+  ICON_W,
+  NODE_H,
+  PAD_L,
+  STATUS_W,
+  TITLE_SIZE,
+  TOGGLE_W,
+  fitTitle,
+  layoutTree,
+  linkPath,
+  nodeWidth,
+  titleSpace,
+  type Orientation,
+} from './layout';
 import { useCamera, type Camera } from './useCamera';
 import './tree.css';
 
@@ -11,21 +25,36 @@ interface Props {
   open: Set<string>;
   selected: string | null;
   orientation: Orientation;
-  /** 퀴즈 결과. 기억났으면 초록, 헷갈렸으면 주황 점. */
+  /** 퀴즈 결과. 기억났으면 초록, 헷갈렸으면 주황. */
   marks: Record<string, { known: boolean }>;
   /** 메모를 남긴 개념. */
   noted: Set<string>;
   /** 노드 본체를 눌렀을 때. 고르고, 그 갈래로 들어간다. 접지는 않는다. */
   onNodeClick: (id: string) => void;
-  /** ＋/－ 표시를 눌렀을 때. 접기·펴기만 한다. */
+  /** 펼침 표시를 눌렀을 때. 접기·펴기만 한다. */
   onToggle: (id: string) => void;
-  /** 카메라를 떠 두고 되돌리기 위한 손잡이. 뒤로 갈 때 보던 자리로 돌아간다. */
+  /** 카메라를 떠 두고 되돌리기 위한 손잡이. */
   handleRef?: React.RefObject<TreeHandle | null>;
 }
 
 export interface TreeHandle {
   snapshot(): Camera;
   restore(cam: Camera): void;
+}
+
+/** 이 개념에 붙는 상태 표시. 노드 너비 계산과 그리기가 같은 목록을 봐야 한다. */
+function statusesOf(
+  id: string,
+  node: ConceptNode,
+  noted: Set<string>,
+  marks: Props['marks'],
+): StatusKind[] {
+  const out: StatusKind[] = [];
+  if (node.sim) out.push('sim');
+  if (node.hasDeep) out.push('deep');
+  if (noted.has(id)) out.push('note');
+  if (id in marks) out.push(marks[id].known ? 'known' : 'unsure');
+  return out;
 }
 
 export default function TreeCanvas({
@@ -52,72 +81,103 @@ export default function TreeCanvas({
     ensureVisible,
     snapshot,
     restore,
+    hasSize,
   } = useCamera(svgRef);
 
-  // 카메라 손잡이를 App에 넘긴다. 뒤로 갈 때 보던 자리·배율을 그대로 되돌리려고.
   useEffect(() => {
     if (handleRef) handleRef.current = { snapshot, restore };
   }, [handleRef, snapshot, restore]);
 
+  /** 상태 개수가 너비에 들어가므로 배치와 같은 계산을 쓴다. */
+  const widthOf = useCallback(
+    (node: ConceptNode) => nodeWidth(node, statusesOf(node.id, node, noted, marks).length),
+    [marks, noted],
+  );
+
   const layout = useMemo(
-    () => layoutTree(byId, root, open, orientation),
-    [byId, root, open, orientation],
+    () => layoutTree(byId, root, open, orientation, widthOf),
+    [byId, root, open, orientation, widthOf],
   );
 
   /*
    * 방향을 바꾸거나 가지를 갈아타면 화면에 맞춘다. 첫 화면은 애니메이션 없이 바로.
-   *
-   * 맞출 범위는 **지금 화면에 그려진 배치**여야 한다. 전에는 "루트만 펼친 상태"를
-   * 따로 계산해서 맞췄는데, 실제로는 과목까지 펼쳐져 있어서 카메라가 트리보다
-   * 좁은 범위를 기준으로 잡혔다.
+   * 지도가 숨겨져 있으면(모바일에서 설명만 보는 중) 크기가 0이라 맞출 수 없다. 건너뛴다.
    */
   const lastFit = useRef('');
   useEffect(() => {
     const key = `${orientation}:${root}`;
-    if (lastFit.current === key) return;
+    if (lastFit.current === key || !hasSize()) return;
     const first = lastFit.current === '';
     lastFit.current = key;
     fit(layout.bounds, !first);
-  }, [orientation, root, layout, fit]);
+  }, [orientation, root, layout, fit, hasSize]);
 
-  // 펼친 노드의 새 자식이 화면 밖이면 카메라가 따라간다.
-  const lastOpened = useRef<string | null>(null);
+  /**
+   * 방금 펼친 노드. 새 자식이 화면 밖이면 그만큼만 민다.
+   * 본체 클릭·＋/－·키보드 어느 길로 펼쳐도 같은 규칙이 걸리도록 한 곳에서 기록한다.
+   */
+  const justOpened = useRef<string | null>(null);
   useEffect(() => {
-    const id = lastOpened.current;
-    if (!id || !open.has(id)) return;
-    const kids = byId[id]?.childIds ?? [];
-    const pts = kids.map((k) => layout.pos[k]).filter(Boolean);
-    if (!pts.length) return;
-    const xs = pts.map((p) => p.x);
-    const ys = pts.map((p) => p.y);
+    const id = justOpened.current;
+    if (!id || !open.has(id) || !hasSize()) return;
+    justOpened.current = null;
+    const kids = (byId[id]?.childIds ?? []).map((k) => layout.byId[k]).filter(Boolean);
+    if (!kids.length) return;
+    const xs = kids.map((p) => p.x);
+    const right = Math.max(...kids.map((p) => p.x + p.w));
+    const ys = kids.map((p) => p.y);
     ensureVisible({
       x: Math.min(...xs),
       y: Math.min(...ys) - NODE_H / 2,
-      w: Math.max(...xs) - Math.min(...xs) + 160,
+      w: right - Math.min(...xs),
       h: Math.max(...ys) - Math.min(...ys) + NODE_H,
     });
-    lastOpened.current = null;
-  }, [byId, open, layout, ensureVisible]);
+  }, [byId, open, layout, ensureVisible, hasSize]);
 
-  // 설명 패널에서 다른 개념으로 건너뛰면 트리도 그쪽을 비춘다.
+  // 다른 개념으로 건너뛰면 트리도 그쪽을 비춘다. 이미 보이면 움직이지 않는다.
   const lastSelected = useRef<string | null>(null);
   useEffect(() => {
-    if (!selected || selected === lastSelected.current) return;
+    if (!selected || selected === lastSelected.current || !hasSize()) return;
     lastSelected.current = selected;
-    const p = layout.pos[selected];
-    if (!p) return;
-    const w = layout.width[selected] ?? 120;
-    ensureVisible({ x: p.x - 30, y: p.y - NODE_H, w: w + 60, h: NODE_H * 2 });
-  }, [selected, layout, ensureVisible]);
+    const p = layout.byId[selected];
+    if (!p || p.hidden) return;
+    ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
+  }, [selected, layout, ensureVisible, hasSize]);
 
   /**
-   * 흐리게 하지 않을 노드들: 고른 개념, 거기까지 가는 길, 그 아래 자식, **그리고 형제**.
+   * 지도가 **숨었다가 다시 보일 때**(모바일에서 설명을 보다 지도로 돌아옴).
    *
-   * 나머지를 흐리게 해야 "지금 보고 있는 게 어디인지"가 한눈에 들어온다.
-   * 테두리 색 하나로는 노드 수십 개 중에서 못 찾는다.
-   *
-   * 형제를 살려 두는 이유는 설명 패널의 '흐름'이 바로 그 형제들을 가리키기 때문이다.
-   * (세그멘테이션 → 페이징 → 가상 메모리)
+   * 숨어 있는 동안에는 크기가 0이라 카메라를 건드리지 않는다. 그 사이 검색이나 링크로
+   * 다른 개념을 골랐다면 그 노드가 화면 밖일 수 있다. 그래서 크기가 잡힌 **뒤에**
+   * 필요한 만큼만 민다. 무조건 전체 맞춤을 하면 보던 자리를 잃는다.
+   */
+  const latest = useRef({ layout, selected });
+  useEffect(() => {
+    latest.current = { layout, selected };
+  }, [layout, selected]);
+
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    let had = el.clientWidth > 0 && el.clientHeight > 0;
+    const ro = new ResizeObserver(() => {
+      const now = el.clientWidth > 0 && el.clientHeight > 0;
+      if (now && !had) {
+        const { layout: lay, selected: sel } = latest.current;
+        const p = sel ? lay.byId[sel] : null;
+        if (p && !p.hidden)
+          ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
+        else fit(lay.bounds, false);
+      }
+      had = now;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ensureVisible, fit]);
+
+  /**
+   * 흐리게 하지 않을 노드: 고른 개념, 거기까지 가는 길, 그 아래 자식, 그리고 형제.
+   * 형제를 살려 두는 건 설명 패널의 '흐름'이 바로 그 형제들을 가리키기 때문이다.
    */
   const focused = useMemo(() => {
     if (!selected || !byId[selected]) return null;
@@ -132,16 +192,18 @@ export default function TreeCanvas({
     return set;
   }, [byId, selected]);
 
+  const expand = (id: string) => {
+    if (!open.has(id) && byId[id].childIds.length > 0) justOpened.current = id;
+    onToggle(id);
+  };
+
   const handleNode = (id: string) => {
     if (didDrag()) return;
-    if (byId[id].childIds.length > 0 && !open.has(id)) lastOpened.current = id;
+    if (byId[id].childIds.length > 0 && !open.has(id)) justOpened.current = id;
     onNodeClick(id);
   };
 
-  /**
-   * 지도를 키보드로도 돌아다닐 수 있게 한다. 마우스 없이는 아예 못 쓰던 화면이었다.
-   * ↑↓ 로 화면에 보이는 순서대로, → 로 펼치고 들어가고, ← 로 접거나 부모로 나온다.
-   */
+  /** 화살표 키로 지도를 돌아다닌다. 마우스 없이는 아예 못 쓰던 화면이었다. */
   const onKeyDown = (e: React.KeyboardEvent) => {
     const list = layout.visible;
     if (!list.length) return;
@@ -161,7 +223,7 @@ export default function TreeCanvas({
         const node = byId[list[here]];
         if (!node.childIds.length) return;
         e.preventDefault();
-        if (!open.has(node.id)) onToggle(node.id);
+        if (!open.has(node.id)) expand(node.id);
         else onNodeClick(node.childIds[0]);
         return;
       }
@@ -175,9 +237,9 @@ export default function TreeCanvas({
       }
       case 'Enter':
       case ' ':
-        if (here !== -1) {
+        if (here !== -1 && byId[list[here]].childIds.length) {
           e.preventDefault();
-          onToggle(list[here]);
+          expand(list[here]);
         }
         return;
       default:
@@ -204,115 +266,105 @@ export default function TreeCanvas({
           }}
         >
           <g className="tree-links">
-            {layout.links.map(({ from, to }) => (
-              <path
-                key={`${from}-${to}`}
-                className={focused && !(focused.has(from) && focused.has(to)) ? 'dim' : undefined}
-                d={linkPath(layout.pos[from], layout.pos[to], layout.width[from], orientation)}
-                fill="none"
-              />
-            ))}
+            {layout.links.map(({ from, to, hidden }) => {
+              const a = layout.byId[from];
+              const b = layout.byId[to];
+              if (!a || !b) return null;
+              const dim = focused && !(focused.has(from) && focused.has(to));
+              return (
+                <path
+                  key={`${from}-${to}`}
+                  className={`${hidden ? 'gone' : ''}${dim ? ' dim' : ''}`}
+                  d={linkPath(a, b, orientation)}
+                  fill="none"
+                />
+              );
+            })}
           </g>
 
-          {layout.visible.map((id) => {
-            const node = byId[id];
-            const p = layout.pos[id];
-            const w = layout.width[id];
-            const depth = Math.min(node.depth, 5);
+          {layout.nodes.map((p) => {
+            const node = byId[p.id];
+            const depth = Math.min(p.depth, 5);
             const hasKids = node.childIds.length > 0;
-            const isOpen = open.has(id);
-            const icon = node.depth === 1;
+            const isOpen = open.has(p.id);
+            const icon = p.depth === 1;
+            const statuses = statusesOf(p.id, node, noted, marks);
             // 좌→우는 왼쪽 끝이 기준, 위→아래는 가운데가 기준이다.
-            const x = orientation === 'h' ? p.x : p.x - w / 2;
+            const x = orientation === 'h' ? p.x : p.x - p.w / 2;
             const y = p.y - NODE_H / 2;
 
-            const dots = [
-              node.hasDeep && 'var(--badge-deep)',
-              node.sim && 'var(--badge-sim)',
-              noted.has(id) && 'var(--accent)',
-              id in marks && (marks[id].known ? 'var(--mark-known)' : 'var(--mark-unsure)'),
-            ].filter((c): c is string => typeof c === 'string');
-
-            // 아이콘·제목·＋를 왼쪽부터 차례로 놓는다.
-            const padL = 11;
-            const titleX = padL + (icon ? 22 : 0);
-            const fs = textWidth(node.title, TITLE_SIZE) > w - titleX - 22 ? 11.5 : TITLE_SIZE;
+            const titleX = PAD_L + (icon ? ICON_W : 0);
+            const title = fitTitle(node.title, titleSpace(p.w, icon, hasKids, statuses.length));
+            // 상태는 토글 앞, 노드 **안쪽**에 놓는다. 테두리에 걸치지 않게.
+            const statusRight = p.w - (hasKids ? TOGGLE_W : 0) - 8;
 
             return (
               <g
-                key={id}
-                className={`tree-node depth-${depth}${id === selected ? ' selected' : ''}${
-                  focused && !focused.has(id) ? ' dim' : ''
-                }`}
-                transform={`translate(${x} ${y})`}
-                onClick={() => handleNode(id)}
+                key={p.id}
+                className={[
+                  'tree-node',
+                  `depth-${depth}`,
+                  p.id === selected && 'selected',
+                  p.hidden && 'gone',
+                  focused && !focused.has(p.id) && 'dim',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={{ transform: `translate(${x}px, ${y}px)` }}
+                onClick={() => !p.hidden && handleNode(p.id)}
                 role="treeitem"
                 aria-expanded={hasKids ? isOpen : undefined}
-                aria-selected={id === selected}
-                tabIndex={-1}
-                style={
-                  node.parentId && layout.pos[node.parentId]
-                    ? ({
-                        '--from-x': `${layout.pos[node.parentId].x - p.x}px`,
-                        '--from-y': `${layout.pos[node.parentId].y - p.y}px`,
-                      } as React.CSSProperties)
-                    : undefined
-                }
+                aria-selected={p.id === selected}
+                aria-hidden={p.hidden || undefined}
               >
+                <rect className="tree-node-box" width={p.w} height={NODE_H} rx={10} />
+                {icon && <SubjectIcon id={p.id} x={PAD_L} y={(NODE_H - 16) / 2} />}
+                <text
+                  className="tree-node-title"
+                  x={titleX}
+                  y={NODE_H / 2 + 5}
+                  fontSize={TITLE_SIZE}
+                >
+                  {title.clipped && <title>{node.title}</title>}
+                  {title.text}
+                </text>
+
+                {statuses.map((kind, i) => (
+                  <StatusMark
+                    key={kind}
+                    kind={kind}
+                    x={statusRight - (statuses.length - i) * STATUS_W + 2}
+                    y={(NODE_H - 12) / 2}
+                  />
+                ))}
+
                 {/*
-                 * 바깥 g는 자리, 안쪽 g는 등장. 둘을 한 요소에 겹치면 위치가 깨진다.
-                 * 등장 애니메이션은 **요소가 새로 생길 때 한 번만** 돈다. React key가 그대로면
-                 * 같은 요소가 유지되므로 이미 있던 노드는 다시 움직이지 않는다.
-                 * 따로 "새로 나타났는지"를 세지 않아도 되는 게 이 방식의 값어치다.
-                 */}
-                <g className="node-in">
-                  <rect className="tree-node-box" width={w} height={NODE_H} rx={8} />
-                  {icon && <SubjectIcon id={id} x={padL} y={(NODE_H - 16) / 2} />}
-                  <text className="tree-node-title" x={titleX} y={NODE_H / 2 + 4.5} fontSize={fs}>
-                    {node.title}
-                  </text>
-                </g>
-                {/*
-                 * 접기·펴기는 ＋/－ 를 눌러야 한다. 노드 본체를 누르는 건 "여기로 들어가기"다.
-                 * 둘을 한 클릭에 몰면, 이미 열린 가지를 눌렀을 때 들어가려던 건지
-                 * 닫으려던 건지 알 수 없다.
+                 * 펼침 표시. 셰브런이 열림/닫힘 방향을 그대로 보여준다.
+                 * 호버 영역은 노드 높이 전체가 아니라 표시 주변의 둥근 자리로 둔다.
                  */}
                 {hasKids && (
                   <g
                     className="tree-toggle"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!didDrag()) onToggle(id);
+                      if (!didDrag()) expand(p.id);
                     }}
                     role="button"
                     aria-label={`${node.title} ${isOpen ? '접기' : '펴기'}`}
                   >
-                    <rect x={w - 24} y={0} width={24} height={NODE_H} fill="transparent" />
-                    <text x={w - 12} y={NODE_H / 2 + 5} textAnchor="middle">
-                      {isOpen ? '−' : '+'}
-                    </text>
-                  </g>
-                )}
-                {/*
-                 * 상태 점은 화면 배율을 거슬러 크기를 고정한다.
-                 * 안 그러면 축소했을 때 1px짜리 얼룩이 되어 아무것도 못 알린다.
-                 * 테두리를 둘러 어떤 바탕에서도 형태가 남게 한다.
-                 */}
-                {dots.length > 0 && (
-                  <g
-                    className="tree-badges"
-                    transform={`translate(${titleX} ${NODE_H - 1}) scale(${1 / cam.k})`}
-                  >
-                    {dots.map((color, i) => (
-                      <circle
-                        key={color}
-                        cx={i * 10}
-                        r={3.4}
-                        fill={color}
-                        stroke="var(--surface)"
-                        strokeWidth={1.2}
-                      />
-                    ))}
+                    <rect
+                      className="tree-toggle-hit"
+                      x={p.w - TOGGLE_W - 2}
+                      y={(NODE_H - 26) / 2}
+                      width={26}
+                      height={26}
+                      rx={8}
+                    />
+                    <path
+                      className="tree-toggle-mark"
+                      transform={`translate(${p.w - TOGGLE_W / 2 - 2} ${NODE_H / 2}) rotate(${isOpen ? 90 : 0})`}
+                      d="M-2.5 -5 L2.5 0 L-2.5 5"
+                    />
                   </g>
                 )}
               </g>
@@ -344,13 +396,6 @@ export default function TreeCanvas({
         >
           －
         </button>
-      </div>
-
-      <div className="tree-legend">
-        <i className="dot" style={{ background: 'var(--badge-deep)' }} /> 심화
-        <i className="dot" style={{ background: 'var(--badge-sim)' }} /> 눈으로 보기
-        <i className="dot" style={{ background: 'var(--accent)' }} /> 내 메모
-        <i className="dot" style={{ background: 'var(--mark-known)' }} /> 퀴즈
       </div>
     </div>
   );

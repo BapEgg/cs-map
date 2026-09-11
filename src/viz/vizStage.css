@@ -1,19 +1,26 @@
+/*
+ * 시각화 무대. **높이를 나눠 쓴다.**
+ * 그림·현재 코드 줄·자막·조작이 한 화면에 다 들어와야 한다. 아래로 밀려나면
+ * 자막을 읽으려고 스크롤하는 사이 그림이 이미 다음 단계로 넘어간다.
+ */
 .vizstage {
   position: absolute;
   inset: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: var(--bg);
   border-radius: var(--radius-lg);
-  overflow-y: auto;
+  outline: none;
 }
 
 .vizstage-bar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
   border-bottom: 1px solid var(--border);
 }
 
@@ -23,51 +30,143 @@
   color: var(--text-muted);
 }
 
+.vizstage-code-toggle {
+  flex: 0 0 auto;
+}
+
 .vizstage-body {
   flex: 1 1 auto;
-  padding: var(--sp-4);
+  min-height: 0;
   display: flex;
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
 }
 
 .vizstage-body .viz {
   flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-/* 넓은 자리에서는 코드와 그림을 크게 벌려 놓는다. */
+/*
+ * 코드를 접었을 때는 폭을 묶는다. 1440px을 그대로 쓰면 세로로 긴 그림이 한가운데
+ * 450px만 차지하고, 자막은 저 멀리 왼쪽 끝에서 시작해 둘이 딴 화면처럼 떨어진다.
+ */
+.vizstage-body:not(.with-code) .viz {
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+/* 그림이 남는 높이를 다 쓴다. 자막과 조작은 제 높이를 먼저 가져간다. */
 .vizstage-body .viz-body {
   flex: 1 1 auto;
-  gap: var(--sp-6);
-  align-items: center;
+  min-height: 0;
+  gap: var(--sp-5);
+  align-items: stretch;
 }
 
-.vizstage-body .viz-code {
-  flex: 0 1 460px;
-  max-width: 460px;
-  font-size: 14px;
-}
-
+/*
+ * 그림을 남는 높이 **안에** 가둔다.
+ *
+ * `height: 100%`만 주면 안 된다. 높이가 정해지지 않은 flex 칸 안에서는 auto로 풀리고,
+ * 그러면 SVG가 viewBox 비율대로 폭에서 높이를 만들어낸다. 1327px 폭 → 1747px 높이가 되어
+ * 자막과 조작 위를 덮었다. 자리를 잡아 두고 그 위에 절대 배치로 얹으면
+ * 그림이 레이아웃을 밀지 못하고, viewBox가 알아서 줄어들며 가운데로 맞춰진다.
+ */
 .vizstage-body .viz-stage {
-  flex: 0 1 560px;
-  max-width: 560px;
-  min-width: 320px;
+  position: relative;
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  /*
+   * 패널용 `margin: 0 auto`를 지운다. 세로로 쌓이는 좁은 화면에서는 가로 auto 여백이
+   * stretch를 막아서 폭이 0이 됐고(안쪽 그림이 absolute라 잴 내용이 없다) 그림이 통째로 사라졌다.
+   */
+  margin: 0;
+}
+
+.vizstage-body .viz-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .vizstage-body .viz-caption {
+  flex: 0 0 auto;
   font-size: 16px;
-  max-width: 78ch;
+  max-width: 76ch;
+  min-height: 0;
+  margin: var(--sp-3) 0;
+}
+
+.vizstage-body .viz-controls {
+  flex: 0 0 auto;
+}
+
+/* 전체 코드는 눌러서 펼친다. 기본은 그림·자막·조작이 먼저다. */
+.vizstage-body .viz-code {
+  display: none;
+}
+
+.vizstage-body.with-code .viz-code {
+  display: block;
+  flex: 0 1 400px;
+  max-width: 400px;
+  min-height: 0;
+  overflow-y: auto;
+  font-size: 13.5px;
 }
 
 @media (max-width: 900px) {
   .vizstage-body {
-    padding: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3) var(--sp-3);
   }
 
-  .vizstage-body .viz-code,
-  .vizstage-body .viz-stage {
-    flex: 1 1 100%;
+  .vizstage-body .viz-body {
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  /*
+   * 폰에서는 그림 위 껍데기를 깎는다. 제목줄과 여백만으로 151px을 먹어서
+   * 정작 봐야 할 그림이 화면의 절반도 못 썼다.
+   */
+  .vizstage-bar {
+    padding: var(--sp-1) var(--sp-3);
+  }
+
+  .vizstage-body .viz {
+    padding: var(--sp-2) var(--sp-3);
+  }
+
+  .vizstage-body .viz-head {
+    margin-bottom: var(--sp-2);
+  }
+
+  .vizstage-body .viz-head h3 {
+    font-size: 14px;
+  }
+
+  .vizstage-body .viz-phase {
+    font-size: 11px;
+  }
+
+  .vizstage-body.with-code .viz-code {
+    flex: 0 0 auto;
     max-width: 100%;
-    min-width: 0;
+    max-height: 30%;
+  }
+
+  .vizstage-body .viz-caption {
+    font-size: 14px;
+    margin: var(--sp-2) 0;
+  }
+
+  .vizstage-hint {
+    display: none;
   }
 }
