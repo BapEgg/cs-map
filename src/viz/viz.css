@@ -1,5 +1,6 @@
 .viz {
   background: var(--viz-bg);
+  border: 1px solid var(--viz-panel-border);
   border-radius: var(--radius-lg);
   padding: 18px 20px 14px;
   color: var(--viz-label);

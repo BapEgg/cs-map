@@ -49,21 +49,24 @@
   --connective: #1098ad; /* 그래서/하지만 같은 연결어 */
 
   /*
-   * 시각화 역할색. 레퍼런스 영상(배열 최댓값 찾기)에서 뽑았다.
-   * 한 장면에 이 셋만 쓴다. 더 늘리지 않는다.
+   * 시각화. 역할색은 레퍼런스 영상(배열 최댓값 찾기)에서 뽑았고,
+   * 한 장면에 이 셋(현재·사라짐·확정)만 쓴다. 더 늘리지 않는다.
+   *
+   * 라이트에서는 밝은 판으로 간다. 밝은 페이지 안에서 여기만 까맣게 두면 튄다.
+   * 채움색은 전부 어두운 글씨를 얹어도 읽히는 밝기로 골랐다.
    */
-  --viz-bg: #1e2530;
-  --viz-cell: transparent;
-  --viz-cell-border: #e8eaf0;
-  --viz-cell-text: #f2f4f8;
-  --viz-band: rgb(255 255 255 / 0.04); /* 무대의 영역 바탕 */
-  --viz-frame-bg: rgb(255 255 255 / 0.07); /* 함수 프레임 묶음 */
-  --viz-current: #b5b02e; /* 지금 보고 있는 것 */
-  --viz-compare: #a8484b; /* 사라지는 것 */
-  --viz-done: #4f8f63; /* 값이 확정된 것 */
-  --viz-on-role: #10151d; /* 역할색 위에 얹는 글씨 */
-  --viz-label: #f2f4f8;
-  --viz-label-muted: #9aa3b4;
+  --viz-bg: #ffffff;
+  --viz-panel-border: #d6dbe6;
+  --viz-cell-border: #46506a;
+  --viz-cell-text: #1b2135;
+  --viz-band: rgb(27 33 53 / 0.05); /* 무대의 영역 바탕 */
+  --viz-frame-bg: rgb(27 33 53 / 0.05); /* 함수 프레임 묶음 */
+  --viz-current: #d9cb3d; /* 지금 보고 있는 것 */
+  --viz-compare: #db8785; /* 사라지는 것 */
+  --viz-done: #7fc096; /* 값이 확정된 것 */
+  --viz-on-role: #1b2135; /* 역할색 위에 얹는 글씨 */
+  --viz-label: #1b2135;
+  --viz-label-muted: #5d6478;
 
   --shadow-panel: 0 1px 3px rgb(27 33 53 / 0.08), 0 8px 24px rgb(27 33 53 / 0.06);
 
@@ -113,8 +116,9 @@
   --term-underline: #b197fc;
   --connective: #66d9e8;
 
-  /* 시각화는 원래 어두운 화면이 기준이라 거의 그대로 둔다 */
+  /* 다크에서는 판도 어둡게. 참고 영상에 가까운 쪽이다. */
   --viz-bg: #161c26;
+  --viz-panel-border: transparent;
   --viz-cell-border: #cdd3de;
   --viz-cell-text: #f2f4f8;
   --viz-band: rgb(255 255 255 / 0.05);
