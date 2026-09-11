@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS 지식 지도 v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbfaf6; --card:#ffffff; --ink:#1f2a44; --muted:#6f6b63; --line:#e3dfd5;
+  --d0:#243357; --d1:#3f5fae; --d2:#7c9fe0; --d3:#b8cdf2; --d4:#e2ebfb;
+  --ok:#2f9e44; --bad:#e8590c; --flow:#d4a106; --deep:#5f3dc4; --sim:#0c8599;
+  --hand:'Gaegu','Nanum Pen Script','Comic Sans MS',cursive;
+  --sans:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:#262626;font-family:var(--sans);font-size:14px;line-height:1.55}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1320px;margin:0 auto;padding:16px 16px 40px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-bottom:10px;position:relative}
+header.top h1{font-family:var(--hand);font-size:30px;margin:0;font-weight:700;color:#262626}
+header.top h1 small{font-family:var(--sans);font-size:12px;font-weight:700;background:#262626;color:#fff;border-radius:6px;padding:1px 6px;vertical-align:middle;margin-left:4px}
+.spacer{flex:1}
+.seg{display:inline-flex;border:1.5px solid #262626;border-radius:999px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:6px 14px;font-weight:600}
+.seg button.on{background:#262626;color:#fff}
+.toggle{display:inline-flex;align-items:center;gap:8px;border:1.5px solid #262626;border-radius:999px;padding:5px 12px;background:var(--card);font-weight:600}
+.toggle .sw{width:30px;height:17px;border-radius:9px;background:#cfcac0;position:relative;transition:.2s;flex:0 0 auto}
+.toggle .sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:#fff4c2}
+.toggle.on .sw{background:#262626}
+.toggle.on .sw::after{left:15px}
+.focusbtn{border:1.5px solid #262626;border-radius:999px;padding:5px 12px;background:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+.focusbtn.study{background:#e7f5ff} .focusbtn.brk{background:#ebfbee}
+#focusPop{position:absolute;right:0;top:48px;z-index:20;width:330px;max-width:calc(100vw - 32px);background:#fff;border:1.5px solid #262626;border-radius:14px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+#focusPop h4{margin:0 0 8px;font-size:14px}
+#focusPop .row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+#focusPop .sounds{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px}
+#focusPop .sounds button{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:6px 2px;font-size:12.5px;font-weight:600}
+#focusPop .sounds button.on{border-color:#262626;background:#262626;color:#fff}
+#focusPop input[type=range]{flex:1}
+#focusPop input[type=number]{width:54px;border:1.5px solid var(--line);border-radius:6px;padding:3px 6px}
+#focusPop .timer{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;text-align:center;margin:4px 0}
+#focusPop .pmode{text-align:center;font-weight:700;font-size:13px}
+#focusPop .pbtns{display:flex;gap:6px}
+#focusPop .pbtns button{flex:1;border:1.5px solid #262626;background:#fff;border-radius:8px;padding:6px;font-weight:700}
+#focusPop .pbtns button.main{background:#262626;color:#fff}
+#focusPop hr{border:0;border-top:1.5px dashed var(--line);margin:12px 0}
+#focusPop .small{font-size:12px;color:var(--muted)}
+#toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:50;background:#262626;color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.quizbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff4c2;border:1.5px solid #262626;border-radius:12px;padding:8px 12px;margin-bottom:10px}
+.quizbar label{font-size:12px;font-weight:700;color:var(--muted)}
+.quizbar select{border:1.5px solid #262626;border-radius:8px;padding:4px 8px;background:#fff;max-width:100%}
+.quizbar .go{border:1.5px solid #262626;background:#262626;color:#fff;border-radius:999px;padding:5px 14px;font-weight:700}
+.score{font-size:13px}
+.score b.ok{color:var(--ok)} .score b.bad{color:var(--bad)}
+details.changes{background:var(--card);border:1.5px dashed var(--line);border-radius:12px;padding:8px 14px;margin-bottom:10px}
+details.changes summary{cursor:pointer;font-weight:700}
+details.changes ul{margin:6px 0 2px;padding-left:18px}
+details.changes li{margin:3px 0}
+details.changes .fb{color:var(--muted);font-size:12.5px}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:14px;align-items:start}
+@media (max-width:980px){main{grid-template-columns:minmax(0,1fr)}}
+#stage{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:14px;height:74vh;min-height:520px;overflow:hidden}
+.tools{position:absolute;left:10px;top:10px;right:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;z-index:2;pointer-events:none}
+.tools > *{pointer-events:auto}
+.tools button{border:1.5px solid #262626;background:#fff;border-radius:999px;padding:3px 11px;font-size:13px;font-weight:600}
+.tools .rootcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;background:#fff;border:1.5px solid #262626;border-radius:999px;padding:3px 10px;font-size:13px}
+.tools .rootcrumb button{border:0;padding:0 2px;background:none;text-decoration:underline;text-underline-offset:2px;font-weight:600}
+.tools .hint{font-size:12px;color:var(--muted);background:rgba(255,255,255,.9);padding:2px 6px;border-radius:6px;pointer-events:none}
+.legend{position:absolute;left:10px;bottom:10px;z-index:2;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:10px;padding:4px 10px;max-width:calc(100% - 70px)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:3px;border:1px solid #1f2a44}
+.legend b{color:#262626}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.zoom button{width:34px;height:34px;border:1.5px solid #262626;background:#fff;border-radius:10px;font-weight:700;font-size:16px;padding:0}
+#svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;background:radial-gradient(circle,#ece8de 1px,transparent 1.2px) 0 0/22px 22px}
+#svg.panning{cursor:grabbing}
+.tnode{cursor:pointer;transition:transform .35s ease, opacity .3s}
+.tnode .tt{font-family:var(--hand);font-weight:700;fill:#1c1c1c;paint-order:stroke;stroke:#fff;stroke-width:6px;stroke-linejoin:round}
+.tnode .bt{font-family:var(--sans);font-weight:700}
+.tnode .ts{font-family:var(--sans);font-size:12px;fill:#8a857b;font-weight:400;stroke:none}
+.tnode .tag{font-family:var(--sans);font-size:10.5px;font-weight:700;stroke:none}
+.tnode .hit{fill:transparent}
+.tlink{fill:none;stroke:#b9b3a6;stroke-width:1.6;transition:d .35s ease, opacity .3s}
+.flink{fill:none;stroke:var(--flow);stroke-width:2;transition:opacity .3s}
+.flabel{font-family:var(--sans);font-size:12.5px;font-weight:700;fill:#8a6a00;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+
+/* ---------- panel ---------- */
+#panel{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+#panel .empty{color:var(--muted);font-size:14.5px;line-height:1.75}
+#panel .empty .big{font-family:var(--hand);font-size:26px;color:#262626;margin-bottom:4px}
+.histback{border:1.5px solid #262626;background:#fff;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700;margin-bottom:8px}
+.crumbs{display:flex;flex-wrap:wrap;gap:2px 4px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:6px}
+.crumb{border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.p-title{font-family:var(--hand);font-size:34px;font-weight:700;line-height:1.15;margin:2px 0 10px}
+.p-title span{background:linear-gradient(transparent 58%, var(--hl) 58%, var(--hl) 92%, transparent 92%);padding:0 4px}
+.simbtn{display:flex;width:100%;align-items:center;gap:10px;border:0;background:#1e252c;color:#fff;border-radius:12px;padding:10px 14px;margin:0 0 12px;text-align:left}
+.simbtn .ic{width:30px;height:30px;border-radius:50%;background:#e9e6a0;color:#1e252c;display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
+.simbtn b{display:block;font-size:14.5px}
+.simbtn small{color:#aeb8c2;font-size:12px}
+.ptabs{display:flex;gap:4px;border-bottom:1.5px solid var(--line);margin-bottom:14px}
+.ptabs button{border:0;background:none;padding:6px 12px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1.5px;font-size:15px}
+.ptabs button.on{color:#262626;border-bottom-color:#262626}
+.ptabs button .n{font-size:11px;background:var(--line);border-radius:999px;padding:0 6px;margin-left:3px;color:#262626;font-weight:600}
+.ptabs button.deep.has{color:var(--deep)}
+.ptabs button.deep.has.on{border-bottom-color:var(--deep)}
+.field{margin-bottom:16px}
+.field > label,.sec h4{display:block;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted);margin:0 0 6px}
+.p-def{font-size:16.5px;font-weight:600;line-height:1.6;background:#f7f5ef;border-left:5px solid var(--hl);border-radius:6px 10px 10px 6px;padding:10px 12px}
+.blk{margin:0 0 9px;font-size:15px;line-height:1.8}
+.blk:last-child{margin-bottom:0}
+.conn{display:inline-block;font-weight:800;border-radius:5px;padding:0 6px;margin-right:6px;font-size:13px;line-height:1.6}
+.conn.so{background:#e6f6ea;color:#2b8a3e}
+.conn.but{background:#fff0e6;color:#d9480f}
+b.em{font-weight:800;background:linear-gradient(transparent 62%, #ffe58799 62%)}
+.term{border:0;background:none;padding:0 1px;font:inherit;color:inherit;font-weight:inherit;text-decoration:underline dotted var(--deep);text-decoration-thickness:2px;text-underline-offset:4px;cursor:pointer;border-radius:3px}
+.term:hover{background:#f3f0ff}
+.term.on{background:#e5dbff}
+.field.hid .blk,.field.hid .p-def{filter:blur(7px);user-select:none;opacity:.55;pointer-events:none}
+.reveal{width:100%;border:1.5px dashed #262626;background:#fffbe8;border-radius:10px;padding:10px;font-weight:700;margin-bottom:14px}
+.grade{display:flex;gap:8px;margin-bottom:14px}
+.grade button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px;font-weight:600}
+.grade button.ok.on{border-color:var(--ok);background:#ebfbee;color:var(--ok)}
+.grade button.bad.on{border-color:var(--bad);background:#fff4e6;color:var(--bad)}
+.quiz-q{background:#fff4c2;border-radius:8px;padding:8px 10px;margin-bottom:12px;font-size:15px}
+.flowline{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:5px 0;font-size:14px}
+.flowline .arr{color:#8a6a00;font-weight:700;font-size:13.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid #262626;background:#fff;border-radius:999px;padding:3px 11px;font-size:13.5px}
+.chip i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid #1f2a44}
+.chip small{font-weight:700;margin-left:3px}
+.act{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.act button{border:1.5px solid #262626;background:#fff;border-radius:999px;padding:5px 12px;font-weight:600;font-size:13px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+.sec{margin-bottom:18px}
+.sec ul{margin:0;padding-left:0;list-style:none}
+.sec li{margin:0 0 10px;font-size:15px;line-height:1.8;padding-left:16px;position:relative}
+.sec li::before{content:'';position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--deep)}
+.lvl{font-size:12.5px;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;gap:8px}
+.lvl b{color:#262626;font-size:13px}
+.lvl.deep b{color:var(--deep)}
+.iv{border:1.5px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.iv.picked{border-color:#262626;background:#fffbe8}
+.iv .q{font-weight:800;font-size:15px}
+.iv .a{margin-top:8px;background:#f6f3ff;border-radius:8px;padding:10px}
+.iv .showa{margin-top:8px;border:1.5px dashed var(--deep);color:var(--deep);background:#fff;border-radius:8px;padding:5px 10px;font-weight:700;font-size:13px}
+.iv .fu{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.iv .fu ul{margin:2px 0 0;padding-left:18px}
+.emptydeep{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);margin-bottom:12px;line-height:1.7}
+/* glossary card */
+.gcard{border:1.5px solid var(--deep);background:#faf8ff;border-radius:12px;padding:10px 12px 12px;margin:4px 0 14px;position:relative;animation:gin .2s ease-out}
+@keyframes gin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.gcard .gpath{font-size:12px;color:var(--deep);font-weight:700;margin-right:24px;display:flex;flex-wrap:wrap;gap:2px 4px;align-items:center}
+.gcard .gpath button{border:0;background:none;padding:0;color:var(--deep);text-decoration:underline;font-weight:700}
+.gcard .gx{position:absolute;right:8px;top:6px;border:0;background:none;font-size:18px;line-height:1;color:var(--muted)}
+.gcard .gt{font-size:17px;font-weight:800;margin:4px 0 4px}
+.gcard .blk{font-size:14.5px;margin-bottom:6px}
+.gcard .ga{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.gcard .ga button{border:1.5px solid var(--deep);background:#fff;color:var(--deep);border-radius:999px;padding:3px 10px;font-weight:700;font-size:12.5px}
+.gcard .ga button.s{border-color:#1e252c;background:#1e252c;color:#fff}
+
+/* ---------- 시각화 ---------- */
+#simLayer{position:absolute;inset:0;z-index:6;background:#1e252c;color:#eef1f4;display:flex;flex-direction:column}
+.simhead{display:flex;gap:10px;align-items:flex-start;padding:12px 14px 8px;flex-wrap:wrap}
+.simhead > div:first-child{flex:1;min-width:0}
+.simtitle{font-size:18px;font-weight:800}
+.simsub{font-size:12.5px;color:#9aa6b2;margin-top:2px}
+.simclose{margin-left:auto;border:1.5px solid #5b6672;background:#2a333c;color:#eef1f4;border-radius:999px;padding:5px 12px;font-weight:700;white-space:nowrap}
+.simalgs{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 8px;align-items:center;font-size:13px;color:#9aa6b2}
+.simalgs button{border:1.5px solid #5b6672;background:transparent;color:#cfd6dd;border-radius:999px;padding:3px 12px;font-weight:700;font-size:13px}
+.simalgs button.on{background:#e9e6a0;color:#1e252c;border-color:#e9e6a0}
+.simalgs input{background:#2a333c;border:1.5px solid #5b6672;color:#eef1f4;border-radius:6px;padding:2px 6px}
+.simalgs .sep{width:1px;height:18px;background:#3a4550;margin:0 4px}
+.simbody{flex:1;overflow:auto;padding:4px 14px 12px}
+.simnarr{padding:10px 14px;background:#161b20;border-top:1px solid #2f3942;font-size:15px;line-height:1.65;min-height:64px}
+.simnarr b{color:#e9e6a0}
+.simctrl{display:flex;gap:6px;align-items:center;padding:8px 14px 10px;background:#161b20;flex-wrap:wrap}
+.simctrl button{border:1.5px solid #5b6672;background:#2a333c;color:#eef1f4;border-radius:8px;padding:5px 12px;font-weight:700}
+.simctrl button.play{background:#e9e6a0;color:#1e252c;border-color:#e9e6a0;min-width:86px}
+.simctrl input[type=range]{flex:1;min-width:120px;accent-color:#e9e6a0}
+.simctrl .cnt{font-size:12.5px;color:#9aa6b2;font-variant-numeric:tabular-nums;min-width:64px;text-align:right}
+.simctrl select{background:#2a333c;border:1.5px solid #5b6672;color:#eef1f4;border-radius:8px;padding:4px}
+.vars{font-family:var(--mono);font-size:13.5px;line-height:1.75;margin:4px 0 12px;color:#eef1f4}
+.vars .k{color:#9aa6b2}
+.vars .v{color:#e9e6a0;font-weight:700}
+.c-ok{color:#7bd389!important} .c-bad{color:#ff8a80!important}
+.slabel{font-size:12px;color:#9aa6b2;margin:10px 0 5px;font-weight:700;letter-spacing:.03em}
+.cells{display:flex;gap:6px}
+.cell{width:34px;height:34px;flex:0 0 34px;border:1.8px solid #dfe3e7;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;transition:background .25s, opacity .25s, border-color .25s;border-radius:3px}
+.cell.cur{background:#9c9a24;border-color:#e9e6a0}
+.cell.past{opacity:.35}
+.cell.hitc{background:#3f7a4c;border-color:#7bd389}
+.cell.faultc{background:#9a3f3a;border-color:#ff8a80}
+.cell.cache{background:#2c5d6e}
+.cell.dim{opacity:.4}
+.arrowrow{display:flex;gap:6px;height:20px}
+.arrowrow span{width:34px;flex:0 0 34px;text-align:center;color:#e9e6a0;font-size:16px;line-height:20px}
+.scroll-x{overflow-x:auto;padding-bottom:4px}
+table.sgrid{border-collapse:separate;border-spacing:4px}
+table.sgrid td,table.sgrid th{width:30px;height:30px;text-align:center;font-size:14px;padding:0}
+table.sgrid th{font-size:11px;color:#9aa6b2;font-weight:700}
+table.sgrid td.lab{width:auto;padding-right:6px;color:#9aa6b2;font-size:12px;text-align:right;white-space:nowrap}
+table.sgrid td.c{border:1.5px solid #4a5561;border-radius:3px}
+table.sgrid td.c.on{border-color:#e9e6a0}
+table.sgrid td.c.new{background:#9a3f3a;border-color:#ff8a80}
+table.sgrid td.c.hitc{background:#3f7a4c;border-color:#7bd389}
+table.sgrid td.c.fut{border-style:dashed;border-color:#333d47}
+table.sgrid th.F{color:#ff8a80} table.sgrid th.H{color:#7bd389}
+.sidebox{background:#262f38;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:13.5px;line-height:1.7}
+.sidebox .t{font-weight:800;color:#e9e6a0;margin-bottom:4px}
+.pchip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:28px;border-radius:6px;padding:0 8px;font-weight:800;color:#1e252c;font-size:13px}
+.cpurow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-bottom:8px}
+.cbox{background:#262f38;border:1.5px solid #3a4550;border-radius:10px;padding:8px 10px;min-height:66px}
+.cbox .h{font-size:11.5px;color:#9aa6b2;font-weight:700;margin-bottom:6px}
+.cbox.cpu{border-color:#e9e6a0;min-width:120px}
+.cbox .q{display:flex;gap:5px;flex-wrap:wrap;min-height:28px;align-items:center}
+.gantt{display:flex;height:34px;margin-top:2px}
+.gantt div{flex:0 0 auto;border-right:1.5px solid #1e252c;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1e252c;font-size:12.5px}
+.gantt div.idle{background:repeating-linear-gradient(45deg,#2a333c,#2a333c 4px,#323c46 4px,#323c46 8px);color:#9aa6b2}
+.ticks{position:relative;height:18px;font-size:11px;color:#9aa6b2}
+.ticks span{position:absolute;transform:translateX(-50%)}
+table.ptab{border-collapse:collapse;font-size:13px;margin-top:6px;width:100%;max-width:560px}
+table.ptab th,table.ptab td{padding:4px 6px;text-align:left;border-bottom:1px solid #2f3942}
+table.ptab th{color:#9aa6b2;font-weight:700;font-size:12px}
+.rembar{height:8px;border-radius:4px;background:#3a4550;position:relative;min-width:80px}
+.rembar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.pg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:760px){.pg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pcard{background:#262f38;border:1.5px solid #3a4550;border-radius:10px;padding:8px;font-size:12.5px;transition:border-color .2s, box-shadow .2s}
+.pcard.on{border-color:#e9e6a0;box-shadow:0 0 0 3px rgba(233,230,160,.2)}
+.pcard.badon{border-color:#ff8a80;box-shadow:0 0 0 3px rgba(255,138,128,.2)}
+.pcard h5{margin:0 0 6px;font-size:12.5px;color:#cfd6dd}
+.pcard table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.pcard td,.pcard th{padding:2px 4px;text-align:center;border-bottom:1px solid #313b45}
+.pcard th{color:#9aa6b2;font-weight:600;font-size:11px}
+.pcard tr.hl td{background:#6d6b1f;color:#fff}
+.pcard tr.okr td{background:#3f7a4c;color:#fff}
+.pcard tr.badr td{background:#9a3f3a;color:#fff}
+.pcard tr.new td{background:#2c5d6e;color:#fff}
+.addrbox{background:#262f38;border:1.5px solid #3a4550;border-radius:10px;padding:10px;margin-bottom:8px}
+.addrbox.on{border-color:#e9e6a0}
+.bits{display:flex;gap:2px;flex-wrap:wrap;margin-top:6px}
+.bits span{width:22px;height:26px;display:flex;align-items:center;justify-content:center;border:1.2px solid #5b6672;font-family:var(--mono);font-size:13px;border-radius:3px}
+.bits span.p{background:#2c5d6e;border-color:#66c2d9}
+.bits span.o{background:#5e5a1c;border-color:#e9e6a0}
+.bits .gap{width:8px;border:0}
+.route{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:4px 0 10px;font-size:12.5px}
+.route span{padding:2px 8px;border-radius:999px;background:#262f38;color:#9aa6b2;border:1px solid #3a4550}
+.route span.on{background:#e9e6a0;color:#1e252c;border-color:#e9e6a0;font-weight:800}
+.route span.done{color:#eef1f4}
+.route em{color:#5b6672;font-style:normal}
+.cmp{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cmp div{background:#262f38;border-radius:8px;padding:6px 10px;font-size:13px}
+.cmp div b{color:#e9e6a0;font-size:16px;margin-left:4px}
+.cmp div.me{outline:2px solid #e9e6a0}
+.arr2d{display:grid;gap:4px}
+.arr2d .cell{width:38px;height:34px;flex-basis:38px;font-size:10.5px;font-family:var(--mono)}
+.strip{display:flex;gap:2px;flex-wrap:wrap}
+.strip .cell{width:18px;height:22px;flex-basis:18px;font-size:0;border-width:1.2px}
+.strip .gapl{width:6px}
+.cacheslots{display:flex;gap:8px;flex-wrap:wrap}
+.cslot{background:#262f38;border:1.5px solid #3a4550;border-radius:8px;padding:6px 8px;min-width:170px}
+.cslot.new{border-color:#66c2d9}
+.cslot .h{font-size:11px;color:#9aa6b2;margin-bottom:4px}
+.cslot .cells .cell{width:34px;height:28px;flex-basis:34px;font-size:10px;font-family:var(--mono)}
+
+.review{margin-top:16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px}
+.review h3{font-family:var(--hand);font-size:24px;margin:0 0 8px}
+.rrow{display:flex;gap:10px;align-items:center;margin:6px 0;flex-wrap:wrap}
+.rrow label{width:180px;font-weight:600;flex:0 0 auto}
+.rrow input{flex:1 1 220px;min-width:0;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff}
+.copy{margin-top:8px;border:1.5px solid #262626;background:#262626;color:#fff;border-radius:999px;padding:7px 16px;font-weight:700}
+#copyOut{width:100%;margin-top:8px;font-size:13px;border:1.5px dashed var(--line);border-radius:8px;padding:8px}
+</style>
+</head>
+<body>
+<div id="toast" hidden></div>
+<div class="wrap">
+  <header class="top">
+    <h1>CS 지식 지도 <small>v3</small></h1>
+    <div class="seg" id="orient">
+      <button data-o="h">좌→우 트리</button>
+      <button data-o="v">위→아래 트리</button>
+    </div>
+    <button class="toggle on" id="flowT" title="바로 옆 형제 개념 사이의 흐름 화살표"><span class="sw"></span>흐름 화살표</button>
+    <div class="spacer"></div>
+    <button class="focusbtn" id="focusBtn">🎧 집중</button>
+    <button class="toggle" id="quizT"><span class="sw"></span>퀴즈 모드</button>
+    <div id="focusPop" hidden>
+      <h4>🎧 집중 사운드</h4>
+      <div class="sounds" id="sounds">
+        <button data-snd="off" class="on">끄기</button>
+        <button data-snd="brown">브라운</button>
+        <button data-snd="pink">핑크</button>
+        <button data-snd="white">화이트</button>
+      </div>
+      <div class="row"><span class="small">볼륨</span><input type="range" id="vol" min="0" max="1" step="0.01" value="0.35"></div>
+      <div class="small">브라운: 낮고 묵직한 소리(빗소리·폭포 느낌) · 핑크: 중간 · 화이트: 가장 쨍한 “쉬—” 소리</div>
+      <hr>
+      <h4>🍅 뽀모도로</h4>
+      <div class="pmode" id="pmode">공부 준비</div>
+      <div class="timer" id="ptimer">25:00</div>
+      <div class="pbtns"><button class="main" id="pStart">시작</button><button id="pReset">초기화</button><button id="pSkip">건너뛰기</button></div>
+      <div class="row" style="margin-top:10px">
+        <span class="small">공부</span><input type="number" id="pStudy" min="1" max="120" value="25"><span class="small">분</span>
+        <span class="small">휴식</span><input type="number" id="pBreak" min="1" max="60" value="5"><span class="small">분</span>
+      </div>
+      <div class="row">
+        <span class="small">긴 휴식</span><input type="number" id="pLong" min="1" max="60" value="15"><span class="small">분 (4번째 휴식마다)</span>
+      </div>
+      <label class="small"><input type="checkbox" id="pMute" checked> 휴식 시간엔 소리 끄기</label>
+    </div>
+  </header>
+
+  <div class="quizbar" id="quizbar" hidden>
+    <label for="qScope">범위</label><select id="qScope"></select>
+    <label for="qLevel">문제 종류</label>
+    <select id="qLevel"><option value="basic">기초 개념 (무엇이고 왜 나왔나)</option><option value="iv">면접 질문 (심화)</option></select>
+    <button class="go" id="randQ">🎲 이 범위에서 문제</button>
+    <span class="score" id="score"></span>
+  </div>
+
+  <details class="changes" open>
+    <summary>v3에서 바뀐 점 (한줄평 반영)</summary>
+    <ul>
+      <li><b>▶ 눈으로 보기</b>: 페이지 교체(FIFO·LRU·OPT), CPU 스케줄링(FCFS·SJF·SRTF·RR), 주소 변환(TLB·페이지 테이블·페이지 폴트), 디스크 스케줄링, 캐시와 지역성. 모두 영상처럼 한 단계씩 움직여요. 트리에서 <b style="color:var(--sim)">▶</b> 표시가 붙은 개념을 누르면 열려요. <span class="fb">← 첨부 영상</span></li>
+      <li><b>모르는 용어 누르기</b>: 보라색 점선 밑줄 용어를 누르면 바로 아래에 설명 카드가 펼쳐져요. 카드 안의 용어도 또 누를 수 있어요(용어 따라가기). 트리에 있는 개념이면 바로 이동하고, “← 돌아가기”로 원래 개념에 돌아와요. <span class="fb">← 심화 탭 한줄평</span></li>
+      <li><b>읽기 편한 설명</b>: 문장마다 줄을 나누고, 핵심 구절에 형광펜을 칠하고, “그래서 / 하지만” 같은 연결어를 색으로 표시했어요. <span class="fb">← 가독성</span></li>
+      <li><b>깊이별 색</b>: 진할수록 큰 개념이에요. 누른 노드가 흰색으로 바뀌지 않고, 펼침/접힘은 ＋/− 로 보여줘요. <span class="fb">← 좌→우 트리 한줄평</span></li>
+      <li><b>위→아래 트리 정리</b>: 곡선 대신 직각 연결선을 쓰고, 글자를 키우고, 튀어나오던 세로 바를 없앴어요. 흐름 화살표는 바로 옆 개념끼리만 그리고, 이유 글씨는 선택했을 때만 보여요. <span class="fb">← 위→아래 한줄평</span></li>
+      <li><b>기초 / 심화</b>로 표기를 바꿨고, <b>🎧 집중</b>(노이즈 + 뽀모도로)을 추가했어요. 기여 탭은 일단 뺐어요.</li>
+    </ul>
+  </details>
+
+  <main>
+    <div id="stage">
+      <div class="tools" id="tools"></div>
+      <svg id="svg"><defs>
+        <marker id="fah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#d4a106" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      </defs><g id="cam"><g id="gl"></g><g id="gf"></g><g id="gn"></g></g></svg>
+      <div class="legend" id="legend"></div>
+      <div class="zoom"><button data-z="in" aria-label="확대">＋</button><button data-z="out" aria-label="축소">－</button><button data-z="fit" aria-label="화면에 맞춤" style="font-size:13px">⤢</button></div>
+      <div id="simLayer" hidden>
+        <div class="simhead"><div><div class="simtitle" id="simTitle"></div><div class="simsub" id="simSub"></div></div><button class="simclose" id="simClose">✕ 트리로 돌아가기</button></div>
+        <div class="simalgs" id="simAlgs"></div>
+        <div class="simbody" id="simBody"></div>
+        <div class="simnarr" id="simNarr"></div>
+        <div class="simctrl">
+          <button data-s="first" title="처음">⏮</button><button data-s="prev">◀ 이전</button><button data-s="play" class="play">▶ 재생</button><button data-s="next">다음 ▶</button>
+          <input type="range" id="simRange" min="0" max="0" value="0">
+          <span class="cnt" id="simCnt"></span>
+          <select id="simSpeed"><option value="1600">느리게</option><option value="1000" selected>보통</option><option value="550">빠르게</option></select>
+        </div>
+      </div>
+    </div>
+    <aside id="panel"></aside>
+  </main>
+
+  <section class="review">
+    <h3>v3 한줄평</h3>
+    <div class="rrow"><label>▶ 눈으로 보기</label><input data-r="눈으로 보기(시각화)"></div>
+    <div class="rrow"><label>용어 누르기</label><input data-r="용어 누르기(설명 카드)"></div>
+    <div class="rrow"><label>읽기 편한 설명</label><input data-r="읽기 편한 설명"></div>
+    <div class="rrow"><label>깊이별 색</label><input data-r="깊이별 색"></div>
+    <div class="rrow"><label>위→아래 트리</label><input data-r="위→아래 트리"></div>
+    <div class="rrow"><label>🎧 집중 (노이즈·뽀모도로)</label><input data-r="집중 사운드·뽀모도로"></div>
+    <button class="copy" id="copyBtn">한줄평 복사하기 → 채팅에 붙여넣기</button>
+    <textarea id="copyOut" rows="7" hidden readonly></textarea>
+  </section>
+</div>
+
+<script>
+/* ================= 기초 데이터 ================= */
+const RAW = [
+ ['cs','CS 지식 지도','컴퓨터가 동작하는 원리부터 서비스를 출시하기까지','하드웨어 위에 운영체제가, 그 위에 프로그램이, 프로그램이 모여 서비스가 된다. **아래층을 알면 위층이 왜 그렇게 생겼는지** 보인다.',
+   ['arch','os','prog','svc'],[['arch','os','하드웨어를 관리하려고'],['os','prog','그 위에서 돌아가는'],['prog','svc','사람들에게 내놓으려면']]],
+
+ ['arch','컴퓨터 구조','CPU·메모리·디스크가 협력해 명령을 실행하는 방식','초기 컴퓨터는 계산이 바뀔 때마다 **배선을 새로 연결**해야 했다. 폰 노이만 구조 이후 모든 부품이 “메모리에서 명령을 꺼내 실행한다”는 **하나의 약속**으로 움직이게 됐다.',
+   ['vn','cpu','cache','mem','disk'],[['vn','cpu','그 핵심 두뇌'],['cpu','cache','메모리가 너무 느려서'],['cache','mem','캐시에 못 담는 나머지'],['mem','disk','꺼지면 사라지니까']]],
+ ['vn','폰 노이만 구조','프로그램과 데이터를 같은 메모리에 저장하는 설계','에니악은 프로그램을 바꾸려면 배선을 다시 꽂아야 했다. **명령어도 데이터처럼 메모리에 넣으면** 소프트웨어만 바꿔 다른 일을 시킬 수 있다.'],
+ ['cpu','CPU','명령어를 가져와(fetch) 해석하고(decode) 실행하는 장치','메모리에 저장된 명령어를 **하나씩 꺼내 처리할 주체**가 필요했다. 안에는 계산 회로(ALU), 초고속 저장소(레지스터), 알아듣는 명령 목록(ISA)이 있다.',
+   ['alu','reg','isa'],[]],
+ ['alu','ALU','산술(+,−,×,÷)과 논리(AND, OR, NOT) 연산 회로','모든 계산은 결국 덧셈과 논리 연산의 조합이라, 이것만 전담하는 회로를 CPU 안에 두었다.'],
+ ['reg','레지스터','CPU 안의 가장 작고 빠른 저장 공간','지금 계산 중인 값을 매번 메모리에서 가져오면 너무 느리다. 그래서 CPU 바로 안에 몇 개의 칸을 둔다.'],
+ ['isa','명령어 집합(ISA)','CPU가 알아듣는 명령어의 목록과 형식','소프트웨어와 하드웨어 사이의 약속. 같은 ISA를 따르면 CPU가 바뀌어도 같은 프로그램이 돈다.',
+   ['cisc','risc'],[['cisc','risc','복잡한 명령은 잘 안 쓰여서']]],
+ ['cisc','CISC','복잡하고 강력한 명령어를 많이 갖춘 방식 (x86)','메모리가 비싸던 시절, 명령어 하나로 많은 일을 시켜 프로그램 크기를 줄이려 했다.'],
+ ['risc','RISC','단순한 명령어만 두고 빠르게 많이 실행하는 방식 (ARM)','1980년대 연구에서 복잡한 명령어는 거의 쓰이지 않는다는 게 드러났다. 단순하게 만들면 파이프라이닝으로 더 빨라진다.'],
+ ['cache','캐시 메모리','CPU와 메인 메모리 사이의 작고 빠른 임시 저장소','CPU 속도가 메모리보다 훨씬 빨리 발전하면서 **CPU가 메모리를 기다리는 시간**이 늘었다. **자주 쓰는 데이터를 가까이** 두면 그 대기가 줄어든다.'],
+ ['mem','메인 메모리','실행 중인 프로그램과 데이터가 올라가는 작업 공간(RAM)','CPU가 직접 읽고 쓸 수 있는 공간이 필요했다. 빠르지만 **전원이 꺼지면 내용이 사라진다**.'],
+ ['disk','디스크','전원이 꺼져도 데이터가 남는 큰 저장 장치','메모리는 비싸고 휘발성이라, 프로그램과 파일을 **영구 보관**할 곳이 따로 필요했다.'],
+
+ ['os','운영체제','하드웨어를 관리하고 프로그램들에게 나눠주는 관리자','초창기엔 사람이 프로그램을 하나씩 직접 올려 실행해서 **CPU가 노는 시간**이 길었다. 여러 프로그램을 번갈아, 안전하게 돌리려고 그 **관리를 대신하는 프로그램**이 생겼다.',
+   ['proc','cpusched','memmgmt','disksched'],[['proc','cpusched','CPU를 나눠 쓰려면'],['cpusched','memmgmt','메모리도 나눠야 해서'],['memmgmt','disksched','디스크 요청도 줄 세우려고']]],
+ ['proc','프로세스와 쓰레드','실행 중인 프로그램과 그 안의 실행 흐름','디스크의 프로그램이 메모리에 올라가면 프로세스가 된다. 프로세스를 여러 개 만드는 건 무거워서, 메모리를 공유하는 **가벼운 단위인 쓰레드**가 나왔다.',
+   ['program','process','thread','ctx'],[['program','process','메모리에 올라가 실행되면'],['process','thread','여러 개 만들기 무거워서'],['thread','ctx','번갈아 돌리려면']]],
+ ['program','프로그램','디스크에 저장된 실행 파일','컴파일된 기계어(.exe)나 바이트코드가 파일로 저장된 상태. 아직 아무 일도 하지 않는다.'],
+ ['process','프로세스','메모리에 올라가 실행 중인 프로그램','운영체제는 프로그램마다 **독립된 메모리 공간**과 상태 정보(PCB)를 주어 서로 간섭 없이 실행되게 한다.'],
+ ['thread','쓰레드','프로세스 안에서 메모리를 공유하며 도는 실행 흐름','프로세스끼리는 메모리가 분리돼 있어 만들고 통신하는 비용이 크다. 한 프로세스 안에서 **여러 일을 동시에** 하려고 쓰레드가 생겼다.'],
+ ['ctx','문맥 교환','CPU가 실행 대상을 바꿀 때 상태를 저장하고 복원하는 일','CPU 하나로 여러 작업이 동시에 도는 것처럼 보이게 하려면, **지금 상태를 저장하고 다음 것을 불러와야** 한다. 이 전환에도 비용이 든다.'],
+ ['cpusched','CPU 스케줄링','어떤 프로세스에게 CPU를 줄지 정하는 규칙','CPU는 하나인데 실행하고 싶은 프로세스는 여럿이다. **누구에게 먼저, 얼마나 주느냐**에 따라 대기 시간과 공평함이 달라진다.',
+   ['np','pre'],[['np','pre','긴 작업이 CPU를 독점해서']]],
+ ['np','비선점형','한번 CPU를 잡으면 끝날 때까지 놓지 않는 방식','구현이 단순하고 문맥 교환이 적다. 대신 긴 작업이 CPU를 잡으면 **짧은 작업들이 한참 기다린다**.',
+   ['fcfs','sjf','hrn'],[['fcfs','sjf','긴 작업 뒤에 막혀서'],['sjf','hrn','긴 작업이 영영 밀려서']]],
+ ['fcfs','FCFS','먼저 온 순서대로 처리','**가장 단순한 공평함**. 하지만 긴 작업 하나가 앞에 있으면 뒤가 모두 기다린다(호위 효과).'],
+ ['sjf','SJF','실행 시간이 가장 짧은 작업부터 처리','**평균 대기 시간은 가장 짧지만**, 긴 작업은 계속 밀리는 기아 현상이 생긴다.'],
+ ['hrn','HRN','(대기시간+실행시간)/실행시간이 큰 것부터 처리','**오래 기다린 작업의 우선순위를 올려** SJF의 기아 현상을 줄였다.'],
+ ['pre','선점형','운영체제가 실행 중인 프로세스의 CPU를 뺏을 수 있는 방식','여러 사용자가 동시에 쓰는 시분할 시스템에선 모두가 빠른 응답을 받아야 해서, **CPU를 중간에 뺏어올 수** 있어야 했다.',
+   ['rr','srtf','mlq','mlfq'],[['mlq','mlfq','큐를 못 옮겨 굶는 작업 때문에']]],
+ ['rr','Round Robin','정해진 시간(타임 퀀텀)씩 돌아가며 실행','대화형 시스템에서 모든 사용자가 반응을 빨리 받도록, **시간을 잘게 쪼개** 공평하게 나눴다.'],
+ ['srtf','SRTF','남은 실행 시간이 가장 짧은 작업에 CPU를 넘김','SJF의 선점형 버전. 더 짧은 작업이 도착하면 즉시 교체한다.'],
+ ['mlq','다단계 큐','작업 종류별로 큐를 나누고 우선순위를 둠','시스템 작업, 대화형 작업, 배치 작업은 성격이 달라 한 가지 규칙으로는 부족했다.'],
+ ['mlfq','다단계 피드백 큐','작업의 행동을 보고 큐 사이를 옮겨 다니게 함','다단계 큐는 한번 정해진 큐를 못 옮겨 낮은 큐가 굶었다. **CPU를 오래 쓰면 아래로, 오래 기다리면 위로** 옮겨 균형을 맞춘다.'],
+ ['memmgmt','메모리 관리','한정된 메모리를 여러 프로세스에 나눠주는 방법','여러 프로세스가 동시에 메모리에 올라가면서, **서로의 영역을 침범하지 않게** 나누고 빈 공간을 효율적으로 쓰는 방법이 필요해졌다.',
+   ['seg','paging','vm','replace'],[['seg','paging','빈 공간이 조각나서'],['paging','vm','더 큰 프로그램도 돌리려고'],['vm','replace','꽉 차면 뭘 내보낼지']]],
+ ['seg','세그멘테이션','코드·데이터·스택 같은 논리 단위로 나눠 배치','**의미 단위로 나누니** 보호와 공유가 쉽다. 하지만 크기가 제각각이라 메모리에 틈(외부 단편화)이 생긴다.'],
+ ['paging','페이징','메모리를 같은 크기의 페이지로 잘라 배치','**크기를 고정하면** 어떤 빈칸에든 넣을 수 있어 외부 단편화가 사라진다. 주소 변환은 MMU와 페이지 테이블이 맡는다.'],
+ ['vm','가상 메모리','디스크 일부를 메모리처럼 써서 실제보다 큰 메모리를 제공','**필요한 페이지만 메모리에 올리고** 나머지는 디스크에 두면, 물리 메모리보다 큰 프로그램도 실행할 수 있다.'],
+ ['replace','페이지 교체 기법','메모리가 꽉 찼을 때 어떤 페이지를 내보낼지 결정','필요한 페이지가 메모리에 없으면(페이지 폴트) 디스크에서 가져와야 한다. 자리가 없으면 **누군가를 내보내야** 하는데, 잘못 고르면 폴트가 계속 난다.',
+   ['fifo','opt','lru','lfu','nru'],[['fifo','lru','오래됐어도 자주 쓸 수 있어서'],['opt','lru','미래 대신 과거로 추측'],['lru','nru','정확한 기록이 비싸서']]],
+ ['fifo','FIFO','가장 먼저 들어온 페이지를 교체','**구현이 가장 쉽다**. 하지만 오래됐어도 자주 쓰는 페이지를 내보낼 수 있고, 프레임을 늘려도 폴트가 느는 벨라디의 모순이 생긴다.'],
+ ['opt','OPT','앞으로 가장 오래 안 쓰일 페이지를 교체','이론상 최적이지만 **미래를 알아야** 해서 실제로는 불가능하다. 다른 기법의 성능을 비교하는 기준으로 쓴다.'],
+ ['lru','LRU','가장 오랫동안 사용하지 않은 페이지를 교체','**최근에 안 쓴 건 앞으로도 안 쓸 것**이라는 가정(지역성)으로 OPT를 흉내 낸다. 가장 널리 쓰이는 기준.'],
+ ['lfu','LFU','사용 횟수가 가장 적은 페이지를 교체','얼마나 자주 쓰였는지를 본다. 다만 초반에만 많이 쓰이고 이후 안 쓰이는 페이지가 계속 남는다.'],
+ ['nru','NRU','최근에 참조되지 않은 페이지를 교체 (참조·변경 비트)','LRU처럼 정확한 시간을 기록하는 건 비싸서, 비트 두 개로 대략적으로 판단한다.'],
+ ['disksched','디스크 스케줄링','디스크 헤드가 어떤 순서로 요청을 처리할지 정함','디스크는 헤드가 물리적으로 움직여야 해서 느리다. **처리 순서만 바꿔도** 이동 거리가 크게 줄어든다.',
+   ['dfcfs','sstf','scan','cscan'],[['dfcfs','sstf','헤드가 너무 왔다갔다해서'],['sstf','scan','먼 요청이 굶어서'],['scan','cscan','양 끝이 불공평해서']]],
+ ['dfcfs','FCFS (디스크)','요청이 들어온 순서대로 처리','공평하지만 헤드가 디스크 양끝을 오가며 이동 거리가 길어진다.'],
+ ['sstf','SSTF','현재 헤드에서 가장 가까운 요청부터','이동 거리는 줄지만 멀리 있는 요청은 계속 밀리는 기아가 생긴다.'],
+ ['scan','SCAN','엘리베이터처럼 한 방향 끝까지 가며 처리 후 반대로','**기아를 막는다**. 하지만 가운데는 자주 지나가고 양 끝은 오래 기다린다.'],
+ ['cscan','C-SCAN','한 방향으로만 처리하고 끝에 가면 처음으로 돌아감','돌아올 때는 처리하지 않아 **모든 위치의 대기 시간이 고르게** 된다.'],
+
+ ['prog','프로그램 개발','코드를 어떤 단위로 묶고 재사용해 왔는가','프로그램이 커질수록 한 사람이 전체를 이해하기 어려워졌다. 그래서 **코드를 묶는 단위**가 함수 → 클래스 → 모듈 → 컴포넌트 → API로 점점 커져 왔다.',
+   ['func','cls','obj','module','pkg','comp','api'],[['func','cls','데이터와 함께 묶으려고'],['cls','obj','설계도로 실체를 찍어내'],['obj','module','파일로 나누려고'],['module','pkg','모듈이 많아져서'],['pkg','comp','독립적으로 재사용하려고'],['comp','api','속을 몰라도 쓰게']]],
+ ['func','함수','특정 기능을 하는 코드 묶음. 입력을 받아 결과를 돌려줌','같은 코드를 여러 번 쓰지 않으려고, 수학의 f(x)=ax+b처럼 **이름을 붙여 호출**하게 했다.'],
+ ['cls','클래스','데이터(변수)와 기능(함수)을 하나로 묶은 설계도','함수만으로는 데이터와 그걸 다루는 함수가 흩어졌다. “사람”이라면 키·몸무게와 먹는다()·일한다()를 **한 곳에 묶는다**.'],
+ ['obj','객체 / 인스턴스','클래스로 메모리에 실제로 만든 것','설계도(클래스)는 하나지만 실제 사람 A, B는 여럿이다. 인스턴스화하면 각자 메모리를 차지하는 실체가 된다.'],
+ ['module','모듈','관련 코드를 모아둔 파일 단위','한 파일에 모든 걸 쓰면 관리가 안 돼서, **기능별로 파일을 나누고** 필요한 것만 가져다 쓰게 했다.'],
+ ['pkg','패키지','여러 모듈을 묶어 배포하는 단위','모듈이 수십 개가 되자 묶어서 이름을 붙이고, npm·pip처럼 설치해 쓰는 단위가 필요해졌다.'],
+ ['comp','컴포넌트','독립적으로 교체·재사용할 수 있는 기능 블록','레고처럼 조립하는 개발(CBD)을 위해, 내부를 숨기고 **인터페이스로만 연결되는 단위**를 만들었다.'],
+ ['api','API','프로그램끼리 기능을 주고받는 약속(인터페이스)','**속을 몰라도 쓸 수 있게** 요청 방법(URL, 파라미터, 인증)과 응답 형식을 명세했다. 외부에 공개하면 OpenAPI가 된다.'],
+
+ ['svc','서비스 개발','아이디어를 실제 서비스로 출시하고 운영하는 과정','코드를 짜는 것만으로는 서비스가 되지 않는다. 무엇을 만들지 정하고, 만들고, 올리고, 계속 고치는 **전체 흐름**이 필요하다.',
+   ['plan','design','dev','vcs','deploy','launch','maint','monet'],[['plan','design','무엇을 만들지 정했으면'],['design','dev','설계대로'],['dev','vcs','코드를 쌓아가며'],['vcs','deploy','정리된 코드를 서버에'],['deploy','launch','사람들에게 공개'],['launch','maint','계속 고치고'],['maint','monet','운영을 이어가려면']]],
+ ['plan','기획','MVP, 타깃 유저, 핵심 기능, 차별화 정하기','다 만들고 나서 아무도 안 쓰는 걸 막으려고, **최소 기능(MVP)**과 누구를 위한 것인지부터 정한다.'],
+ ['design','설계','화면, 사용자 시나리오, 데이터(ERD), API 설계','코드를 쓰기 전에 구조를 정해야 나중에 뜯어고치는 비용이 줄어든다.'],
+ ['dev','개발','프론트엔드·백엔드·DB를 만들고 연결하기','사용자가 보는 화면, 데이터를 처리하는 서버, 데이터를 저장하는 DB로 역할을 나누면 각각을 따로 만들고 고칠 수 있다.',
+   ['fe','be','db'],[['fe','be','필요한 데이터를 요청'],['be','db','저장하고 조회']]],
+ ['fe','프론트엔드','사용자가 보고 누르는 화면','웹은 HTML(구조)·CSS(모양)·JS(동작)로, 앱은 React Native 같은 도구로 만든다. 반응형 웹이면 하나로 PC와 모바일을 모두 대응한다.'],
+ ['be','백엔드','요청을 받아 데이터를 처리하는 서버 (API, CRUD)','로그인·회원가입처럼 화면만으로는 할 수 없는 일을 처리한다. 생성·조회·수정·삭제(CRUD)와 예외 처리가 기본이다.'],
+ ['db','DB 구축','데이터를 테이블로 저장하고 SQL로 다루기','파일로 저장하면 여러 사람이 동시에 읽고 쓰기 어렵다. DB는 데이터를 표로 정리하고 동시 접근과 검색을 대신 처리해 준다.'],
+ ['vcs','소스 관리','Git/GitHub, 브랜치 전략(개발·운영)','여러 명이 동시에 고치고, 잘못되면 되돌리려면 변경 이력을 관리해야 한다.'],
+ ['deploy','배포','클라우드, Vercel/Cloudflare에 서버 구축','내 컴퓨터에서만 돌던 코드를 누구나 접속할 수 있는 서버에 올린다.'],
+ ['launch','출시','앱스토어 등록, 도메인 연결, HTTPS 설정','사람들이 찾아올 수 있게 주소(도메인)를 붙이고, 통신을 암호화(HTTPS)하고, 앱이면 스토어 심사를 통과해야 한다.'],
+ ['maint','유지보수','버그 수정, 기능 개선, 장애 대응','출시는 시작일 뿐이다. 실제 사용자가 생기면 예상 못 한 버그와 장애가 나오고, 피드백에 따라 기능을 고친다.'],
+ ['monet','수익화','광고, 구독, 유료 서비스','서비스를 계속 운영하려면 서버비와 시간을 감당할 수익 모델이 필요하다.'],
+];
+
+/* ================= 심화 데이터 ================= */
+const DEEP = {
+ cache:{checked:'2026.09',
+  ins:['지역성(locality)에 기댄다: 방금 쓴 데이터는 곧 또 쓰고(시간 지역성), 그 근처 데이터도 곧 쓴다(공간 지역성).','L1(가장 작고 빠름) → L2 → L3(코어끼리 공유) 계층으로 되어 있고, 모두 없으면(캐시 미스) 메인 메모리까지 간다.','데이터는 1바이트씩이 아니라 캐시 라인(보통 64바이트) 단위로 한 번에 가져온다.'],
+  use:['2차원 배열을 행 방향으로 돌면 가져온 캐시 라인을 꽉 채워 써서, 열 방향으로 돌 때보다 훨씬 빠르다.','멀티쓰레드에서 서로 다른 변수가 같은 캐시 라인에 있으면 서로의 캐시를 계속 무효화하는 false sharing이 생겨 느려진다.'],
+  iv:[{q:'캐시의 지역성이란 무엇인가요?',a:'시간 지역성은 최근 접근한 데이터를 곧 다시 접근하는 성질, 공간 지역성은 접근한 데이터 근처를 곧 접근하는 성질입니다. 캐시는 이 두 성질 덕분에 작은 크기로도 높은 적중률을 냅니다.',f:['2차원 배열을 행 우선과 열 우선으로 순회할 때 속도가 다른 이유는?','멀티코어에서 캐시 일관성(coherence) 문제는 왜 생기나요?']}]},
+ thread:{checked:'2026.09',
+  ins:['한 프로세스 안의 쓰레드들은 코드·데이터·힙 영역을 공유하고, 스택과 레지스터(프로그램 카운터 포함)만 각자 가진다.','공유하기 때문에 통신이 빠르지만, 같은 변수를 동시에 고치면 결과가 꼬이는 경쟁 상태(race condition)가 생긴다. 그래서 뮤텍스·세마포어 같은 동기화가 필요하다.'],
+  use:['크롬은 탭마다 별도 프로세스를 써서 한 탭이 죽어도 다른 탭은 살아 있다(안정성·보안 때문에 쓰레드 대신 프로세스를 고른 예).','웹 서버는 요청마다 쓰레드를 새로 만들지 않고, 미리 만들어 둔 쓰레드 풀을 재사용한다.','Node.js는 JS 실행은 단일 쓰레드(이벤트 루프)지만, 파일 I/O 같은 일은 내부 쓰레드 풀(libuv)에 맡긴다.'],
+  iv:[{q:'프로세스와 쓰레드의 차이를 설명해 주세요.',a:'프로세스는 운영체제로부터 독립된 메모리 공간을 받은 실행 단위이고, 쓰레드는 프로세스 안에서 메모리를 공유하며 실행되는 흐름입니다. 쓰레드는 생성·전환 비용이 작고 통신이 쉽지만, 공유 자원 동기화가 필요하고 한 쓰레드의 오류가 프로세스 전체에 영향을 줄 수 있습니다.',f:['쓰레드마다 스택을 따로 두는 이유는?','멀티쓰레드 대신 멀티프로세스를 고르는 경우는?','경쟁 상태를 막는 방법에는 무엇이 있나요?']}]},
+ ctx:{checked:'2026.09',
+  ins:['현재 작업의 레지스터, PC, 스택 포인터 등을 PCB(쓰레드는 TCB)에 저장하고, 다음 작업의 것을 불러온다.','프로세스끼리 전환하면 주소 공간이 바뀌어 TLB·캐시에 있던 내용이 쓸모없어진다. 이 간접 비용이 저장·복원 자체보다 크다.','같은 프로세스의 쓰레드끼리 전환하면 주소 공간이 그대로라 비용이 더 작다.'],
+  use:['쓰레드를 코어 수보다 훨씬 많이 만들면 문맥 교환만 하다 성능이 떨어진다. 그래서 쓰레드 풀 크기를 제한한다.'],
+  iv:[{q:'문맥 교환은 언제 일어나고, 왜 비용이 드나요?',a:'타임 퀀텀이 끝나거나(타이머 인터럽트), I/O를 기다리거나, 더 높은 우선순위 작업이 오면 일어납니다. 레지스터를 저장·복원하는 직접 비용과, 전환 뒤 캐시·TLB가 비어서 생기는 미스라는 간접 비용이 있습니다.',f:['쓰레드 간 문맥 교환이 프로세스 간보다 빠른 이유는?','PCB에는 어떤 정보가 들어 있나요?']}]},
+ rr:{checked:'2026.09',
+  ins:['준비 큐를 원형으로 돌며 각 작업에 타임 퀀텀만큼 CPU를 준다. 시간이 다 되면 타이머 인터럽트가 걸리고 작업은 큐 맨 뒤로 간다.','퀀텀이 너무 크면 사실상 FCFS가 되고, 너무 작으면 문맥 교환이 잦아 오버헤드가 커진다.'],
+  use:['리눅스의 실시간 스케줄링 정책 중 하나로 SCHED_RR이 있다.','로드밸런서가 요청을 서버들에 차례로 나눠주는 방식도 라운드 로빈이라 부른다.'],
+  iv:[{q:'라운드 로빈에서 타임 퀀텀 크기는 어떻게 정해야 하나요?',a:'문맥 교환 시간보다 충분히 커야 오버헤드가 작고, 너무 크면 응답 시간이 길어져 FCFS처럼 됩니다. 보통 대부분의 작업이 한 퀀텀 안에 CPU 사용을 마치고 I/O로 넘어갈 정도로 잡습니다.',f:['RR의 평균 대기 시간은 SJF와 비교해 어떤가요?','응답 시간과 처리량 중 RR이 유리한 쪽은?']}]},
+ mlfq:{checked:'2026.09',
+  ins:['새 작업은 가장 높은 우선순위 큐에서 시작한다.','주어진 시간을 다 쓰면 한 단계 아래 큐로 내려간다(CPU를 오래 쓰는 작업으로 판단).','시간을 다 쓰기 전에 I/O 등으로 스스로 양보하면 그 큐에 머문다(대화형 작업으로 판단).','일정 주기마다 모든 작업을 맨 위로 올려(priority boost) 굶는 작업을 막는다.'],
+  use:['실행 시간을 미리 몰라도 짧은 작업·대화형 작업을 먼저 처리하게 되어, Windows를 비롯한 여러 운영체제 스케줄러의 기본 발상이 됐다.'],
+  iv:[{q:'작업의 실행 시간을 모를 때 SJF에 가깝게 동작시키려면 어떻게 하나요?',a:'MLFQ처럼 작업의 과거 행동을 관찰해 우선순위를 조정합니다. CPU를 오래 쓰는 작업은 점점 낮은 큐로, 짧게 쓰고 양보하는 작업은 높은 큐에 남겨서 결과적으로 짧은 작업이 먼저 처리됩니다.',f:['퀀텀 직전에 일부러 I/O를 해서 높은 큐에 머무는 꼼수는 어떻게 막나요?','priority boost가 없으면 어떤 문제가 생기나요?']}]},
+ paging:{checked:'2026.09',
+  ins:['가상 주소를 페이지 번호(p)와 오프셋(d)으로 나눈다. MMU가 페이지 테이블에서 p를 물리 프레임 번호(f)로 바꾸고, f와 d를 합쳐 실제 주소를 만든다.','페이지 테이블도 메모리에 있어서 매번 메모리를 두 번 읽게 된다. 그래서 최근 변환 결과를 담는 전용 캐시인 TLB를 둔다.','주소 공간이 크면 페이지 테이블이 거대해져서, 필요한 부분만 만드는 다단계 페이지 테이블을 쓴다(x86-64는 보통 4단계).','크기가 고정이라 외부 단편화는 없지만, 마지막 페이지의 남는 공간(내부 단편화)은 생긴다.'],
+  use:['일반적인 페이지 크기는 4KB. 데이터베이스나 JVM처럼 메모리를 크게 쓰는 프로그램은 2MB·1GB 대용량 페이지(Huge Pages)로 TLB 미스를 줄인다.'],
+  iv:[{q:'페이징과 세그멘테이션의 차이는 무엇인가요?',a:'페이징은 메모리를 같은 크기로 나눠 외부 단편화를 없애지만 내부 단편화가 생길 수 있고, 세그멘테이션은 코드·데이터·스택 같은 의미 단위로 나눠 보호·공유가 쉽지만 크기가 달라 외부 단편화가 생깁니다.',f:['내부 단편화와 외부 단편화의 차이는?','TLB는 왜 필요하고, 문맥 교환 때 TLB는 어떻게 되나요?']}]},
+ vm:{checked:'2026.09',
+  ins:['요구 페이징: 프로그램 전체가 아니라 실제로 접근한 페이지만 메모리에 올린다.','페이지 폴트 처리: 접근한 페이지가 메모리에 없음 → 트랩 발생 → 운영체제가 디스크에서 읽어 빈 프레임에 올림 → 페이지 테이블 갱신 → 멈췄던 명령어를 다시 실행.','메모리는 부족한데 실행 중인 프로세스가 너무 많으면, 페이지를 넣고 빼는 데만 시간을 쓰는 스래싱(thrashing)이 생긴다.'],
+  use:['fork()로 프로세스를 복제해도 메모리가 바로 두 배가 되지 않는 이유: 쓰기 전까지 같은 페이지를 공유하는 Copy-on-Write 덕분이다.','파일을 메모리처럼 다루는 mmap, 리눅스의 swap 영역이 모두 가상 메모리 위에서 동작한다.'],
+  iv:[{q:'스래싱이란 무엇이고 어떻게 해결하나요?',a:'프로세스들이 자주 쓰는 페이지 묶음(워킹셋)을 메모리에 다 올릴 수 없어 페이지 폴트가 폭증하고, CPU가 일은 못 하고 페이지 교체만 하는 상태입니다. 동시에 실행하는 프로세스 수를 줄이거나, 워킹셋 모델·페이지 폴트 빈도(PFF)로 프로세스별 프레임 수를 조절해 해결합니다.',f:['페이지 폴트가 발생했을 때 처리 과정을 순서대로 말해보세요.','Copy-on-Write는 어떻게 동작하나요?']}]},
+ lru:{checked:'2026.09',
+  ins:['소프트웨어로 구현할 땐 해시맵 + 이중 연결 리스트를 쓴다. 해시맵으로 O(1)에 찾고, 쓸 때마다 리스트 맨 앞으로 옮기고, 꽉 차면 맨 뒤를 지운다.','하드웨어·운영체제에선 모든 접근 시간을 기록하기 비싸서, 참조 비트를 이용한 클럭(Second Chance) 알고리즘 같은 근사 LRU를 쓴다.'],
+  use:['Redis의 allkeys-lru 정책, 브라우저·CDN 캐시, 리눅스 페이지 캐시(active/inactive 리스트) 등 캐시가 있는 곳 대부분.'],
+  iv:[{q:'LRU 캐시를 O(1)로 구현해 보세요.',a:'키→노드를 저장하는 해시맵과 사용 순서를 담는 이중 연결 리스트를 함께 씁니다. get/put 때 해당 노드를 리스트 맨 앞으로 옮기고, 용량을 넘으면 맨 뒤 노드를 지우고 해시맵에서도 삭제합니다.',f:['단일 연결 리스트가 아니라 이중 연결 리스트여야 하는 이유는?','여러 쓰레드가 동시에 접근하면 어떻게 하나요?','LRU가 불리한 접근 패턴은? (예: 큰 데이터를 한 번 쭉 훑는 순차 스캔)']}]},
+ api:{checked:'2026.09',
+  ins:['REST: 자원을 URI로 표현하고(/users/1), 행위는 HTTP 메서드(GET 조회, POST 생성, PUT/PATCH 수정, DELETE 삭제)로, 결과는 상태 코드(200, 201, 404, 500…)로 알린다.','서버는 요청 사이에 클라이언트 상태를 기억하지 않는다(stateless). 그래서 매 요청에 인증 토큰을 담아 보낸다.'],
+  use:['소셜 로그인은 OAuth 2.0으로 카카오·구글 쪽에 인증을 맡긴다.','공공데이터포털 같은 OpenAPI는 발급받은 인증키를 파라미터에 넣어 호출한다.'],
+  iv:[{q:'REST API란 무엇인가요?',a:'HTTP를 이용해 자원을 URI로 식별하고, HTTP 메서드로 그 자원에 대한 행위를 표현하는 API 설계 방식입니다. 무상태성, 일관된 인터페이스 같은 원칙을 따릅니다.',f:['PUT과 PATCH의 차이는?','멱등성이란 무엇이고, 어떤 메서드가 멱등한가요?','401과 403의 차이는?']}]},
+};
+
+/* ================= 용어 사전 ================= */
+const GLOSS = [
+ ['시간 지역성',[],'방금 쓴 데이터는 **곧 또 쓰는** 성질이다. 반복문 안에서 같은 변수를 계속 쓰는 게 대표적인 예다.',null,['cache']],
+ ['공간 지역성',[],'방금 쓴 데이터의 **근처도 곧 쓰는** 성질이다. 배열을 앞에서부터 차례로 읽는 게 대표적인 예다.',null,['cache']],
+ ['지역성',['locality'],'프로그램은 모든 데이터를 골고루 쓰지 않고, **쓰던 곳과 그 근처를 집중해서** 쓴다. 시간 지역성과 공간 지역성으로 나뉜다. 캐시가 작아도 효과적인 이유가 이것이다.',null,['cache']],
+ ['캐시 미스',[],'찾는 데이터가 캐시에 **없는** 경우다. 더 느린 다음 단계(L2, L3, 메인 메모리)까지 가야 해서 시간이 걸린다. 반대로 있으면 캐시 적중(히트)이다.',null,['cache']],
+ ['캐시 라인',[],'캐시가 메모리에서 데이터를 가져오는 **최소 단위**다(보통 64바이트). 1바이트만 필요해도 주변 64바이트를 한꺼번에 가져온다. 그래서 공간 지역성이 좋은 코드가 빠르다.',null,['cache']],
+ ['L1·L2·L3 캐시',['L1','L2','L3'],'CPU 가까이에 있는 캐시의 층이다. **L1**은 코어마다 있고 가장 작고 빠르다. **L2**는 조금 더 크고 느리다. **L3**는 여러 코어가 함께 쓰는 가장 큰 캐시다. 가까울수록 빠르고 작다.'],
+ ['false sharing',[],'서로 다른 쓰레드가 **다른 변수**를 쓰는데, 두 변수가 우연히 같은 캐시 라인에 있어서 서로의 캐시를 계속 무효화하는 현상이다. 겉보기엔 공유가 없는데 느려진다.'],
+ ['캐시 일관성',['coherence'],'코어마다 캐시가 따로 있어서 같은 데이터의 복사본이 여러 개 생긴다. 한 코어가 값을 바꾸면 **다른 코어의 복사본도 맞춰줘야** 하는데, 이것을 캐시 일관성 문제라고 한다.'],
+ ['메모리 영역',['코드·데이터·힙','힙','스택'],'프로그램이 메모리에 올라가면 네 영역으로 나뉜다. **코드**는 실행할 명령어, **데이터**는 전역 변수, **힙**은 실행 중에 필요할 때 받아 쓰는 공간, **스택**은 함수 호출과 지역 변수를 담는다.'],
+ ['프로그램 카운터',[],'**다음에 실행할 명령어의 주소**를 기억하는 레지스터다. 쓰레드마다 따로 있어야 각자 어디까지 실행했는지 알 수 있다.'],
+ ['경쟁 상태',['race condition'],'여러 쓰레드가 같은 데이터를 **동시에** 고칠 때, 실행 순서에 따라 결과가 달라지는 문제다. 예를 들어 두 쓰레드가 동시에 count++를 하면 2가 아니라 1만 늘 수 있다.'],
+ ['뮤텍스',[],'한 번에 **한 쓰레드만** 들어갈 수 있게 잠그는 자물쇠다. 들어간 쓰레드가 잠금을 풀어야 다음 쓰레드가 들어간다.'],
+ ['세마포어',[],'정해진 **개수만큼**의 쓰레드가 동시에 들어갈 수 있게 하는 신호 장치다. 개수가 1이면 뮤텍스와 비슷하게 동작한다.'],
+ ['동기화',[],'여러 쓰레드나 프로세스가 공유 자원을 쓸 때 **순서를 맞춰 충돌을 막는** 일이다. 뮤텍스, 세마포어 같은 도구를 쓴다.'],
+ ['쓰레드 풀',[],'쓰레드를 요청마다 새로 만들지 않고, 미리 여러 개 만들어 두고 **돌려쓰는** 방식이다. 생성 비용을 아끼고 쓰레드 수를 제한할 수 있다.'],
+ ['이벤트 루프',[],'할 일(이벤트)을 큐에 쌓아 두고, 하나의 쓰레드가 **하나씩 꺼내 처리하는** 반복 구조다. 오래 걸리는 I/O는 맡겨두고, 끝나면 알림을 받아 이어서 처리한다.'],
+ ['PCB',['TCB'],'Process Control Block. 운영체제가 프로세스마다 만드는 **정보 카드**다. 프로세스 번호, 상태, 레지스터 값, 프로그램 카운터, 메모리 정보가 들어 있다. 쓰레드용은 TCB라고 한다.'],
+ ['주소 공간',[],'프로세스가 “내 것”이라고 보는 메모리 주소의 범위다. 프로세스마다 따로 있어서, 같은 주소 1000번이라도 **프로세스가 다르면 실제 위치가 다르다.**'],
+ ['TLB',[],'페이지 테이블에서 찾은 “페이지 번호 → 프레임 번호” 결과를 저장해두는 **작고 빠른 캐시**다. 여기서 찾으면(TLB 히트) 페이지 테이블까지 가지 않아도 된다.',null,['paging']],
+ ['인터럽트',['타이머 인터럽트'],'CPU가 하던 일을 잠시 멈추고 **급한 일을 먼저 처리하게 하는 신호**다. 타이머 인터럽트는 정해진 시간이 지나면 울려서 운영체제가 CPU를 되찾게 한다.'],
+ ['트랩',[],'실행 중에 생긴 예외(페이지 폴트, 0으로 나누기 등)나 시스템 호출 때문에 **운영체제로 제어가 넘어가는 것**이다. 소프트웨어가 일으키는 인터럽트라고 보면 된다.'],
+ ['준비 큐',[],'CPU를 받을 준비가 된 프로세스들이 **줄 서 있는 곳**이다. 스케줄러가 여기서 다음에 실행할 프로세스를 고른다.',null,['cpu','FCFS']],
+ ['타임 퀀텀',[],'라운드 로빈에서 한 프로세스가 **한 번에 쓸 수 있는 CPU 시간**이다. 이 시간이 지나면 다음 차례에게 넘긴다.',null,['cpu','RR']],
+ ['오버헤드',[],'원래 하려는 일 말고 **부가적으로 드는 비용**(시간, 메모리)이다. 문맥 교환 시간이 대표적인 오버헤드다.'],
+ ['기아',['기아 현상'],'우선순위가 계속 밀려서 어떤 작업이 **영영 실행되지 못하는** 상태다. 오래 기다리면 우선순위를 올려주는 에이징으로 막는다.'],
+ ['호위 효과',[],'실행 시간이 **긴 작업 하나가 앞에 있어서** 뒤의 짧은 작업들이 줄줄이 기다리는 현상이다. FCFS의 대표적인 단점이다.',null,['cpu','FCFS']],
+ ['시분할 시스템',['시분할'],'CPU 시간을 잘게 나눠 여러 사용자와 프로그램에게 **번갈아** 주는 방식이다. 아주 빠르게 번갈아서 모두가 동시에 쓰는 것처럼 느끼게 한다.'],
+ ['페이지 테이블',[],'가상 메모리의 **페이지 번호 → 실제 메모리의 프레임 번호**를 적어둔 표다. 프로세스마다 하나씩 있다. 칸마다 지금 메모리에 있는지 알려주는 유효 비트도 있다.',null,['paging']],
+ ['MMU',[],'Memory Management Unit. CPU가 쓰는 가상 주소를 실제 메모리 주소로 **바꿔주는 하드웨어**다. TLB와 페이지 테이블을 이용한다.',null,['paging']],
+ ['유효 비트',[],'페이지 테이블 칸에 붙은 표시다. **1이면 지금 메모리에 있고, 0이면 디스크에 있다.** 0인 페이지에 접근하면 페이지 폴트가 난다.',null,['paging']],
+ ['프레임',['물리 프레임'],'실제 메모리(RAM)를 페이지와 같은 크기로 나눈 **한 칸**이다. 페이지는 가상 쪽 조각이고, 프레임은 실제 쪽 칸이다.',null,['paging']],
+ ['오프셋',[],'페이지 **안에서의 위치**다. 페이지 번호가 “몇 번째 칸”이라면, 오프셋은 “그 칸 안에서 몇 번째 바이트”인지를 뜻한다.',null,['paging']],
+ ['외부 단편화',[],'빈 메모리의 **총량은 충분한데**, 여기저기 작게 흩어져 있어서 큰 덩어리를 넣을 수 없는 상태다.'],
+ ['내부 단편화',[],'받은 칸이 필요보다 커서 **칸 안에 남는 공간**이다. 4KB 페이지에 1KB만 쓰면 3KB가 낭비된다.'],
+ ['다단계 페이지 테이블',[],'페이지 테이블을 한 장의 거대한 표 대신 **목차 → 세부 표**처럼 여러 단계로 나눈 것이다. 실제로 쓰는 부분의 표만 만들어서 메모리를 아낀다.'],
+ ['Huge Pages',[],'4KB보다 훨씬 큰(2MB, 1GB) 페이지다. 같은 메모리를 적은 수의 페이지로 덮으니 **TLB 한 칸이 커버하는 범위가 넓어져** TLB 미스가 준다.'],
+ ['페이지 폴트',[],'접근하려는 페이지가 **지금 메모리에 없는** 상황이다. 운영체제가 디스크에서 그 페이지를 가져와 올린 뒤 명령을 다시 실행한다.',null,['paging']],
+ ['요구 페이징',[],'페이지를 미리 다 올리지 않고, **실제로 필요해질 때**(페이지 폴트가 날 때) 올리는 방식이다.',null,['paging']],
+ ['스래싱',['thrashing'],'메모리가 모자라 페이지 폴트가 계속 나서, CPU가 일은 못 하고 **페이지를 넣고 빼는 데만** 시간을 쓰는 상태다.'],
+ ['워킹셋',[],'프로세스가 **최근 일정 시간 동안 자주 쓴 페이지들의 묶음**이다. 이만큼은 메모리에 있어야 폴트가 적게 난다.'],
+ ['Copy-on-Write',[],'복사를 바로 하지 않고, 원본과 복사본이 **같은 페이지를 함께 쓰다가** 누군가 값을 바꾸려 할 때 그 페이지만 복사하는 기법이다.'],
+ ['fork',['fork()'],'실행 중인 프로세스를 그대로 **복제해 자식 프로세스를 만드는** 시스템 호출이다(유닉스·리눅스).'],
+ ['mmap',[],'파일을 메모리 주소에 연결해서, 파일을 **배열처럼 읽고 쓸 수 있게** 하는 기능이다.'],
+ ['swap',[],'메모리가 부족할 때 당장 안 쓰는 페이지를 잠시 내려두는 **디스크 공간**이다.'],
+ ['해시맵',[],'키를 넣으면 계산(해시)으로 저장 위치를 바로 찾아서, 데이터를 **평균 O(1)에** 찾는 자료구조다. 사전에서 단어로 바로 찾는 것과 비슷하다.'],
+ ['이중 연결 리스트',[],'각 칸이 **앞 칸과 뒤 칸을 모두** 가리키는 리스트다. 중간 칸을 빼고 끼우는 일을 O(1)에 할 수 있다.'],
+ ['O(1)',[],'데이터가 아무리 많아져도 **걸리는 시간이 일정하다**는 뜻이다(시간 복잡도). O(n)은 데이터 수에 비례해 늘어난다.'],
+ ['클럭 알고리즘',['Second Chance'],'페이지들을 원형으로 두고 바늘이 돈다. 참조 비트가 1이면 0으로 바꾸고 **한 번 봐주고**(두 번째 기회), 0이면 교체한다. LRU를 싸게 흉내 내는 방식이다.'],
+ ['참조 비트',[],'페이지가 최근에 **읽히거나 쓰였으면 하드웨어가 1로** 바꿔두는 표시다. 운영체제가 주기적으로 0으로 지우면서 최근 사용 여부를 가늠한다.'],
+ ['URI',['URL'],'인터넷에서 자원의 위치나 이름을 나타내는 주소 형식이다. /users/1처럼 **“무엇”을 가리킨다.**'],
+ ['HTTP 메서드',[],'요청의 **행위**를 나타내는 단어다. GET은 조회, POST는 생성, PUT·PATCH는 수정, DELETE는 삭제다.'],
+ ['상태 코드',[],'서버가 요청 결과를 숫자로 알려주는 것이다. **2xx는 성공, 4xx는 요청 쪽 문제**(404 없음, 401 인증 필요, 403 권한 없음), **5xx는 서버 문제**다.'],
+ ['무상태',['stateless'],'서버가 이전 요청을 **기억하지 않는** 성질이다. 그래서 요청마다 필요한 정보(인증 토큰 등)를 다 담아 보낸다. 대신 서버를 늘리기 쉽다.'],
+ ['인증 토큰',[],'로그인에 성공하면 서버가 발급해주는 **출입증** 같은 문자열이다. 이후 요청에 함께 보내서 로그인한 사람임을 증명한다.'],
+ ['OAuth',['OAuth 2.0'],'비밀번호를 우리 서비스에 주지 않고, 구글·카카오 같은 곳에서 로그인한 뒤 **권한만 위임받는** 방식이다. 소셜 로그인이 이것이다.'],
+ ['멱등성',[],'같은 요청을 **여러 번 보내도 결과가 같은** 성질이다. GET, PUT, DELETE는 멱등하고, POST는 보통 멱등하지 않다.'],
+ ['OpenAPI',[],'외부에 공개된 API다. 또는 API 명세를 적는 표준 형식(OpenAPI Specification)을 가리키기도 한다.'],
+ ['파이프라이닝',[],'명령어 처리를 여러 단계(가져오기·해석·실행)로 나눠, **공장 컨베이어처럼 겹쳐서** 처리하는 기법이다. 한 명령이 끝나기 전에 다음 명령을 시작한다.'],
+ ['기계어',[],'CPU가 바로 이해하는 **0과 1로 된 명령어**다.'],
+ ['바이트코드',[],'특정 CPU가 아니라 **가상 머신**(예: JVM)이 이해하도록 만든 중간 단계 코드다.'],
+ ['휘발성',[],'전원이 꺼지면 **내용이 사라지는** 성질이다. RAM은 휘발성, 디스크는 비휘발성이다.'],
+ ['fetch',['decode','execute'],'CPU가 명령어를 처리하는 3단계다. 메모리에서 **가져오고**(fetch), 무슨 명령인지 **해석하고**(decode), **실행한다**(execute).'],
+ ['로드밸런서',[],'들어오는 요청을 여러 서버에 **골고루 나눠주는** 장치나 프로그램이다.'],
+ ['시스템 호출',[],'프로그램이 파일 읽기, 프로세스 만들기처럼 **운영체제만 할 수 있는 일을 부탁하는 통로**다.'],
+ ['I/O',[],'Input/Output. 디스크 읽기·쓰기, 네트워크, 키보드처럼 **CPU 밖의 장치와 데이터를 주고받는 일**이다. CPU보다 훨씬 느리다.'],
+ ['배치 작업',[],'사람이 결과를 바로 기다리지 않고, **모아서 한꺼번에 처리하는** 작업이다(예: 밤에 도는 정산).'],
+ ['대화형 작업',['대화형'],'사람이 입력하고 **바로 반응을 기다리는** 작업이다(예: 타이핑, 클릭). 응답이 빨라야 한다.'],
+];
+/* 트리 개념 이름도 용어로 연결 */
+const NODE_TERMS = [['폰 노이만 구조',['폰 노이만'],'vn'],['ALU',[],'alu'],['레지스터',[],'reg'],['CISC',[],'cisc'],['RISC',[],'risc'],['캐시 메모리',['캐시'],'cache'],['메인 메모리',['RAM'],'mem'],['운영체제',[],'os'],['프로세스',[],'process'],['쓰레드',[],'thread'],['문맥 교환',[],'ctx'],['FCFS',[],'fcfs'],['SJF',[],'sjf'],['HRN',[],'hrn'],['SRTF',[],'srtf'],['라운드 로빈',['Round Robin'],'rr'],['다단계 큐',[],'mlq'],['다단계 피드백 큐',['MLFQ'],'mlfq'],['세그멘테이션',[],'seg'],['페이징',[],'paging'],['가상 메모리',[],'vm'],['FIFO',[],'fifo'],['LRU',[],'lru'],['LFU',[],'lfu'],['OPT',[],'opt'],['NRU',[],'nru'],['SSTF',[],'sstf'],['SCAN',[],'scan'],['C-SCAN',[],'cscan'],['API',[],'api'],['컴포넌트',[],'comp'],['모듈',[],'module'],['패키지',[],'pkg'],['클래스',[],'cls']];
+
+/* 시각화가 붙는 개념 */
+const SIMMAP = { replace:['pagerep','FIFO'], fifo:['pagerep','FIFO'], lru:['pagerep','LRU'], opt:['pagerep','OPT'],
+  cpusched:['cpu','FCFS'], np:['cpu','FCFS'], pre:['cpu','RR'], fcfs:['cpu','FCFS'], sjf:['cpu','SJF'], srtf:['cpu','SRTF'], rr:['cpu','RR'],
+  paging:['paging'], vm:['paging'], disksched:['disk','FCFS'], dfcfs:['disk','FCFS'], sstf:['disk','SSTF'], scan:['disk','SCAN'], cscan:['disk','C-SCAN'], cache:['cache','ROW'] };
+
+/* ================= 모델 ================= */
+const N = {};
+RAW.forEach(([id,t,s,w,c=[],e=[]]) => N[id] = {id,t,s,w,c,e,p:null});
+Object.values(N).forEach(n => n.c.forEach(k => { N[k].p = n.id; }));
+Object.values(N).forEach(n => { let d=0, x=n.id; while(N[x].p){ x=N[x].p; d++; } n.d=d; });
+const ALL = Object.keys(N);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const DEPTH = ['#243357','#3f5fae','#7c9fe0','#b8cdf2','#e2ebfb'];
+const dcol = id => DEPTH[Math.min(N[id].d,4)];
+const dtext = id => N[id].d<=1 ? '#ffffff' : '#1f2a44';
+const pathTo = id => { const a=[]; while(id){ a.unshift(id); id=N[id].p; } return a; };
+const desc = id => [id, ...N[id].c.flatMap(desc)];
+const isUnder = (id, root) => pathTo(id).includes(root);
+const flowOf = id => { const p=N[id].p; if(!p) return {prev:[],next:[]}; const e=N[p].e; return {prev:e.filter(x=>x[1]===id), next:e.filter(x=>x[0]===id)}; };
+const narrow = () => window.innerWidth < 980;
+const firstSentence = s => (s.match(/^.*?[.!?](\s|$)/)||[s])[0].trim();
+
+/* 용어 정규식 */
+const TERMS = {}; const TERM_BY = {};
+GLOSS.forEach(([k,a,d,n,sim]) => { TERMS[k]={k,d,n,sim}; [k,...a].forEach(x=>TERM_BY[x]=k); });
+NODE_TERMS.forEach(([k,a,n]) => { if(!TERMS[k]){ TERMS[k]={k,d:`${N[n].s}. ${firstSentence(N[n].w)}`,n,sim:SIMMAP[n]||null}; } [k,...a].forEach(x=>TERM_BY[x]=k); });
+const TERM_RE = new RegExp(Object.keys(TERM_BY).sort((a,b)=>b.length-a.length).map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function fmt(text, self, used){
+  let h = esc(text).replace(TERM_RE, m => { const k=TERM_BY[m], t=TERMS[k]; if(!t || (t.n && t.n===self) || k===self || used.has(k)) return m; used.add(k); return `<button class="term" data-term="${esc(k)}">${m}</button>`; });
+  return h.replace(/\*\*(.+?)\*\*/g,'<b class="em">$1</b>');
+}
+function lines(text, self, used=new Set()){
+  return text.split(/(?<=[.!?])\s+(?=\S)/).map(s => {
+    let conn=''; const m=s.match(/^(그래서|하지만|대신|다만|즉|결국|그런데|반대로)\s*/);
+    if(m){ conn=`<span class="conn ${/그래서|결국|즉/.test(m[1])?'so':'but'}">${m[1]}</span>`; s=s.slice(m[0].length); }
+    return `<p class="blk">${conn}${fmt(s,self,used)}</p>`; }).join('');
+}
+
+const S = { o:'h', flows:true, quiz:false, qScope:'cs', qLevel:'basic', sel:null, root:'cs',
+  open:new Set(['cs','os','memmgmt']), known:{}, rev:{}, tab:'basic', ivShow:new Set(), ivPick:null, hist:[] };
+
+/* ================= 트리 ================= */
+const svg=$('#svg'), camEl=$('#cam'), gl=$('#gl'), gf=$('#gf'), gn=$('#gn');
+const NS='http://www.w3.org/2000/svg';
+const T = { cam:{x:30,y:40,k:1}, tgt:null, running:false, pos:{}, els:{}, lels:{}, fels:{} };
+const VW=136, VH=46, BUS=24;
+function textW(t, fs){ let w=0; for(const ch of t) w += ch.charCodeAt(0)>0x2e80 ? fs*.95 : fs*.56; return w; }
+function splitTitle(t){
+  if(textW(t,16) <= VW-18) return [t];
+  const sp=[...t.matchAll(/ /g)].map(m=>m.index); if(!sp.length) return [t];
+  const mid=t.length/2, i=sp.reduce((a,b)=>Math.abs(b-mid)<Math.abs(a-mid)?b:a);
+  return [t.slice(0,i), t.slice(i+1)];
+}
+function layout(){
+  const o=S.o, old=T.pos, pos={}; let slot=0;
+  const colW=narrow()?170:200, rowH=36, slotW=VW+30, levH=130;
+  const walk=(id,d)=>{ const n=N[id]; let v;
+    if(n.c.length && S.open.has(id)){ const vs=n.c.map(k=>walk(k,d+1)); v=(vs[0]+vs[vs.length-1])/2; } else v=slot++;
+    pos[id] = o==='h' ? {x:d*colW, y:v*rowH} : {x:v*slotW, y:d*levH}; return v; };
+  walk(S.root,0); T.pos=pos;
+  const anc = id => { let p=N[id].p; while(p && !old[p]) p=N[p].p; return (p && old[p]) || pos[N[id].p] || pos[id]; };
+  const linkD = (a,b) => o==='h'
+    ? `M${a.x+10} ${a.y} C${(a.x+b.x)/2} ${a.y} ${(a.x+b.x)/2} ${b.y} ${b.x-7} ${b.y}`
+    : `M${a.x} ${a.y+VH/2} V${b.y-VH/2-BUS} H${b.x} V${b.y-VH/2}`;
+  const want=new Set();
+  Object.keys(pos).forEach(id => { const p=N[id].p; if(!p || !pos[p]) return; want.add(id);
+    const d=linkD(pos[p],pos[id]); let el=T.lels[id];
+    if(!el){ el=document.createElementNS(NS,'path'); el.setAttribute('class','tlink'); const d0=linkD(pos[p], anc(id));
+      el.setAttribute('d',d0); el.style.d=`path("${d0}")`; el.style.opacity=0; gl.appendChild(el); T.lels[id]=el; el.getBoundingClientRect(); }
+    el.setAttribute('d',d); el.style.d=`path("${d}")`; el.style.opacity=1; });
+  Object.keys(T.lels).forEach(id => { if(!want.has(id)){ const el=T.lels[id]; delete T.lels[id]; el.style.opacity=0; setTimeout(()=>el.remove(),320); } });
+  drawFlows();
+  Object.keys(pos).forEach(id => { let g=T.els[id];
+    if(!g){ g=document.createElementNS(NS,'g'); g.setAttribute('class','tnode'); g.dataset.id=id;
+      const s=old[id]||anc(id); g.style.transition='none'; g.style.transform=`translate(${s.x}px,${s.y}px)`; g.style.opacity=0;
+      gn.appendChild(g); T.els[id]=g; g.getBoundingClientRect(); g.style.transition=''; }
+    g.style.transform=`translate(${pos[id].x}px,${pos[id].y}px)`; g.style.opacity=1; paint(id); });
+  Object.keys(T.els).forEach(id => { if(!pos[id]){ const g=T.els[id]; delete T.els[id];
+    const t=pos[N[id].p] || {x:0,y:0}; g.style.transform=`translate(${t.x}px,${t.y}px)`; g.style.opacity=0; setTimeout(()=>g.remove(),350); } });
+  renderTools();
+}
+function drawFlows(){
+  gf.innerHTML='';
+  if(S.o!=='v' || !S.flows) return;
+  const pos=T.pos;
+  Object.keys(pos).forEach(pid => { const P=N[pid]; if(!S.open.has(pid)) return;
+    P.e.forEach(([a,b,label]) => { if(!pos[a]||!pos[b]) return;
+      const A=pos[a], B=pos[b], ia=P.c.indexOf(a), ib=P.c.indexOf(b), involved = S.sel===a || S.sel===b;
+      const adj = Math.abs(ia-ib)===1 && B.x>A.x;
+      if(!adj && !involved) return;
+      let d, lx, ly;
+      if(adj){ d=`M${A.x+VW/2+3} ${A.y} L${B.x-VW/2-4} ${B.y}`; lx=(A.x+VW/2+B.x-VW/2)/2; ly=A.y-VH/2-9; }
+      else { const y0=A.y+VH/2+30, h=26+6*Math.abs(ia-ib); d=`M${A.x+20} ${A.y+VH/2+2} C${A.x+20} ${y0+h} ${B.x-20} ${y0+h} ${B.x-20} ${B.y+VH/2+4}`; lx=(A.x+B.x)/2; ly=y0+h*.75+12; }
+      const p=document.createElementNS(NS,'path'); p.setAttribute('class','flink'); p.setAttribute('d',d); p.setAttribute('marker-end','url(#fah)');
+      if(!adj) p.setAttribute('stroke-dasharray','5 4'); if(adj && B.x-A.x > (VW+30)*1.6 && !involved) p.style.opacity=.35;
+      const tt=document.createElementNS(NS,'title'); tt.textContent=`${N[a].t} → ${N[b].t}: ${label}`; p.appendChild(tt); gf.appendChild(p);
+      if(involved){ const t=document.createElementNS(NS,'text'); t.setAttribute('class','flabel'); t.setAttribute('text-anchor','middle'); t.setAttribute('x',lx); t.setAttribute('y',ly); t.textContent=label; gf.appendChild(t); }
+    }); });
+}
+function paint(id){
+  const n=N[id], g=T.els[id], has=n.c.length>0, open=S.open.has(id), sel=id===S.sel, col=dcol(id);
+  const deep=!!DEEP[id], sim=!!SIMMAP[id];
+  const mk = S.known[id]===true ? '#2f9e44' : S.known[id]===false ? '#e8590c' : null;
+  const sign = has ? (open ? '−' : '+') : '';
+  if(S.o==='h'){
+    const r=has?9.5:6, fs=n.d<2?21:19, tw=textW(n.t,fs);
+    const sub = !has ? `<tspan class="ts" dx="10">${S.quiz ? '· · ·' : esc(n.s.length>32 ? n.s.slice(0,31)+'…' : n.s)}</tspan>` : (open ? '' : `<tspan class="ts" dx="8">하위 ${n.c.length}개</tspan>`);
+    g.innerHTML = `<rect class="hit" x="-14" y="-16" width="${has?tw+130:tw+320}" height="32"/>
+      ${sel ? `<rect x="11" y="-14" width="${tw+10}" height="27" rx="6" fill="#ffe587"/>` : ''}
+      <circle r="${r}" fill="${col}" stroke="#1f2a44" stroke-width="1.4"/>
+      ${sign ? `<text text-anchor="middle" y="${sign==='+'?5:4.5}" font-size="15" font-weight="800" font-family="sans-serif" fill="${n.d>=2?'#1f2a44':'#fff'}" style="pointer-events:none">${sign}</text>` : ''}
+      <text x="16" y="6"><tspan class="tt" font-size="${fs}" ${sel?'style="stroke:#ffe587"':''}>${esc(n.t)}</tspan>${deep?'<tspan class="tag" fill="#5f3dc4" dx="6" dy="-8">심화</tspan><tspan dy="8"></tspan>':''}${sim?`<tspan class="tag" fill="#0c8599" dx="${deep?4:6}" dy="-8">▶</tspan><tspan dy="8"></tspan>`:''}${mk?`<tspan fill="${mk}" dx="4">●</tspan>`:''}${sub}</text>`;
+  } else {
+    const lines=splitTitle(n.t), fs=lines.some(l=>textW(l,16)>VW-18)?14.5:16, ty=lines.length===1?5.5:-5, tc=dtext(id);
+    const cap=[]; if(has && !open) cap.push(`하위 ${n.c.length}개`); if(deep) cap.push('<tspan fill="#5f3dc4" font-weight="700">심화</tspan>'); if(sim) cap.push('<tspan fill="#0c8599" font-weight="700">▶ 보기</tspan>');
+    g.innerHTML = `${sel?`<rect x="${-VW/2-5}" y="${-VH/2-5}" width="${VW+10}" height="${VH+10}" rx="16" fill="none" stroke="#ffd43b" stroke-width="5"/>`:''}
+      <rect x="${-VW/2}" y="${-VH/2}" width="${VW}" height="${VH}" rx="12" fill="${col}" stroke="${sel?'#111':'#1f2a44'}" stroke-width="${sel?2.4:1.2}"/>
+      <text text-anchor="middle" y="${ty}">${lines.map((l,i)=>`<tspan class="bt" x="0" dy="${i?17:0}" font-size="${fs}" fill="${tc}">${esc(l)}</tspan>`).join('')}</text>
+      ${sign?`<g transform="translate(0,${VH/2})"><circle r="8" fill="#fff" stroke="#1f2a44" stroke-width="1.3"/><text text-anchor="middle" y="${sign==='+'?4.5:4}" font-size="13" font-weight="800" font-family="sans-serif" fill="#1f2a44">${sign}</text></g>`:''}
+      ${cap.length?`<text class="tag" x="12" y="${VH/2+17}" fill="#8a857b">${cap.join(' · ')}</text>`:''}
+      ${mk?`<circle cx="${VW/2-9}" cy="${-VH/2+9}" r="4.5" fill="${mk}" stroke="#fff"/>`:''}`;
+  }
+}
+function refreshNodes(){ Object.keys(T.els).forEach(paint); drawFlows(); }
+function renderLegend(){
+  $('#legend').innerHTML = `<b>깊이</b> ${['전체','1단계','2단계','3단계','4단계+'].map((l,i)=>`<span><i style="background:${DEPTH[i]}"></i>${l}</span>`).join('')} <span>· 진할수록 큰 개념 · <b style="color:var(--deep)">심화</b> · <b style="color:var(--sim)">▶</b> 시각화</span>`;
+}
+/* 카메라 */
+function applyCam(){ const c=T.cam; camEl.setAttribute('transform',`translate(${c.x},${c.y}) scale(${c.k})`); }
+function kick(){ if(T.running) return; T.running=true; const step=()=>{ const t=T.tgt; if(!t){ T.running=false; return; }
+  const c=T.cam; c.x+=(t.x-c.x)*.18; c.y+=(t.y-c.y)*.18; c.k+=(t.k-c.k)*.18; applyCam();
+  if(Math.abs(t.x-c.x)<.5 && Math.abs(t.y-c.y)<.5 && Math.abs(t.k-c.k)<.002){ Object.assign(c,t); applyCam(); T.tgt=null; T.running=false; return; }
+  requestAnimationFrame(step); }; requestAnimationFrame(step); }
+function bbox(ids){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; ids.forEach(id=>{ const p=T.pos[id]; if(!p) return;
+  const w0=S.o==='h'?16:VW/2+6, w1=S.o==='h'?(N[id].c.length?210:400):VW/2+6, hu=S.o==='h'?18:VH/2+BUS+14, hd=S.o==='h'?18:VH/2+26;
+  x0=Math.min(x0,p.x-w0); x1=Math.max(x1,p.x+w1); y0=Math.min(y0,p.y-hu); y1=Math.max(y1,p.y+hd); }); return {x0,y0,x1,y1}; }
+function fit(instant){
+  const W=svg.clientWidth, H=svg.clientHeight, b=bbox(Object.keys(T.pos)), top=56, bot=50;
+  const fitK=Math.min((W-40)/(b.x1-b.x0), (H-top-bot)/(b.y1-b.y0));
+  const k=Math.max(S.o==='v'?.86:(narrow()?.7:.8), Math.min(1, fitK));
+  const anchor=T.pos[S.sel]||T.pos[S.root]; let x,y;
+  if((b.x1-b.x0)*k <= W-40) x=(W-(b.x1-b.x0)*k)/2 - b.x0*k; else x = S.o==='h' ? 20-b.x0*k : W/2-anchor.x*k;
+  if((b.y1-b.y0)*k <= H-top-bot) y=top+(H-top-bot-(b.y1-b.y0)*k)/2 - b.y0*k; else y = S.o==='v' ? top-b.y0*k : (H+top)/2-anchor.y*k;
+  const t={x,y,k}; if(instant){ Object.assign(T.cam,t); T.tgt=null; applyCam(); } else { T.tgt=t; kick(); }
+}
+function ensureVisible(ids){
+  const W=svg.clientWidth, H=svg.clientHeight, c=T.tgt||T.cam, b=bbox(ids), m=24, top=56, bot=56;
+  const sx0=b.x0*c.k+c.x, sx1=b.x1*c.k+c.x, sy0=b.y0*c.k+c.y, sy1=b.y1*c.k+c.y; let dx=0, dy=0;
+  if(sx1-sx0>W-2*m || sx0<m) dx=m-sx0; else if(sx1>W-m) dx=W-m-sx1;
+  if(sy1-sy0>H-top-bot || sy0<top) dy=top-sy0; else if(sy1>H-bot) dy=H-bot-sy1;
+  if(dx||dy){ T.tgt={x:c.x+dx, y:c.y+dy, k:c.k}; kick(); }
+}
+function zoomAt(k2,px,py){ const c=T.tgt||T.cam; k2=Math.max(.3,Math.min(2.5,k2)); T.tgt={k:k2,x:px-(px-c.x)*k2/c.k,y:py-(py-c.y)*k2/c.k}; kick(); }
+(() => {
+  const ptrs=new Map(); let start=null, moved=0, downId=null, pinch=null;
+  const pt=e=>{ const r=svg.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+  svg.addEventListener('pointerdown', e => { if(e.button && e.button!==0) return;
+    svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId,pt(e)); T.tgt=null;
+    if(ptrs.size===1){ start={...pt(e),cam:{...T.cam}}; moved=0; const g=e.target.closest('.tnode'); downId=g?g.dataset.id:null; }
+    else if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch={d:dist(a,b),m:mid(a,b),cam:{...T.cam}}; downId=null; moved=99; } });
+  svg.addEventListener('pointermove', e => { if(!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId,pt(e));
+    if(ptrs.size===2 && pinch){ const [a,b]=[...ptrs.values()], c0=pinch.cam, k2=Math.max(.3,Math.min(2.5,c0.k*dist(a,b)/pinch.d)), m=mid(a,b);
+      T.cam.k=k2; T.cam.x=m.x-(pinch.m.x-c0.x)*k2/c0.k; T.cam.y=m.y-(pinch.m.y-c0.y)*k2/c0.k; applyCam(); return; }
+    if(ptrs.size===1 && start){ const p=pt(e); moved=Math.max(moved,dist(p,start));
+      if(moved>4){ svg.classList.add('panning'); T.cam.x=start.cam.x+p.x-start.x; T.cam.y=start.cam.y+p.y-start.y; applyCam(); } } });
+  const up=e=>{ ptrs.delete(e.pointerId);
+    if(ptrs.size===0){ if(moved<=4 && downId) clickNode(downId); start=null; pinch=null; downId=null; svg.classList.remove('panning'); }
+    else if(ptrs.size===1){ const p=[...ptrs.values()][0]; start={...p,cam:{...T.cam}}; pinch=null; } };
+  svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  svg.addEventListener('wheel', e => { e.preventDefault(); T.tgt=null;
+    if(e.ctrlKey||e.metaKey){ const p=pt(e), c=T.cam, k2=Math.max(.3,Math.min(2.5,c.k*Math.exp(-e.deltaY*.01))); c.x=p.x-(p.x-c.x)*k2/c.k; c.y=p.y-(p.y-c.y)*k2/c.k; c.k=k2; }
+    else { let dx=e.deltaX, dy=e.deltaY; if(e.shiftKey && !dx){ dx=dy; dy=0; } T.cam.x-=dx; T.cam.y-=dy; }
+    applyCam(); }, {passive:false});
+})();
+$('#stage').querySelector('.zoom').addEventListener('click', e => { const b=e.target.closest('[data-z]'); if(!b) return;
+  const z=b.dataset.z, c=T.tgt||T.cam; if(z==='fit') fit(); else zoomAt(c.k*(z==='in'?1.25:.8), svg.clientWidth/2, svg.clientHeight/2); });
+
+function clickNode(id){
+  const n=N[id];
+  if(n.c.length && id!==S.root){ if(S.open.has(id)) S.open.delete(id); else S.open.add(id); }
+  selectNode(id); layout();
+  ensureVisible(S.open.has(id) ? [id,...n.c] : [id]);
+  if(narrow() && !n.c.length) $('#panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function selectNode(id){ if(S.sel!==id) S.tab = (S.quiz && S.qLevel==='iv' && S.ivPick && S.ivPick.id===id) ? 'deep' : 'basic'; S.sel=id; renderPanel(); refreshNodes(); }
+function goTo(id, push=true){
+  if(push && S.sel && S.sel!==id) S.hist.push(S.sel);
+  if(!isUnder(id,S.root)) S.root='cs';
+  pathTo(id).slice(0,-1).forEach(x=>S.open.add(x));
+  if(S.sel!==id && !(S.ivPick && S.ivPick.id===id)) S.tab='basic';
+  S.sel=id; renderPanel(); layout(); ensureVisible([id]);
+  if(narrow()) $('#panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function setRoot(id){ S.root=id; S.open.add(id); layout(); fit(); renderPanel(); }
+function back(){
+  if(!$('#simLayer').hidden){ Sim.close(); return; }
+  if(S.root!=='cs'){ const prev=S.root; S.root=N[prev].p||'cs'; S.sel=prev; layout(); fit(); renderPanel(); return; }
+  if(S.sel){ const p=N[S.sel].p; if(!p) return; if(S.open.has(S.sel)) S.open.delete(S.sel); else { S.open.delete(p); S.sel=p; } renderPanel(); layout(); ensureVisible([S.sel]); }
+}
+function renderTools(){
+  const crumb = S.root!=='cs' ? `<span class="rootcrumb">📍 ${pathTo(S.root).map((x,i,a)=> i<a.length-1 ? `<button data-root="${x}">${esc(N[x].t)}</button> ›` : `<b>${esc(N[x].t)}</b>`).join(' ')}</span><button data-root="cs">전체 지도로</button>` : '';
+  $('#tools').innerHTML = `${crumb}<button data-t="all">모두 펼치기</button><button data-t="none">모두 접기</button><span class="hint">드래그: 이동 · 휠: 스크롤 · Ctrl+휠/핀치: 확대 · Esc: 뒤로</span>`;
+}
+$('#tools').addEventListener('click', e => {
+  const r=e.target.closest('[data-root]'); if(r){ setRoot(r.dataset.root); return; }
+  const t=e.target.closest('[data-t]'); if(!t) return;
+  if(t.dataset.t==='all') desc(S.root).forEach(id=>N[id].c.length&&S.open.add(id)); else { desc(S.root).forEach(id=>S.open.delete(id)); S.open.add(S.root); }
+  layout(); fit();
+});
+
+/* ================= 설명 카드 ================= */
+function mark(id){ return S.known[id]===true ? '<span class="dot ok"></span>' : S.known[id]===false ? '<span class="dot bad"></span>' : ''; }
+function simButton(id){ const m=SIMMAP[id]; if(!m) return ''; const def=SIMS[m[0]];
+  return `<button class="simbtn" data-sim="${m[0]}" data-alg="${m[1]||''}"><span class="ic">▶</span><span><b>동작 과정 눈으로 보기</b><small>${esc(def.title)} · ${esc(def.short)}</small></span></button>`; }
+function renderPanel(){
+  const el=$('#panel'), id=S.sel; GC.el=null;
+  if(!id){ el.innerHTML=`<div class="empty"><div class="big">개념을 눌러보세요</div>가지가 있는 개념은 누르면 펼쳐지고, 동시에 여기에 설명이 열려요.<br><br>설명 속 <button class="term" data-term="캐시 라인">보라색 점선 밑줄</button> 용어를 누르면 그 자리에서 뜻이 펼쳐져요.<br><br><b style="color:var(--sim)">▶</b> 표시가 있는 개념은 동작 과정을 한 단계씩 눈으로 볼 수 있어요.</div>`; return; }
+  const n=N[id], dp=DEEP[id];
+  let h='';
+  if(S.hist.length){ const last=S.hist[S.hist.length-1]; h+=`<button class="histback" data-hback>← ${esc(N[last].t)}(으)로 돌아가기</button>`; }
+  h += `<div class="crumbs">${pathTo(id).map(x=>`<button class="crumb" data-go="${x}">${esc(N[x].t)}</button>`).join('<span>›</span>')}</div>
+    <div class="p-title" style="--hl:${N[id].d<=1?'#c9d6f3':dcol(id)}"><span>${esc(n.t)}</span>${mark(id)}</div>`;
+  h += simButton(id);
+  h += `<div class="ptabs"><button data-tab="basic" class="${S.tab==='basic'?'on':''}">기초</button><button data-tab="deep" class="deep ${dp?'has':''} ${S.tab==='deep'?'on':''}">심화${dp?'':' <span class="n">준비 중</span>'}</button></div>`;
+  h += S.tab==='basic' ? basicTab(id) : deepTab(id);
+  el.innerHTML=h;
+}
+function basicTab(id){
+  const n=N[id], f=flowOf(id), hidden=S.quiz && !S.rev[id], used=new Set();
+  let h='';
+  if(S.quiz) h+=`<div class="quiz-q">Q. <b>${esc(n.t)}</b>은(는) 무엇이고, 왜 생겨났을까?</div>`;
+  h+=`<div class="field ${hidden?'hid':''}"><label>한 줄 정의</label><div class="p-def blk" style="--hl:${dcol(id)}">${fmt(n.s,id,used)}</div></div>
+      <div class="field ${hidden?'hid':''}"><label>왜 나왔나</label>${lines(n.w,id,used)}</div>`;
+  if(hidden) h+=`<button class="reveal" data-act="reveal">떠올려봤으면 탭해서 확인 👀</button>`;
+  else if(S.quiz) h+=`<div class="grade"><button class="ok ${S.known[id]===true?'on':''}" data-act="ok">✓ 기억났음</button><button class="bad ${S.known[id]===false?'on':''}" data-act="bad">✗ 헷갈렸음</button></div>`;
+  if(f.prev.length||f.next.length){
+    h+=`<div class="field"><label>흐름</label>`;
+    f.prev.forEach(([a,,l])=>h+=`<div class="flowline"><button class="chip" data-go="${a}">${esc(N[a].t)}</button><span class="arr">— ${esc(l)} →</span><b>${esc(n.t)}</b></div>`);
+    f.next.forEach(([,b,l])=>h+=`<div class="flowline"><b>${esc(n.t)}</b><span class="arr">— ${esc(l)} →</span><button class="chip" data-go="${b}">${esc(N[b].t)}</button></div>`);
+    h+=`</div>`;
+  }
+  if(n.c.length) h+=`<div class="field"><label>하위 개념 ${n.c.length}개</label><div class="chips">${n.c.map(k=>`<button class="chip" data-go="${k}"><i style="background:${dcol(k)}"></i>${esc(N[k].t)}${DEEP[k]?'<small style="color:var(--deep)">심화</small>':''}${SIMMAP[k]?'<small style="color:var(--sim)">▶</small>':''}${mark(k)}</button>`).join('')}</div></div>`;
+  const acts=[];
+  if(n.c.length && S.root!==id) acts.push(`<button data-root="${id}">🔭 이 가지만 크게 보기</button>`);
+  if(S.root!=='cs') acts.push(`<button data-root="cs">🗺 전체 지도로</button>`);
+  if(DEEP[id]) acts.push(`<button data-tab="deep" style="border-color:var(--deep);color:var(--deep)">심화 내용 보기 →</button>`);
+  if(acts.length) h+=`<div class="act">${acts.join('')}</div>`;
+  return h;
+}
+function deepTab(id){
+  const dp=DEEP[id];
+  let h=`<div class="lvl deep"><b>심화</b>${dp?`<span>최종 확인 ${dp.checked}</span>`:''}</div>`;
+  if(!dp) return h+`<div class="emptydeep">이 개념의 심화 내용은 아직 준비 중이에요.<br>지금은 페이징, 가상 메모리, LRU, 쓰레드, 문맥 교환,<br>라운드 로빈, 다단계 피드백 큐, 캐시, API에 들어 있어요.</div>`;
+  const used=new Set(), pick=S.ivPick&&S.ivPick.id===id ? S.ivPick.i : -1;
+  const iv=(x,i)=>{ const key=id+':'+i, show=S.ivShow.has(key);
+    return `<div class="iv ${i===pick?'picked':''}">${i===pick?'<div style="font-size:11.5px;font-weight:800;color:#8a6a00">🎲 퀴즈 문제</div>':''}<div class="q">Q. ${esc(x.q)}</div>
+      ${show?`<div class="a">${lines(x.a,id,new Set())}</div>`:`<button class="showa" data-act="iva" data-k="${key}">먼저 말로 답해보고 → 모범 답변 보기</button>`}
+      ${show&&S.quiz?`<div class="grade" style="margin:8px 0 0"><button class="ok ${S.known[id]===true?'on':''}" data-act="ok">✓ 답했음</button><button class="bad ${S.known[id]===false?'on':''}" data-act="bad">✗ 막혔음</button></div>`:''}
+      <div class="fu">↳ 꼬리 질문<ul>${x.f.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div></div>`; };
+  const order=dp.iv.map((x,i)=>i); if(pick>=0){ order.splice(order.indexOf(pick),1); order.unshift(pick); }
+  const ivh=`<div class="sec"><h4>🎤 면접 질문</h4>${order.map(i=>iv(dp.iv[i],i)).join('')}</div>`;
+  if(pick>=0) h+=ivh;
+  h+=`<div class="sec"><h4>🔧 내부 구조</h4><ul>${dp.ins.map(x=>`<li class="blk">${fmt(x,id,used)}</li>`).join('')}</ul></div>
+      <div class="sec"><h4>🌍 실제 활용</h4><ul>${dp.use.map(x=>`<li class="blk">${fmt(x,id,used)}</li>`).join('')}</ul></div>`;
+  if(pick<0) h+=ivh;
+  return h;
+}
+/* 용어 카드 */
+const GC={stack:[],el:null};
+function renderGC(){
+  const k=GC.stack[GC.stack.length-1], t=TERMS[k]; if(!t||!GC.el) return;
+  const path=GC.stack.map((x,i,a)=> i<a.length-1 ? `<button data-gi="${i}">${esc(x)}</button> ›` : `<span>${esc(x)}</span>`).join(' ');
+  const acts=[]; if(t.n) acts.push(`<button data-go="${t.n}">🌳 트리에서 “${esc(N[t.n].t)}” 보기</button>`);
+  if(t.sim) acts.push(`<button class="s" data-sim="${t.sim[0]}" data-alg="${t.sim[1]||''}">▶ 눈으로 보기</button>`);
+  GC.el.innerHTML=`<div class="gpath">📖 ${GC.stack.length>1?'용어 따라가기: ':''}${path}</div><button class="gx" data-gclose aria-label="닫기">×</button>
+    <div class="gt">${esc(k)}</div>${lines(t.d, t.n||k)}${acts.length?`<div class="ga">${acts.join('')}</div>`:''}`;
+}
+function closeGC(){ if(GC.el){ GC.el.remove(); GC.el=null; } document.querySelectorAll('.term.on').forEach(x=>x.classList.remove('on')); }
+const panel=$('#panel');
+panel.addEventListener('click', e => {
+  const term=e.target.closest('.term');
+  if(term){ const k=term.dataset.term, inCard=term.closest('.gcard');
+    if(inCard){ GC.stack.push(k); renderGC(); return; }
+    if(term.classList.contains('on')){ closeGC(); return; }
+    closeGC(); const blk=term.closest('.blk, .empty, .q')||term.parentElement;
+    GC.stack=[k]; GC.el=document.createElement('div'); GC.el.className='gcard'; blk.after(GC.el); term.classList.add('on'); renderGC(); return; }
+  if(e.target.closest('[data-gclose]')){ closeGC(); return; }
+  const gi=e.target.closest('[data-gi]'); if(gi){ GC.stack=GC.stack.slice(0,+gi.dataset.gi+1); renderGC(); return; }
+  const sim=e.target.closest('[data-sim]'); if(sim){ Sim.open(sim.dataset.sim, sim.dataset.alg||null); return; }
+  if(e.target.closest('[data-hback]')){ const prev=S.hist.pop(); goTo(prev,false); return; }
+  const go=e.target.closest('[data-go]'); if(go){ goTo(go.dataset.go); return; }
+  const r=e.target.closest('[data-root]'); if(r){ setRoot(r.dataset.root); return; }
+  const tb=e.target.closest('[data-tab]'); if(tb){ S.tab=tb.dataset.tab; renderPanel(); return; }
+  const a=e.target.closest('[data-act]'); if(!a) return;
+  const act=a.dataset.act, id=S.sel;
+  if(act==='reveal') S.rev[id]=true; if(act==='ok') S.known[id]=true; if(act==='bad') S.known[id]=false; if(act==='iva') S.ivShow.add(a.dataset.k);
+  renderPanel(); refreshNodes(); updateScore();
+});
+
+/* ================= 시각화 ================= */
+const PCOL = {P1:'#f4a261',P2:'#6cb4ee',P3:'#e9d15f',P4:'#8fd19e',P5:'#c7a3f0'};
+const hex = (n,w=4) => '0x'+n.toString(16).toUpperCase().padStart(w,'0');
+const SIMS = {
+ pagerep:{ title:'페이지 교체', short:'FIFO · LRU · OPT', algs:['FIFO','LRU','OPT'],
+  sub:'메모리 칸(프레임)이 꽉 찼을 때 어떤 페이지를 내보내는지 한 칸씩 따라가 봐요.',
+  params:{ref:'7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1', F:3},
+  controls(p){ return `<span class="sep"></span>프레임 <input id="pF" type="number" min="1" max="6" value="${p.F}" style="width:48px"> 참조열 <input id="pRef" value="${p.ref}" style="width:230px"><button id="pApply">적용</button>`; },
+  bind(p){ $('#pApply').onclick=()=>{ p.F=Math.max(1,Math.min(6,+$('#pF').value||3)); p.ref=$('#pRef').value.trim().split(/[\s,]+/).filter(Boolean).map(Number).filter(x=>!isNaN(x)).slice(0,30).join(' ')||p.ref; Sim.rebuild(); }; },
+  run(alg,p){ const ref=p.ref.split(' ').map(Number), F=p.F; const frames=Array(F).fill(null), queue=[], last={}; let faults=0, hits=0; const steps=[];
+    steps.push({i:-1, frames:[...frames], faults, hits, msg:`<b>${alg}</b> 방식으로 시작해요. 프레임(메모리 칸)은 ${F}개이고, 위의 참조열 순서대로 페이지를 요청해요.`});
+    ref.forEach((pg,i)=>{ let hit=frames.includes(pg), slot=null, victim=null, msg='';
+      if(hit){ hits++; slot=frames.indexOf(pg); msg=`페이지 <b>${pg}</b>는 이미 메모리에 있어요 → <b style="color:#7bd389">적중(HIT)</b>. 아무것도 바꾸지 않아요.`+(alg==='LRU'?` 대신 ${pg}를 “가장 최근에 쓴 페이지”로 기록해요.`:''); }
+      else { faults++; const empty=frames.indexOf(null);
+        if(empty>=0){ slot=empty; msg=`페이지 <b>${pg}</b>가 메모리에 없어요 → <b style="color:#ff8a80">페이지 폴트</b>. 빈 프레임 ${empty}에 올려요.`; }
+        else { if(alg==='FIFO'){ victim=queue[0]; msg=`페이지 <b>${pg}</b>가 없어요 → <b style="color:#ff8a80">페이지 폴트</b>. 자리가 없으니 <b>가장 먼저 들어온 ${victim}</b>를 내보내요.`; }
+          else if(alg==='LRU'){ victim=frames.reduce((a,b)=>last[b]<last[a]?b:a); msg=`페이지 <b>${pg}</b>가 없어요 → <b style="color:#ff8a80">페이지 폴트</b>. <b>가장 오랫동안 안 쓴 ${victim}</b>(마지막 사용: ${last[victim]+1}번째)를 내보내요.`; }
+          else { const nxt=f=>{ const j=ref.indexOf(f,i+1); return j<0?Infinity:j; }; victim=frames.reduce((a,b)=>nxt(b)>nxt(a)?b:a); const nv=nxt(victim);
+            msg=`페이지 <b>${pg}</b>가 없어요 → <b style="color:#ff8a80">페이지 폴트</b>. 앞으로의 요청을 미리 보고, <b>가장 늦게 다시 쓰일 ${victim}</b>(${nv===Infinity?'다시 안 쓰임':(nv-i)+'칸 뒤'})를 내보내요.`; }
+          slot=frames.indexOf(victim); }
+        frames[slot]=pg; if(victim!==null) queue.splice(queue.indexOf(victim),1); queue.push(pg); }
+      last[pg]=i;
+      const nxt=f=>{ const j=ref.indexOf(f,i+1); return j<0?'∞':(j-i)+'칸 뒤'; };
+      const order = alg==='FIFO' ? `들어온 순서 (왼쪽이 가장 오래됨): ${queue.map(x=>`<span class="pchip" style="background:#cfd6dd">${x}</span>`).join(' ')}`
+        : alg==='LRU' ? `최근 사용 순서 (왼쪽이 가장 오래 안 씀): ${frames.filter(x=>x!==null).sort((a,b)=>last[a]-last[b]).map(x=>`<span class="pchip" style="background:#cfd6dd">${x}</span>`).join(' ')}`
+        : `다음에 다시 쓰이는 시점: ${frames.filter(x=>x!==null).map(x=>`<span class="pchip" style="background:#cfd6dd">${x}: ${nxt(x)}</span>`).join(' ')}`;
+      steps.push({i, pg, hit, slot, victim, frames:[...frames], faults, hits, msg, order}); });
+    return steps; },
+  render(st,steps,alg,p){ const ref=p.ref.split(' ').map(Number), F=p.F, i=st.i;
+    let h=`<div class="vars"><span class="k">요청 페이지:</span> <span class="v">${i<0?'-':st.pg}</span><br><span class="k">결과:</span> ${i<0?'-':st.hit?'<span class="c-ok">HIT (이미 있음)</span>':'<span class="c-bad">PAGE FAULT (없음)</span>'}<br><span class="k">내보낸 페이지:</span> <span class="v">${st.victim??'-'}</span><br><span class="k">페이지 폴트:</span> <span class="c-bad">${st.faults}</span>  <span class="k">적중:</span> <span class="c-ok">${st.hits}</span></div>`;
+    h+=`<div class="slabel">참조열 (요청 순서)</div><div class="scroll-x"><div class="arrowrow">${ref.map((x,j)=>`<span>${j===i?'▼':''}</span>`).join('')}</div><div class="cells">${ref.map((x,j)=>`<div class="cell ${j===i?'cur':j<i?'past':''}">${x}</div>`).join('')}</div></div>`;
+    h+=`<div class="slabel">프레임 상태 (세로 한 줄 = 그 시점의 메모리)</div><div class="scroll-x"><table class="sgrid"><tr><th></th>${ref.map((x,j)=>{ const s=steps[j+1]; return `<th class="${j<=i?(s.hit?'H':'F'):''}">${j<=i?(s.hit?'H':'F'):''}</th>`; }).join('')}</tr>`;
+    for(let f=0;f<F;f++){ h+=`<tr><td class="lab">프레임 ${f}</td>`; ref.forEach((x,j)=>{ const s=steps[j+1];
+      if(j>i){ h+=`<td class="c fut"></td>`; return; } const v=s.frames[f]; let cls='c'; if(j===i) cls+=' on'; if(s.slot===f) cls+= s.hit?' hitc':' new';
+      h+=`<td class="${cls}">${v??''}</td>`; }); h+='</tr>'; }
+    h+='</table></div>';
+    if(i>=0) h+=`<div class="sidebox"><div class="t">${alg}가 기억하는 정보</div>${st.order}</div>`;
+    if(i===ref.length-1){ const res=this.algs.map(a=>[a,this.run(a,p).slice(-1)[0].faults]);
+      h+=`<div class="slabel">같은 참조열, 알고리즘별 페이지 폴트 수</div><div class="cmp">${res.map(([a,f])=>`<div class="${a===alg?'me':''}">${a}<b>${f}</b></div>`).join('')}</div><div class="sidebox">OPT가 가장 적지만 미래를 알아야 해서 실제로는 못 써요. LRU는 과거를 보고 OPT를 흉내 내서 FIFO보다 보통 적어요.</div>`; }
+    return h; } },
+
+ cpu:{ title:'CPU 스케줄링', short:'FCFS · SJF · SRTF · RR', algs:['FCFS','SJF','SRTF','RR'],
+  sub:'프로세스 4개가 CPU를 나눠 쓰는 과정을 1칸(1초)씩 따라가 봐요. 아래 막대가 간트 차트예요.',
+  params:{q:2, procs:[{id:'P1',arr:0,burst:5},{id:'P2',arr:1,burst:3},{id:'P3',arr:2,burst:8},{id:'P4',arr:3,burst:6}]},
+  controls(p,alg){ return alg==='RR' ? `<span class="sep"></span>타임 퀀텀 <input id="cQ" type="number" min="1" max="8" value="${p.q}" style="width:48px"><button id="cApply">적용</button>` : ''; },
+  bind(p){ const b=$('#cApply'); if(b) b.onclick=()=>{ p.q=Math.max(1,Math.min(8,+$('#cQ').value||2)); Sim.rebuild(); }; },
+  run(alg,p){ const P=p.procs.map(x=>({...x,rem:x.burst,fin:null})), get=id=>P.find(x=>x.id===id), q=p.q;
+    let t=0, queue=[], run=null, used=0, done=0; const gantt=[], steps=[];
+    const snap=(ev,cur)=>steps.push({t, cur, run, queue:[...queue], gantt:[...gantt], rem:Object.fromEntries(P.map(x=>[x.id,x.rem])), fin:Object.fromEntries(P.map(x=>[x.id,x.fin])), ev});
+    snap([`<b>${alg}</b> 방식으로 시작해요. 표의 도착 시간에 맞춰 프로세스가 준비 큐에 들어와요.`], null);
+    while(done<P.length && t<200){ const ev=[];
+      P.filter(x=>x.arr===t).forEach(x=>{ queue.push(x.id); ev.push(`${x.id} 도착 → 준비 큐 뒤에 줄 서요.`); });
+      if(alg==='RR' && run && used>=q){ queue.push(run); ev.push(`${run}의 타임 퀀텀(${q}칸)이 끝나서 → 준비 큐 <b>맨 뒤</b>로 가요.`); run=null; }
+      if(alg==='SRTF' && run && queue.length){ const best=queue.reduce((a,b)=>get(b).rem<get(a).rem?b:a);
+        if(get(best).rem<get(run).rem){ ev.push(`${best}(남은 ${get(best).rem}) &lt; ${run}(남은 ${get(run).rem}) → ${run}이(가) <b>CPU를 뺏겨요(선점)</b>.`); queue.push(run); queue.splice(queue.indexOf(best),1); run=best; used=0; ev.push(`${best} 실행 시작.`); } }
+      if(!run && queue.length){ let pick, why;
+        if(alg==='FCFS'||alg==='RR'){ pick=queue[0]; why='준비 큐 맨 앞이라서'; }
+        else if(alg==='SJF'){ pick=queue.reduce((a,b)=>get(b).burst<get(a).burst?b:a); why=`전체 실행 시간이 가장 짧아서(${get(pick).burst})`; }
+        else { pick=queue.reduce((a,b)=>get(b).rem<get(a).rem?b:a); why=`남은 시간이 가장 짧아서(${get(pick).rem})`; }
+        queue.splice(queue.indexOf(pick),1); run=pick; used=0; ev.push(`<b>${pick}</b> 실행 시작 (${why}).`); }
+      let cur=null;
+      if(run){ const x=get(run); x.rem--; used++; gantt.push(run); cur=run; if(x.rem===0){ x.fin=t+1; done++; ev.push(`${run} 완료! (완료 시각 ${t+1})`); run=null; } }
+      else { gantt.push(null); ev.push('실행할 프로세스가 없어서 CPU가 쉬어요.'); }
+      snap(ev,cur); t++; }
+    return steps; },
+  stats(steps,p){ const last=steps[steps.length-1]; return p.procs.map(x=>({id:x.id, fin:last.fin[x.id], tat:last.fin[x.id]-x.arr, wait:last.fin[x.id]-x.arr-x.burst})); },
+  render(st,steps,alg,p){ const total=steps[steps.length-1].gantt.length, U=26, isLast=st===steps[steps.length-1];
+    let h=`<div class="vars"><span class="k">시간:</span> <span class="v">${st.cur===undefined||steps.indexOf(st)===0?'0 (시작 전)':`${st.t} → ${st.t+1}`}</span><br><span class="k">CPU에서 실행 중:</span> <span class="v">${st.cur?`${st.cur} (남은 ${st.rem[st.cur]})`:'-'}</span><br><span class="k">준비 큐:</span> <span class="v">[${st.queue.join(', ')}]</span></div>`;
+    h+=`<div class="cpurow"><div class="cbox" style="flex:1;min-width:180px"><div class="h">준비 큐 (왼쪽이 맨 앞)</div><div class="q">${st.queue.length?st.queue.map(x=>`<span class="pchip" style="background:${PCOL[x]}">${x}</span>`).join(''):'<span style="color:#6b7784">비어 있음</span>'}</div></div>
+      <div class="cbox cpu"><div class="h">CPU</div><div class="q">${st.cur?`<span class="pchip" style="background:${PCOL[st.cur]};min-width:60px">${st.cur}</span>`:'<span style="color:#6b7784">쉬는 중</span>'}</div></div>
+      <div class="cbox" style="min-width:120px"><div class="h">완료</div><div class="q">${Object.entries(st.fin).filter(([k,v])=>v!==null).map(([k])=>`<span class="pchip" style="background:${PCOL[k]};opacity:.7">${k}</span>`).join('')||'<span style="color:#6b7784">-</span>'}</div></div></div>`;
+    const segs=[]; st.gantt.forEach((x,j)=>{ const s=segs[segs.length-1]; if(s && s.id===x) s.len++; else segs.push({id:x,start:j,len:1}); });
+    h+=`<div class="slabel">간트 차트 (누가 언제 CPU를 썼나)</div><div class="scroll-x"><div style="width:${total*U+20}px"><div class="gantt">${segs.map(s=>`<div class="${s.id?'':'idle'}" style="width:${s.len*U}px;background:${s.id?PCOL[s.id]:''}">${s.id||''}</div>`).join('')}<div style="width:${(total-st.gantt.length)*U}px;border:1.5px dashed #333d47;border-left:0;background:none"></div></div>
+      <div class="ticks">${[0,...segs.map(s=>s.start+s.len)].map(x=>`<span style="left:${x*U}px">${x}</span>`).join('')}</div></div></div>`;
+    h+=`<table class="ptab"><tr><th>프로세스</th><th>도착</th><th>실행 시간</th><th>남은 시간</th><th>완료</th><th>대기 시간</th></tr>${p.procs.map(x=>{ const r=st.rem[x.id], f=st.fin[x.id];
+      return `<tr><td><span class="pchip" style="background:${PCOL[x.id]}">${x.id}</span></td><td>${x.arr}</td><td>${x.burst}</td><td><div class="rembar"><i style="width:${r/x.burst*100}%;background:${PCOL[x.id]}"></i></div></td><td>${f??'-'}</td><td>${f!=null?f-x.arr-x.burst:'-'}</td></tr>`; }).join('')}</table>`;
+    if(isLast){ const res=this.algs.map(a=>{ const s=this.stats(this.run(a,p),p); return [a, s.reduce((m,x)=>m+x.wait,0)/s.length]; });
+      h+=`<div class="slabel">평균 대기 시간 비교 (작을수록 좋음)</div><div class="cmp">${res.map(([a,w])=>`<div class="${a===alg?'me':''}">${a}${a==='RR'?`(q=${p.q})`:''}<b>${w.toFixed(2)}</b></div>`).join('')}</div><div class="sidebox">대기 시간 = 완료 시각 − 도착 시각 − 실행 시간. SJF·SRTF는 평균 대기가 짧지만 긴 작업이 밀리기 쉽고, RR은 평균은 길어도 모두가 자주 CPU를 받아서 반응이 빨라요.</div>`; }
+    return h; },
+  msg(st){ return (steps => st.ev.join(' '))(); } },
+
+ paging:{ title:'주소 변환', short:'TLB · 페이지 테이블 · 페이지 폴트', algs:[],
+  sub:'CPU가 쓰는 가상 주소가 실제 메모리 주소로 바뀌는 길을 따라가 봐요. 페이지 크기는 4KB, 주소는 16비트예요.',
+  params:{},
+  run(){ const W={ tlb:[{p:0,f:5},{p:5,f:7}], pt:[{f:5,v:1},{f:null,v:0},{f:1,v:1},{f:2,v:1},{f:null,v:0},{f:7,v:1},{f:null,v:0},{f:null,v:0}],
+      mem:['다른 프로그램','페이지 2','페이지 3','','운영체제','페이지 0','다른 프로그램','페이지 5'], disk:[1,4,6,7], st:{hit:0,miss:0,fault:0}, cur:{} };
+    const steps=[]; const snap=o=>steps.push(JSON.parse(JSON.stringify({tlb:W.tlb,pt:W.pt,mem:W.mem,disk:W.disk,stat:W.st,...W.cur,...o})));
+    snap({act:null, msg:'준비: 페이지 0, 2, 3, 5는 메모리에 있고, 1, 4, 6, 7은 디스크에 있어요. TLB는 칸이 2개뿐이에요. 가상 주소 3개를 차례로 따라가 봐요.'});
+    const access=(addr)=>{ const p=addr>>12, d=addr&0xfff; W.cur={addr,p,d,phys:null,split:false};
+      snap({act:'cpu', msg:`CPU가 가상 주소 <b>${hex(addr)}</b>를 읽으려 해요. 이건 프로세스가 보는 “가상” 주소라서, 실제 메모리 어디인지 바꿔야 해요.`});
+      W.cur.split=true;
+      snap({act:'split', msg:`주소를 둘로 쪼개요. 앞 4비트 <b>${p.toString(2).padStart(4,'0')}</b> = 페이지 번호 <b>${p}</b>, 뒤 12비트 = 오프셋 <b>${hex(d,3)}</b>(페이지 안에서의 위치). 페이지가 4KB(2¹²)라서 뒤 12비트가 오프셋이에요.`});
+      let f; const ti=W.tlb.findIndex(e=>e.p===p);
+      if(ti>=0){ W.st.hit++; f=W.tlb[ti].f; snap({act:'tlb', tlbHl:ti, tlbOk:true, msg:`TLB에서 페이지 ${p}를 찾았어요 → <b style="color:#7bd389">TLB 히트!</b> 페이지 테이블까지 안 가도 돼요. 프레임 = ${f}.`}); }
+      else { W.st.miss++; snap({act:'tlb', tlbMiss:true, msg:`TLB에 페이지 ${p}가 없어요 → <b style="color:#ff8a80">TLB 미스</b>. 메모리에 있는 페이지 테이블을 봐야 해요(한 번 더 메모리를 읽는 느린 길).`});
+        if(W.pt[p].v){ snap({act:'pt', ptHl:p, ptOk:true, msg:`페이지 테이블 ${p}번 칸: 유효 비트 <b>1</b> → 메모리에 있어요. 프레임 = <b>${W.pt[p].f}</b>.`}); }
+        else { W.st.fault++; snap({act:'pt', ptHl:p, ptOk:false, fault:true, msg:`페이지 테이블 ${p}번 칸: 유효 비트 <b>0</b> → 지금 메모리에 없어요! <b style="color:#ff8a80">페이지 폴트</b> → 트랩으로 운영체제에게 넘어가요.`});
+          const free=W.mem.indexOf(''); W.disk=W.disk.filter(x=>x!==p); W.mem[free]=`페이지 ${p}`;
+          snap({act:'disk', memHl:free, memNew:true, fault:true, msg:`운영체제가 디스크(swap)에서 페이지 ${p}를 읽어 <b>비어 있던 프레임 ${free}</b>에 올려요. 디스크는 느려서 이 과정이 가장 오래 걸려요.`});
+          W.pt[p]={f:free,v:1};
+          snap({act:'pt', ptHl:p, ptOk:true, ptNew:true, memHl:free, msg:`페이지 테이블 ${p}번 칸을 “프레임 ${free}, 유효 비트 1”로 고쳐요. 그리고 멈췄던 명령어를 <b>처음부터 다시 실행</b>해요.`}); }
+        f=W.pt[p].f; let ev=null; if(W.tlb.length>=2) ev=W.tlb.shift(); W.tlb.push({p,f});
+        snap({act:'tlb', tlbHl:W.tlb.length-1, tlbNew:true, msg:`찾은 결과(페이지 ${p} → 프레임 ${f})를 TLB에 적어둬요${ev?` (자리가 없어서 가장 오래된 페이지 ${ev.p} 항목을 뺐어요)`:''}. 다음엔 빨라져요.`}); }
+      W.cur.phys=(f<<12)|d;
+      snap({act:'mem', memHl:f, msg:`물리 주소 = 프레임 <b>${f}</b> + 오프셋 <b>${hex(d,3)}</b> = <b>${hex(W.cur.phys)}</b>. 실제 메모리의 프레임 ${f} 안에서 ${hex(d,3)}번째 바이트를 읽어요.`}); };
+    access(0x3A7F); access(0x3004); access(0x1C20);
+    W.cur={}; snap({act:'end', msg:`끝! TLB 히트 <b>${W.st.hit}</b>번, TLB 미스 <b>${W.st.miss}</b>번, 페이지 폴트 <b>${W.st.fault}</b>번. 두 번째 주소(같은 페이지 3)는 TLB 덕분에 페이지 테이블을 건너뛰었어요.`});
+    return steps; },
+  render(st){ const a=st.act, route=[['cpu','가상 주소'],['split','쪼개기'],['tlb','TLB'],['pt','페이지 테이블'],['disk','디스크'],['mem','물리 주소']];
+    const order=route.map(r=>r[0]); const ai=order.indexOf(a);
+    let h=`<div class="vars"><span class="k">가상 주소:</span> <span class="v">${st.addr!=null?hex(st.addr):'-'}</span>   <span class="k">물리 주소:</span> <span class="v">${st.phys!=null?hex(st.phys):'-'}</span><br><span class="k">TLB 히트</span> <span class="c-ok">${st.stat.hit}</span>  <span class="k">TLB 미스</span> <span class="c-bad">${st.stat.miss}</span>  <span class="k">페이지 폴트</span> <span class="c-bad">${st.stat.fault}</span></div>`;
+    h+=`<div class="route">${route.map((r,i)=>`<span class="${r[0]===a?'on':(ai>i?'done':'')}">${r[1]}</span>${i<route.length-1?'<em>→</em>':''}`).join('')}</div>`;
+    const bits = st.addr!=null ? st.addr.toString(2).padStart(16,'0').split('') : Array(16).fill('·');
+    h+=`<div class="addrbox ${a==='cpu'||a==='split'?'on':''}"><div style="font-size:12.5px;color:#cfd6dd;font-weight:700">① CPU가 보낸 가상 주소 ${st.addr!=null?`<span class="v" style="color:#e9e6a0;font-family:var(--mono)">${hex(st.addr)}</span>`:''}</div>
+      <div class="bits">${bits.map((b,i)=>`${i===4?'<span class="gap"></span>':''}<span class="${st.split?(i<4?'p':'o'):''}">${b}</span>`).join('')}</div>
+      ${st.split?`<div style="display:flex;gap:16px;font-size:12px;margin-top:6px;flex-wrap:wrap"><span style="color:#66c2d9">■ 페이지 번호 = ${st.p}</span><span style="color:#e9e6a0">■ 오프셋 = ${hex(st.d,3)}</span></div>`:''}</div>`;
+    const tlbCls = a==='tlb' ? (st.tlbMiss?'badon':'on') : '';
+    h+=`<div class="pg"><div class="pcard ${tlbCls}"><h5>② TLB (빠른 캐시, 2칸)</h5><table><tr><th>페이지</th><th>프레임</th></tr>${st.tlb.map((e,i)=>`<tr class="${a==='tlb'&&st.tlbHl===i?(st.tlbNew?'new':'okr'):''}"><td>${e.p}</td><td>${e.f}</td></tr>`).join('')}</table>${a==='tlb'&&st.tlbMiss?'<div style="color:#ff8a80;font-weight:700;margin-top:4px">페이지 '+st.p+' 없음</div>':''}</div>
+      <div class="pcard ${a==='pt'?(st.ptOk?'on':'badon'):''}"><h5>③ 페이지 테이블</h5><table><tr><th>페이지</th><th>프레임</th><th>유효</th></tr>${st.pt.map((e,i)=>`<tr class="${a==='pt'&&st.ptHl===i?(st.ptOk?(st.ptNew?'new':'okr'):'badr'):''}"><td>${i}</td><td>${e.f??'-'}</td><td>${e.v}</td></tr>`).join('')}</table></div>
+      <div class="pcard ${a==='mem'||a==='disk'?'on':''}"><h5>④ 실제 메모리 (프레임)</h5><table><tr><th>프레임</th><th>내용</th></tr>${st.mem.map((m,i)=>`<tr class="${st.memHl===i&&(a==='mem'||a==='disk'||a==='pt')?(st.memNew?'new':'hl'):''}"><td>${i}</td><td style="text-align:left">${m||'<span style="color:#6b7784">비어 있음</span>'}</td></tr>`).join('')}</table></div>
+      <div class="pcard ${a==='disk'?'badon':''}"><h5>💾 디스크 (swap)</h5><div style="line-height:1.8">메모리에 없는 페이지:<br>${st.disk.map(x=>`<span class="pchip" style="background:#cfd6dd;margin:2px">페이지 ${x}</span>`).join('')}</div>${a==='disk'?'<div style="color:#ff8a80;font-weight:700;margin-top:6px">↑ 페이지 '+st.p+' 읽어 올리는 중</div>':''}</div></div>`;
+    return h; } },
+
+ disk:{ title:'디스크 스케줄링', short:'FCFS · SSTF · SCAN · C-SCAN', algs:['FCFS','SSTF','SCAN','C-SCAN'],
+  sub:'디스크 헤드가 요청된 실린더(0~199)를 어떤 순서로 방문하는지 봐요. 선이 짧을수록 이동이 적어요.',
+  params:{req:[98,183,37,122,14,124,65,67], head:53, max:199},
+  run(alg,p){ let head=p.head, left=[...p.req], total=0; const path=[head], steps=[];
+    steps.push({path:[...path], head, left:[...left], total, msg:`헤드는 지금 <b>${head}</b>번 실린더에 있어요. 요청 ${left.length}개를 <b>${alg}</b> 방식으로 처리해요.`});
+    const go=(to,why)=>{ const d=Math.abs(to-head); total+=d; head=to; path.push(to); left=left.filter(x=>x!==to); steps.push({path:[...path], head, left:[...left], total, msg:`${why} → <b>${to}</b>번으로 이동 (거리 ${d}, 누적 ${total})`}); };
+    if(alg==='FCFS') p.req.forEach(x=>go(x,'들어온 순서대로 다음 요청'));
+    else if(alg==='SSTF'){ while(left.length){ const nx=left.reduce((a,b)=>Math.abs(b-head)<Math.abs(a-head)?b:a); go(nx,`지금 위치(${head})에서 가장 가까운 요청`); } }
+    else if(alg==='SCAN'){ const down=left.filter(x=>x<=head).sort((a,b)=>b-a), up=left.filter(x=>x>head).sort((a,b)=>a-b);
+      down.forEach(x=>go(x,'0번 방향(아래)으로 가면서 만나는 요청')); if(up.length){ go(0,'끝(0번)까지 간 뒤 방향을 바꿈'); } up.forEach(x=>go(x,'반대 방향(위)으로 가면서 만나는 요청')); }
+    else { const up=left.filter(x=>x>=head).sort((a,b)=>a-b), low=left.filter(x=>x<head).sort((a,b)=>a-b);
+      up.forEach(x=>go(x,'199번 방향(위)으로 가면서 만나는 요청')); if(low.length){ go(p.max,'끝(199번)까지 간 뒤'); go(0,'처리 없이 처음(0번)으로 복귀'); } low.forEach(x=>go(x,'다시 위로 가면서 만나는 요청')); }
+    steps[steps.length-1].msg += ` · 끝! 총 이동 거리 <b>${total}</b>`;
+    return steps; },
+  render(st,steps,alg,p){ const W=640, X=v=>20+v/p.max*(W-40), rowH=26, H=62+(steps.length)*rowH, isLast=st===steps[steps.length-1];
+    let h=`<div class="vars"><span class="k">헤드 위치:</span> <span class="v">${st.head}</span>   <span class="k">누적 이동 거리:</span> <span class="v">${st.total}</span><br><span class="k">남은 요청:</span> <span class="v">[${st.left.join(', ')}]</span></div>`;
+    let s=`<svg width="${W}" height="${H}" style="display:block"><line x1="20" y1="30" x2="${W-20}" y2="30" stroke="#5b6672"/>`;
+    [0,50,100,150,199].forEach(v=>s+=`<text x="${X(v)}" y="16" fill="#9aa6b2" font-size="11" text-anchor="middle">${v}</text><line x1="${X(v)}" y1="26" x2="${X(v)}" y2="34" stroke="#5b6672"/>`);
+    const srt=[...p.req].sort((a,b)=>a-b); let prevX=-99, lvl=0;
+    srt.forEach(v=>{ const done=!st.left.includes(v); lvl = X(v)-prevX<22 ? (lvl+1)%2 : 0; prevX=X(v);
+      s+=`<line x1="${X(v)}" y1="36" x2="${X(v)}" y2="${H-24}" stroke="#2a333c" stroke-dasharray="2 3"/><circle cx="${X(v)}" cy="30" r="5" fill="${done?'#7bd389':'#1e252c'}" stroke="${done?'#7bd389':'#e9e6a0'}" stroke-width="1.8"/><text x="${X(v)}" y="${H-12+lvl*11}" fill="${done?'#7bd389':'#cfd6dd'}" font-size="10.5" text-anchor="middle">${v}</text>`; });
+    s+=`<text x="${X(p.head)+8}" y="${44+4}" fill="#e9e6a0" font-size="11" font-weight="700">시작 ${p.head}</text>`;
+    st.path.forEach((v,i)=>{ if(!i) return; const a=st.path[i-1], cur=i===st.path.length-1; s+=`<line x1="${X(a)}" y1="${44+(i-1)*rowH}" x2="${X(v)}" y2="${44+i*rowH}" stroke="${cur?'#e9e6a0':'#8fb8ff'}" stroke-width="${cur?3.5:2}" stroke-linecap="round"/>`; });
+    st.path.forEach((v,i)=>{ s+=`<circle cx="${X(v)}" cy="${44+i*rowH}" r="${i===st.path.length-1?6:3.5}" fill="${i===st.path.length-1?'#e9e6a0':'#8fb8ff'}"/>`; });
+    s+='</svg>';
+    h+=`<div class="slabel">헤드가 지나간 길 (위→아래로 시간이 흘러요)</div><div class="scroll-x">${s}</div>`;
+    if(isLast){ const res=this.algs.map(a=>[a,this.run(a,p).slice(-1)[0].total]);
+      h+=`<div class="slabel">알고리즘별 총 이동 거리</div><div class="cmp">${res.map(([a,t])=>`<div class="${a===alg?'me':''}">${a}<b>${t}</b></div>`).join('')}</div><div class="sidebox">SCAN은 0번 쪽으로 먼저 움직이게, C-SCAN은 199번 쪽으로 움직이고 복귀 이동도 거리에 넣었어요. 교재마다 방향과 계산 방식이 조금씩 달라요.</div>`; }
+    return h; } },
+
+ cache:{ title:'캐시와 지역성', short:'행 우선 vs 열 우선 순회', algs:['ROW','COL'], algName:{ROW:'행 우선 순회',COL:'열 우선 순회'},
+  sub:'2차원 배열 a[4][8]을 두 가지 순서로 읽을 때 캐시가 어떻게 채워지는지 봐요. 캐시 라인 1줄 = 원소 4개, 캐시는 2줄만 담아요.',
+  params:{R:4,C:8,L:4,cap:2},
+  run(alg,p){ const {R,C,L,cap}=p; let cache=[], hits=0, misses=0; const steps=[], order=[];
+    if(alg==='ROW'){ for(let r=0;r<R;r++) for(let c=0;c<C;c++) order.push([r,c]); } else { for(let c=0;c<C;c++) for(let r=0;r<R;r++) order.push([r,c]); }
+    steps.push({i:-1, cache:[], hits, misses, msg:`<b>${this.algName[alg]}</b>로 a[4][8]을 읽어요. 메모리에는 행 순서대로 한 줄로 저장돼 있어요(아래 띠). 캐시는 한 번에 4칸짜리 줄(캐시 라인)을 가져와요.`});
+    order.forEach(([r,c],i)=>{ const line=Math.floor((r*C+c)/L), idx=cache.indexOf(line); let msg, ev=null;
+      if(idx>=0){ hits++; cache.splice(idx,1); cache.push(line); msg=`a[${r}][${c}]는 이미 캐시에 있는 줄 안에 있어요 → <b style="color:#7bd389">적중</b>. 방금 가져온 줄의 옆 칸이라서예요(<b>공간 지역성</b>).`; }
+      else { misses++; if(cache.length>=cap) ev=cache.shift(); cache.push(line); const r0=Math.floor(line*L/C), c0=(line*L)%C;
+        msg=`a[${r}][${c}]가 캐시에 없어요 → <b style="color:#ff8a80">미스</b>. 메모리에서 a[${r0}][${c0}~${c0+L-1}] 4칸을 <b>한 줄로 통째로</b> 가져와요.${ev!==null?` 캐시가 꽉 차서 가장 오래 안 쓴 줄(a[${Math.floor(ev*L/C)}][${(ev*L)%C}~${(ev*L)%C+L-1}])을 내보냈어요.`:''}`; }
+      steps.push({i, r, c, line, hit:idx>=0, cache:[...cache], hits, misses, msg, visited:order.slice(0,i+1).map(x=>x.join(','))}); });
+    return steps; },
+  render(st,steps,alg,p){ const {R,C,L}=p, lineOf=(r,c)=>Math.floor((r*C+c)/L), isLast=st===steps[steps.length-1], vis=new Set(st.visited||[]);
+    const total=st.hits+st.misses;
+    let h=`<div class="vars"><span class="k">읽는 원소:</span> <span class="v">${st.i<0?'-':`a[${st.r}][${st.c}]`}</span>   <span class="k">결과:</span> ${st.i<0?'-':st.hit?'<span class="c-ok">적중</span>':'<span class="c-bad">미스</span>'}<br><span class="k">적중</span> <span class="c-ok">${st.hits}</span>  <span class="k">미스</span> <span class="c-bad">${st.misses}</span>  <span class="k">적중률</span> <span class="v">${total?Math.round(st.hits/total*100):0}%</span></div>`;
+    h+=`<div class="slabel">2차원 배열 a[4][8] (노란 칸 = 지금 읽는 원소, 청록 = 캐시에 있음)</div><div class="scroll-x"><div class="arr2d" style="grid-template-columns:repeat(${C},38px)">`;
+    for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const cur=st.r===r&&st.c===c, inC=st.cache.includes(lineOf(r,c)); h+=`<div class="cell ${cur?(st.hit?'hitc':'cur'):inC?'cache':vis.has(r+','+c)?'dim':''}">${r},${c}</div>`; }
+    h+=`</div></div><div class="slabel">메모리 속 모습 (한 줄로 쭉 · 4칸마다 캐시 라인 경계)</div><div class="scroll-x"><div class="strip">`;
+    for(let k=0;k<R*C;k++){ const r=Math.floor(k/C), c=k%C, cur=st.r===r&&st.c===c, inC=st.cache.includes(Math.floor(k/L)); if(k&&k%L===0) h+='<span class="gapl"></span>'; h+=`<div class="cell ${cur?'cur':inC?'cache':''}"></div>`; }
+    h+=`</div></div><div class="slabel">캐시 (2줄)</div><div class="cacheslots">${[0,1].map(i=>{ const line=st.cache[i]; if(line===undefined) return `<div class="cslot"><div class="h">줄 ${i+1}: 비어 있음</div></div>`;
+      const r0=Math.floor(line*L/C), c0=(line*L)%C; return `<div class="cslot ${line===st.line&&!st.hit?'new':''}"><div class="h">줄 ${i+1}: a[${r0}][${c0}~${c0+L-1}]${i===st.cache.length-1?' (가장 최근)':''}</div><div class="cells">${[0,1,2,3].map(j=>`<div class="cell cache">${r0},${c0+j}</div>`).join('')}</div></div>`; }).join('')}</div>`;
+    if(isLast){ const res=this.algs.map(a=>{ const l=this.run(a,p).slice(-1)[0]; return [a,l.hits,l.misses]; });
+      h+=`<div class="slabel">순서만 바꿨을 때 결과</div><div class="cmp">${res.map(([a,hh,m])=>`<div class="${a===alg?'me':''}">${this.algName[a]} · 적중<b>${hh}</b> 미스<b>${m}</b></div>`).join('')}</div><div class="sidebox">같은 데이터를 읽어도 순서에 따라 캐시 효율이 크게 달라요. 행 우선은 가져온 줄을 끝까지 다 쓰고, 열 우선은 한 칸만 쓰고 줄을 버려요. 실제 CPU의 캐시는 훨씬 크지만 원리는 같아요.</div>`; }
+    return h; } },
+};
+SIMS.cpu.msg=null;
+
+const Sim = { type:null, alg:null, steps:[], i:0, timer:null,
+  open(type, alg){ this.type=type; const d=SIMS[type]; this.alg = alg && d.algs.includes(alg) ? alg : (d.algs[0]||null);
+    $('#simLayer').hidden=false; $('#simTitle').textContent=`▶ ${d.title}`; $('#simSub').textContent=d.sub; this.rebuild();
+    if(narrow()) $('#stage').scrollIntoView({behavior:'smooth',block:'start'}); },
+  rebuild(){ const d=SIMS[this.type]; this.stop(); this.steps=d.run.call(d,this.alg,d.params); this.i=0;
+    $('#simAlgs').innerHTML = (d.algs.length?d.algs.map(a=>`<button data-alg="${a}" class="${a===this.alg?'on':''}">${(d.algName&&d.algName[a])||a}</button>`).join(''):'') + (d.controls?d.controls(d.params,this.alg):'');
+    if(d.bind) d.bind(d.params);
+    const r=$('#simRange'); r.max=this.steps.length-1; this.draw(); },
+  draw(){ const d=SIMS[this.type], st=this.steps[this.i];
+    $('#simBody').innerHTML = d.render.call(d, st, this.steps, this.alg, d.params);
+    $('#simNarr').innerHTML = this.type==='cpu' ? `<span style="color:#9aa6b2">${this.i===0?'':'t='+st.t+' · '}</span>${st.ev.join(' ')}` : st.msg;
+    $('#simRange').value=this.i; $('#simCnt').textContent=`${this.i+1} / ${this.steps.length}`;
+    document.querySelector('.simctrl [data-s="play"]').textContent = this.timer ? '⏸ 멈춤' : (this.i>=this.steps.length-1 ? '↺ 다시' : '▶ 재생'); },
+  go(i){ this.i=Math.max(0,Math.min(this.steps.length-1,i)); this.draw(); },
+  play(){ if(this.timer){ this.stop(); this.draw(); return; } if(this.i>=this.steps.length-1) this.i=0;
+    const tick=()=>{ if(this.i>=this.steps.length-1){ this.stop(); this.draw(); return; } this.go(this.i+1); this.timer=setTimeout(tick, +$('#simSpeed').value); };
+    this.timer=setTimeout(tick, 50); this.draw(); },
+  stop(){ clearTimeout(this.timer); this.timer=null; },
+  close(){ this.stop(); $('#simLayer').hidden=true; },
+};
+$('#simAlgs').addEventListener('click', e => { const b=e.target.closest('button[data-alg]'); if(!b) return; Sim.alg=b.dataset.alg; Sim.rebuild(); });
+document.querySelector('.simctrl').addEventListener('click', e => { const b=e.target.closest('[data-s]'); if(!b) return; const s=b.dataset.s;
+  if(s==='first'){ Sim.stop(); Sim.go(0); } if(s==='prev'){ Sim.stop(); Sim.go(Sim.i-1); } if(s==='next'){ Sim.stop(); Sim.go(Sim.i+1); } if(s==='play') Sim.play(); });
+$('#simRange').addEventListener('input', e => { Sim.stop(); Sim.go(+e.target.value); });
+$('#simClose').addEventListener('click', () => Sim.close());
+
+/* ================= 집중: 노이즈 + 뽀모도로 ================= */
+const Focus = { ctx:null, src:null, gain:null, kind:'off', vol:.35, muted:false,
+  ensure(){ if(!this.ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; this.ctx=new AC(); this.gain=this.ctx.createGain(); this.gain.gain.value=this.vol; this.gain.connect(this.ctx.destination); }
+    if(this.ctx.state==='suspended') this.ctx.resume(); return true; },
+  buffer(kind){ const sr=this.ctx.sampleRate, len=sr*6, b=this.ctx.createBuffer(1,len,sr), d=b.getChannelData(0);
+    let last=0,b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for(let i=0;i<len;i++){ const w=Math.random()*2-1;
+      if(kind==='white') d[i]=w*.22;
+      else if(kind==='pink'){ b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759; b2=.969*b2+w*.153852; b3=.8665*b3+w*.3104856; b4=.55*b4+w*.5329522; b5=-.7616*b5-w*.016898; d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.07; b6=w*.115926; }
+      else { last=(last+.02*w)/1.02; d[i]=last*3.2; } }
+    const drift=d[len-1]-d[0]; for(let i=0;i<len;i++) d[i]-=drift*i/len;
+    const fade=Math.floor(sr*.02); for(let i=0;i<fade;i++){ const g=i/fade; d[len-1-i]=d[len-1-i]*g+d[i]*(1-g); }
+    return b; },
+  play(kind){ this.stopSrc(); this.kind=kind; document.querySelectorAll('#sounds button').forEach(b=>b.classList.toggle('on',b.dataset.snd===kind));
+    if(kind==='off' || !this.ensure()) return; const s=this.ctx.createBufferSource(); s.buffer=this.buffer(kind); s.loop=true; s.connect(this.gain); s.start(); this.src=s; this.applyVol(); },
+  stopSrc(){ if(this.src){ try{ this.src.stop(); }catch(e){} this.src.disconnect(); this.src=null; } },
+  applyVol(){ if(this.gain) this.gain.gain.setTargetAtTime(this.muted?0:this.vol, this.ctx.currentTime, .08); },
+  chime(){ if(!this.ensure()) return; const t=this.ctx.currentTime; [[659.25,0],[880,.22],[1318.5,.44]].forEach(([f,dt])=>{ const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(0,t+dt); g.gain.linearRampToValueAtTime(.22,t+dt+.02); g.gain.exponentialRampToValueAtTime(.001,t+dt+1.3); o.connect(g); g.connect(this.ctx.destination); o.start(t+dt); o.stop(t+dt+1.4); }); },
+};
+const Pomo = { mode:'study', running:false, end:0, left:25*60, count:1, timer:null,
+  mins(){ return {study:+$('#pStudy').value||25, brk:+$('#pBreak').value||5, long:+$('#pLong').value||15}; },
+  start(){ Focus.ensure(); if(this.running){ this.pause(); return; } this.running=true; this.end=Date.now()+this.left*1000; this.timer=setInterval(()=>this.update(),250); this.update(); },
+  pause(){ this.running=false; clearInterval(this.timer); this.left=Math.max(0,Math.round((this.end-Date.now())/1000)); this.render(); },
+  reset(){ this.running=false; clearInterval(this.timer); this.mode='study'; this.count=1; this.left=this.mins().study*60; Focus.muted=false; Focus.applyVol(); this.render(); },
+  update(){ this.left=Math.max(0,Math.ceil((this.end-Date.now())/1000)); if(this.left<=0) this.next(true); this.render(); },
+  next(auto){ if(auto) Focus.chime(); const m=this.mins();
+    if(this.mode==='study'){ this.mode = this.count%4===0 ? 'long' : 'brk'; } else { this.mode='study'; this.count++; }
+    this.left=(this.mode==='study'?m.study:this.mode==='long'?m.long:m.brk)*60; this.end=Date.now()+this.left*1000;
+    Focus.muted = this.mode!=='study' && $('#pMute').checked; Focus.applyVol();
+    toast(this.mode==='study' ? `📖 ${this.count}번째 공부 시작! ${m.study}분` : this.mode==='long' ? `🌿 긴 휴식 ${m.long}분 — 푹 쉬어요` : `☕ 휴식 ${m.brk}분 — 눈을 쉬게 해주세요`);
+    this.render(); },
+  render(){ const mm=String(Math.floor(this.left/60)).padStart(2,'0'), ss=String(this.left%60).padStart(2,'0'), lab=this.mode==='study'?`📖 공부 · ${this.count}번째`:this.mode==='long'?'🌿 긴 휴식':'☕ 휴식';
+    $('#ptimer').textContent=`${mm}:${ss}`; $('#pmode').textContent = this.running ? lab : (this.left===this.mins().study*60 && this.mode==='study' && this.count===1 ? '공부 준비' : `${lab} (일시정지)`);
+    $('#pStart').textContent = this.running ? '일시정지' : '시작';
+    const fb=$('#focusBtn'); fb.className='focusbtn'+(this.running?(this.mode==='study'?' study':' brk'):'');
+    fb.textContent = this.running||this.left!==this.mins().study*60 ? `${this.mode==='study'?'📖':'☕'} ${mm}:${ss}${Focus.kind!=='off'?' 🎧':''}` : `🎧 집중${Focus.kind!=='off'?' ·':''}`;
+    document.title = this.running ? `${mm}:${ss} ${this.mode==='study'?'공부':'휴식'} · CS 지식 지도` : 'CS 지식 지도 v3'; },
+};
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true, 4000); }
+$('#focusBtn').addEventListener('click', e => { e.stopPropagation(); $('#focusPop').hidden=!$('#focusPop').hidden; });
+document.addEventListener('click', e => { if(!$('#focusPop').hidden && !e.target.closest('#focusPop') && !e.target.closest('#focusBtn')) $('#focusPop').hidden=true; });
+$('#sounds').addEventListener('click', e => { const b=e.target.closest('[data-snd]'); if(b){ Focus.play(b.dataset.snd); Pomo.render(); } });
+$('#vol').addEventListener('input', e => { Focus.vol=+e.target.value; Focus.applyVol(); });
+$('#pStart').addEventListener('click', () => Pomo.start());
+$('#pReset').addEventListener('click', () => Pomo.reset());
+$('#pSkip').addEventListener('click', () => { const r=Pomo.running; Pomo.next(false); if(!r){ Pomo.running=false; clearInterval(Pomo.timer); } Pomo.render(); });
+['pStudy','pBreak','pLong'].forEach(id => $('#'+id).addEventListener('change', () => { if(!Pomo.running && Pomo.mode==='study') { Pomo.left=Pomo.mins().study*60; Pomo.render(); } }));
+$('#pMute').addEventListener('change', () => { Focus.muted = Pomo.mode!=='study' && $('#pMute').checked; Focus.applyVol(); });
+
+/* ================= 퀴즈 ================= */
+const scopeSel=$('#qScope');
+scopeSel.innerHTML=ALL.filter(id=>N[id].c.length).map(id=>`<option value="${id}">${'   '.repeat(N[id].d)}${N[id].d?'└ ':''}${esc(id==='cs'?'전체':N[id].t)}</option>`).join('');
+scopeSel.addEventListener('change',()=>{ S.qScope=scopeSel.value; updateScore(); });
+$('#qLevel').addEventListener('change',e=>{ S.qLevel=e.target.value; updateScore(); });
+function pool(){ const p=desc(S.qScope).filter(x=>x!==S.qScope); return S.qLevel==='iv' ? p.filter(x=>DEEP[x]) : p; }
+function updateScore(){ const p=pool(), ok=p.filter(x=>S.known[x]===true).length, bad=p.filter(x=>S.known[x]===false).length;
+  $('#score').innerHTML = p.length ? `이 범위 ${p.length}개 중 <b class="ok">기억 ${ok}</b> · <b class="bad">헷갈림 ${bad}</b>` : `이 범위엔 아직 ${S.qLevel==='iv'?'면접 질문이':'문제가'} 없어요`; }
+$('#randQ').addEventListener('click',()=>{ const p=pool(); if(!p.length){ updateScore(); return; }
+  const fresh=p.filter(x=>S.known[x]!==true), list=fresh.length?fresh:p;
+  let id=list[Math.floor(Math.random()*list.length)]; if(list.length>1 && id===S.sel) id=list[(list.indexOf(id)+1)%list.length];
+  if(S.qLevel==='iv'){ const i=Math.floor(Math.random()*DEEP[id].iv.length); S.ivPick={id,i}; S.ivShow.delete(id+':'+i); S.tab='deep'; }
+  else { S.ivPick=null; S.rev[id]=false; S.tab='basic'; }
+  Sim.close(); goTo(id,false); });
+$('#quizT').addEventListener('click',()=>{ S.quiz=!S.quiz; S.rev={}; S.ivPick=null; $('#quizT').classList.toggle('on',S.quiz); $('#quizbar').hidden=!S.quiz; updateScore(); renderPanel(); refreshNodes(); });
+
+/* ================= 보기 전환 ================= */
+function setOrient(o){ S.o=o; document.querySelectorAll('#orient button').forEach(b=>b.classList.toggle('on',b.dataset.o===o));
+  $('#flowT').style.display = o==='v' ? '' : 'none';
+  [T.els,T.lels].forEach(m=>Object.values(m).forEach(g=>g.remove())); gf.innerHTML=''; T.els={}; T.lels={}; T.pos={};
+  layout(); fit(true); }
+$('#orient').addEventListener('click',e=>{ const b=e.target.closest('[data-o]'); if(b){ Sim.close(); setOrient(b.dataset.o); } });
+$('#flowT').addEventListener('click',()=>{ S.flows=!S.flows; $('#flowT').classList.toggle('on',S.flows); drawFlows(); });
+document.addEventListener('keydown',e=>{ if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  if(e.key==='Escape') back();
+  if(!$('#simLayer').hidden){ if(e.key==='ArrowRight'){ Sim.stop(); Sim.go(Sim.i+1); } if(e.key==='ArrowLeft'){ Sim.stop(); Sim.go(Sim.i-1); } if(e.key===' '){ e.preventDefault(); Sim.play(); } } });
+window.addEventListener('resize',()=>applyCam());
+$('#copyBtn').addEventListener('click',()=>{ const ls=['[CS 지도 v3 한줄평]']; document.querySelectorAll('[data-r]').forEach(i=>ls.push(`${i.dataset.r}: ${i.value.trim()||'-'}`));
+  const txt=ls.join('\n'), out=$('#copyOut'); out.value=txt; out.hidden=false; const done=()=>{ $('#copyBtn').textContent='복사됨! 채팅에 붙여넣어 주세요'; };
+  const fb=()=>{ out.select(); try{ document.execCommand('copy'); done(); }catch(e){} }; if(navigator.clipboard) navigator.clipboard.writeText(txt).then(done,fb); else fb(); });
+
+if(narrow()) document.querySelector('details.changes').open=false;
+renderLegend(); renderPanel(); updateScore(); Pomo.render();
+setOrient('h');
+</script>
+</body>
+</html>
