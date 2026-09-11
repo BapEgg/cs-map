@@ -14,6 +14,7 @@ import {
   linkPath,
   nodeWidth,
   titleSpace,
+  type Box,
   type Orientation,
 } from './layout';
 import { useCamera, type Camera } from './useCamera';
@@ -129,6 +130,12 @@ export default function TreeCanvas({
   const lastSelected = useRef<string | null>(null);
 
   /**
+   * 아직 못 보여준 자리. 지도가 숨어 있는 동안(폰에서 설명만 보는 중) 고른 개념이 여기 쌓인다.
+   * 크기가 0일 때 카메라를 밀면 다시 보여줄 때 빈 화면이 되므로, 자리만 적어 두고 나중에 민다.
+   */
+  const pending = useRef<Box | null>(null);
+
+  /**
    * 카메라를 움직이는 곳은 **여기 한 군데뿐이다.**
    *
    * 전에는 "방금 펼친 가지 보여주기"와 "고른 노드 따라가기"가 각자 카메라를 밀었다.
@@ -139,62 +146,57 @@ export default function TreeCanvas({
    * 없으면 고른 노드만 본다.
    */
   useEffect(() => {
-    if (!hasSize()) return;
     const opened = justOpened.current;
     const selectionMoved = selected !== null && selected !== lastSelected.current;
     if (selected !== null) lastSelected.current = selected;
+
+    /** 이번에 보여줘야 할 자리. 없으면 null. */
+    let want: Box | null = null;
 
     if (opened && open.has(opened)) {
       justOpened.current = null;
       const parent = layout.byId[opened];
       const kids = (byId[opened]?.childIds ?? []).map((k) => layout.byId[k]).filter(Boolean);
       if (kids.length) {
+        // 펼쳤으면 부모와 새 자식을 **함께** 담는다. 둘을 따로 밀면 서로 되돌린다.
         const spots = parent && !parent.hidden ? [parent, ...kids] : kids;
         const x0 = Math.min(...spots.map((p) => p.x));
         const x1 = Math.max(...spots.map((p) => p.x + p.w));
         const y0 = Math.min(...spots.map((p) => p.y)) - NODE_H / 2;
         const y1 = Math.max(...spots.map((p) => p.y)) + NODE_H / 2;
-        ensureVisible({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
-        return;
+        want = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
       }
     }
 
-    if (!selectionMoved || selected === null) return;
-    const p = layout.byId[selected];
-    if (!p || p.hidden) return;
-    ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
+    if (!want && selectionMoved && selected !== null) {
+      const p = layout.byId[selected];
+      if (p && !p.hidden) want = { x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 };
+    }
+
+    if (!want) return;
+    if (hasSize()) ensureVisible(want);
+    else pending.current = want; // 지도가 다시 보이면 그때 민다
   }, [byId, open, selected, layout, ensureVisible, hasSize]);
 
   /**
-   * 지도가 **숨었다가 다시 보일 때**(모바일에서 설명을 보다 지도로 돌아옴).
+   * 지도가 **숨었다가 다시 보일 때**(폰에서 설명을 보다 지도로 돌아옴).
    *
-   * 숨어 있는 동안에는 크기가 0이라 카메라를 건드리지 않는다. 그 사이 검색이나 링크로
-   * 다른 개념을 골랐다면 그 노드가 화면 밖일 수 있다. 그래서 크기가 잡힌 **뒤에**
-   * 필요한 만큼만 민다. 무조건 전체 맞춤을 하면 보던 자리를 잃는다.
+   * 전에는 ResizeObserver가 0 크기를 거쳐 갔는지로만 판단했는데, 관측이 다시 걸리는 시점에 따라
+   * 그 0을 못 보고 지나가면 고른 노드가 화면 밖에 남았다. 이제는 위에서 적어 둔 자리를
+   * **크기가 잡히는 대로 비운다.** 적어 둔 게 없으면 보던 자리를 그대로 둔다.
    */
-  const latest = useRef({ layout, selected });
-  useEffect(() => {
-    latest.current = { layout, selected };
-  }, [layout, selected]);
-
   useEffect(() => {
     const el = svgRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
-    let had = el.clientWidth > 0 && el.clientHeight > 0;
     const ro = new ResizeObserver(() => {
-      const now = el.clientWidth > 0 && el.clientHeight > 0;
-      if (now && !had) {
-        const { layout: lay, selected: sel } = latest.current;
-        const p = sel ? lay.byId[sel] : null;
-        if (p && !p.hidden)
-          ensureVisible({ x: p.x - 24, y: p.y - NODE_H, w: p.w + 48, h: NODE_H * 2 });
-        else fit(lay.bounds, false, focusBox(lay, sel));
-      }
-      had = now;
+      const box = pending.current;
+      if (!box || el.clientWidth <= 0 || el.clientHeight <= 0) return;
+      pending.current = null;
+      ensureVisible(box);
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [ensureVisible, fit, focusBox]);
+  }, [ensureVisible]);
 
   /**
    * 흐리게 하지 않을 노드: 고른 개념, 거기까지 가는 길, 그 아래 자식, 그리고 형제.

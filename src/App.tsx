@@ -11,6 +11,7 @@ import { useStudy } from './store/useStudy';
 import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
+import { ONE_PANE, useMedia } from './ui/media';
 import VizStage from './viz/VizStage';
 import './App.css';
 
@@ -57,17 +58,8 @@ export default function App() {
    * 좁은 화면에서는 지도와 설명을 한 화면에 같이 못 둔다. 세로로 쌓으면 둘 다 반쪽이 된다.
    * 그래서 한 번에 하나만 보여주고, 개념을 고르면 설명으로 넘어간다.
    */
-  const [narrow, setNarrow] = useState(
-    () => typeof matchMedia !== 'undefined' && matchMedia('(max-width: 900px)').matches,
-  );
+  const narrow = useMedia(ONE_PANE);
   const [phoneView, setPhoneView] = useState<'map' | 'read'>('map');
-  useEffect(() => {
-    if (typeof matchMedia === 'undefined') return;
-    const mq = matchMedia('(max-width: 900px)');
-    const onChange = () => setNarrow(mq.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
 
   /** 지난번에 보던 개념. 다시 열었을 때 그 자리로 돌아간다. */
   const lastSeen = study.data.recent.find((id) => tree.byId[id]) ?? null;

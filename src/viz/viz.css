@@ -169,9 +169,10 @@
 }
 
 .viz-compact .viz-addr,
+.viz-compact .viz-region-sub,
 .viz-compact .viz-free-text,
 .viz-compact .viz-band-text {
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .viz-caption {

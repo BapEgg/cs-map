@@ -15,6 +15,21 @@
   outline: none;
 }
 
+/*
+ * 좁은 화면에서는 **화면을 통째로 쓴다.**
+ *
+ * 지도 자리 안에만 들어가면 폰에서는 위쪽 173px(검색줄·도구줄·지도/설명 전환)이
+ * 그대로 남아 그림에 400px밖에 안 돌아온다. 어차피 한 번에 하나만 보는 폭이고
+ * 무대는 dialog다 — 뒤에 남겨 둘 이유가 없다. (값은 src/ui/media.ts 의 ONE_PANE.)
+ */
+@media (max-width: 1100px) {
+  .vizstage {
+    position: fixed;
+    z-index: 60;
+    border-radius: 0;
+  }
+}
+
 .vizstage-bar {
   flex: 0 0 auto;
   display: flex;
@@ -121,7 +136,8 @@
   font-size: 13.5px;
 }
 
-@media (max-width: 900px) {
+/* 값은 src/ui/media.ts 의 PHONE 과 맞춘다 — 장면 배치가 바뀌는 폭. */
+@media (max-width: 620px) {
   .vizstage-body {
     padding: var(--sp-2) var(--sp-3) var(--sp-3);
   }

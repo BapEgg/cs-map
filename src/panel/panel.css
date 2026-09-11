@@ -14,7 +14,7 @@
  * 좁은 데스크톱. 480px을 고정으로 떼 주면 1000px 화면에서 지도에 476px밖에 안 남아
  * 둘 다 좁아진다. 설명은 400px이면 한 줄에 40자쯤 들어가 아직 읽을 만하다.
  */
-@media (max-width: 1200px) and (min-width: 901px) {
+@media (max-width: 1300px) and (min-width: 1101px) {
   .panel {
     flex: 0 0 400px;
   }
@@ -337,7 +337,8 @@ button.term:hover {
   gap: var(--sp-4);
 }
 
-@media (max-width: 900px) {
+/* 값은 src/ui/media.ts 의 ONE_PANE 과 맞춘다. */
+@media (max-width: 1100px) {
   .panel {
     flex: 1 1 auto;
     max-height: none;

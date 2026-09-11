@@ -14,12 +14,15 @@ const MAX_K = 2.2;
 const clampK = (k: number) => Math.min(MAX_K, Math.max(MIN_K, k));
 
 /**
- * **자동** 맞춤이 내려갈 수 있는 바닥. 손으로 줄이는 것과 다른 값이다.
+ * **자동** 맞춤이 내려갈 수 있는 바닥. 손으로 줄이는 것(MIN_K)과 다른 값이다.
  *
- * 폰(366px)에서 전체를 맞추면 0.55까지 내려가 14px 제목이 7.7px이 된다. 지도가 아니라 얼룩이다.
- * 좁은 화면에서는 다 담으려 하지 말고 읽을 수 있는 크기를 지키고 밀어서 보게 한다.
+ * 화면 폭과 무관하게 하나로 둔다. 자동으로 맞출 때는 **글씨가 읽히는 게 먼저**고,
+ * 읽히는 선은 화면 크기가 아니라 사람 눈이 정한다. 0.85면 14px 제목이 11.9px로 찍히고,
+ * 터치용으로 넓힌 52짜리 판도 44px을 지킨다(tree.css의 pointer: coarse).
+ * 그 아래로 내려가면 지도가 아니라 얼룩이 되므로, 다 담으려 하지 말고 밀어서 보게 한다.
+ * (전에는 폰만 0.85, 나머지는 0.55였다. 노트북에서 전체를 맞추면 9.6px이 나왔다.)
  */
-const fitFloor = (viewW: number) => (viewW < 620 ? 0.85 : MIN_K);
+const FIT_MIN = 0.85;
 
 /**
  * 드래그로 이동, 휠로 스크롤, Ctrl+휠로 확대. 가로 스크롤바는 쓰지 않는다.
@@ -61,8 +64,7 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
   const fit = useCallback(
     /** @param focus 다 안 들어갈 때 가운데에 둘 자리(고른 노드). */
     (bounds: Box, animate = true, focus?: Box) => {
-      const view = viewSize();
-      setCam(fitCamera(bounds, view, { min: fitFloor(view.w), max: MAX_K, focus }), animate);
+      setCam(fitCamera(bounds, viewSize(), { min: FIT_MIN, max: MAX_K, focus }), animate);
     },
     [setCam, viewSize],
   );

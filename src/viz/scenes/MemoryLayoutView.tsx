@@ -1,4 +1,4 @@
-import { useNarrow } from '../useNarrow';
+import { PHONE, useMedia } from '../../ui/media';
 import {
   CODE_SLOT,
   DATA_SLOTS,
@@ -14,12 +14,13 @@ import {
 /**
  * 무대 치수. **폰에서는 줄이는 게 아니라 다시 잡는다.**
  *
- * 데스크톱 치수를 그대로 두고 배율만 낮추면 316×383 자리에서 0.68배가 되어
- * 11px 글씨가 7.5px로 찍힌다. 그래서 폰에서는
- *   - 칸 높이를 낮추고(46 → 34) 위아래 여백을 줄여 세로를 426으로 만들고,
- *   - 영역 이름을 넣는 왼쪽 여백을 118 → 66으로 좁히고(곁가지 설명은 뺀다),
- *   - 포인터가 도는 오른쪽 길을 90 → 40으로 줄인다.
- * 결과적으로 배율이 0.9 근처가 되고, 남은 글씨는 아래 FONT에서 키워 10~13px로 찍힌다.
+ * 데스크톱 치수(430×566)를 그대로 두고 배율만 낮추면 좁은 자리에서 0.7배쯤이 되어
+ * 11px 글씨가 7.5px로 찍힌다. 그래서 폰에서는 무대 자체를 다시 잡는다.
+ *   - 세로로 남는 자리가 가로보다 넉넉하다(폰은 길쭉하니까). 가로를 먼저 줄인다:
+ *     영역 이름 자리 118 → 92, 포인터가 도는 오른쪽 길 90 → 40.
+ *   - 칸 높이는 46 → 42로만 줄인다. 더 낮추면 상자가 납작해져 글씨가 갇힌다.
+ *   - 남은 글씨는 `.viz-compact`에서 키운다.
+ * 결과 배율이 1을 넘어서(≈1.09) 글씨가 데스크톱보다 오히려 크게 찍힌다.
  */
 interface Metrics {
   slotH: number;
@@ -28,7 +29,7 @@ interface Metrics {
   top: number;
   labelX: number;
   laneOut: number;
-  /** 곁가지 설명("명령어", "위로 자람 ↑"). 폰에서는 뺀다. */
+  /** 곁가지 설명("명령어", "위로 자람 ↑"). */
   subs: boolean;
   /** 칸 안에서 상자가 비워 두는 세로 여백(위아래 합). 칸이 낮아지면 같이 줄어야 한다. */
   boxGap: number;
@@ -37,8 +38,8 @@ interface Metrics {
 }
 
 function metricsOf(narrow: boolean): Metrics {
-  const slotH = narrow ? 34 : 46;
-  const barX = narrow ? 66 : 118;
+  const slotH = narrow ? 42 : 46;
+  const barX = narrow ? 92 : 118;
   const barW = narrow ? 180 : 222;
   const top = narrow ? 26 : 30;
   return {
@@ -48,8 +49,9 @@ function metricsOf(narrow: boolean): Metrics {
     top,
     labelX: barX - 13,
     laneOut: barX + barW + (narrow ? 30 : 42),
-    subs: !narrow,
-    boxGap: narrow ? 7 : 10,
+    // 곁가지 설명은 폰에서도 남긴다. 무대를 다시 잡아 자리가 생겼으니 뺄 이유가 없다.
+    subs: true,
+    boxGap: narrow ? 9 : 10,
     w: barX + barW + (narrow ? 40 : 90),
     h: SLOTS * slotH + top * 2,
   };
@@ -98,7 +100,7 @@ function RegionLabel({
 }
 
 export default function MemoryLayoutView({ state }: { state: MemoryState }) {
-  const narrow = useNarrow();
+  const narrow = useMedia(PHONE);
   const m = metricsOf(narrow);
   const slotY = (i: number) => slotYOf(m, i);
   const barH = SLOTS * m.slotH;

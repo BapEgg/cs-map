@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { SPEEDS, type Scene, type Speed } from './types';
-import { useNarrow } from './useNarrow';
+import { PHONE, useMedia } from '../ui/media';
 import { usePlayer } from './usePlayer';
 import './viz.css';
 
@@ -27,7 +27,7 @@ export default function Player<S>({ scene, render, stage }: Props<S>) {
     next,
     seek,
   } = usePlayer(scene, { stage });
-  const narrow = useNarrow();
+  const narrow = useMedia(PHONE);
 
   return (
     <div className="viz" ref={containerRef} tabIndex={0} aria-label={scene.title}>
