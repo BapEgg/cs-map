@@ -1,5 +1,5 @@
 .panel {
-  flex: 0 0 420px;
+  flex: 0 0 480px;
   min-width: 0;
   max-height: 100%;
   overflow-y: auto;
@@ -115,8 +115,8 @@
 
 .card3-line {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 700;
   line-height: 1.5;
 }
 
@@ -133,23 +133,32 @@
   margin: var(--sp-3) 0 0;
 }
 
+/*
+ * 키워드는 누를 수 없다. 하위 개념 칩과 똑같이 생기면 눌러보게 되므로
+ * 테두리 없는 납작한 라벨로 두어 '읽는 것'임을 알린다.
+ */
 .card3-keys em {
   font-style: normal;
   font-size: 12px;
-  padding: 2px var(--sp-2);
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--text-muted);
+}
+
+.card3-keys em::before {
+  content: '#';
+  margin-right: 1px;
+  opacity: 0.5;
 }
 
 /* 본문: 한 문장 = 한 줄 */
 .rich {
-  margin: 0 0 var(--sp-2);
+  margin: 0 0 var(--sp-3);
+  font-size: 16px;
+  line-height: 1.75;
 }
 
 .rich-line {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: var(--sp-3);
 }
 
 .rich mark {
@@ -171,9 +180,9 @@ button.term {
   border: none;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline dotted;
-  text-decoration-color: var(--term-underline);
-  text-decoration-thickness: 1.5px;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
