@@ -99,7 +99,6 @@ export default function ConceptPanel({
   };
 
   const richProps = { selfId: id, index, onTerm: openTerm };
-  const hasFullCard = !!(node.card?.analogy || node.card?.keywords?.length);
   const top = cards[cards.length - 1];
 
   return (
@@ -198,7 +197,7 @@ export default function ConceptPanel({
           {node.card?.one_line && (
             <section className="memo-line">
               <h3 className="section-title">한 문장으로</h3>
-              <div className={hasFullCard ? 'card3' : 'card3 card3-bare'}>
+              <div className="card3">
                 {/*
                   div로 감싼다. RichText가 문단마다 <p>를 내보내는데 <p> 안의 <p>는
                   브라우저가 바깥 <p>를 먼저 닫아 버려서 구조가 통째로 어긋난다.

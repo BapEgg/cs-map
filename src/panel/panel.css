@@ -107,27 +107,20 @@
 
 /*
  * 외울 한 문장(3줄 카드, HANDOFF 5-4). 설명 뒤에 온다.
- * 왼쪽에 강조색 띠를 둬서 "여기가 외울 것"임을 한눈에 알린다.
+ *
+ * 상자도 띠도 두르지 않는다. 왼쪽에 색 띠를 세운 안내 상자는 어느 앱에나 있는 모양이라
+ * 눈이 그냥 지나친다. 대신 **교재에 형광펜을 긋듯** 문장 아래를 칠한다 —
+ * 이 앱에서 형광펜은 이미 "여기 봐라"는 뜻이고, 외울 문장에 줄을 긋는 건 누구나 해 본 일이다.
  */
 .card3 {
-  padding: var(--sp-4);
-  margin-bottom: var(--sp-5);
-  background: var(--surface-sunken);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius);
-}
-
-/* 비유·키워드가 아직 없을 때. 판은 벗기되 왼쪽 띠는 남겨 자리를 알린다. */
-.card3-bare {
-  padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
-  background: none;
+  margin: var(--sp-2) 0 var(--sp-5);
 }
 
 .card3-line {
   margin: 0;
-  font-size: calc(19px * var(--read-scale, 1));
-  font-weight: 700;
-  line-height: 1.5;
+  font-size: calc(20px * var(--read-scale, 1));
+  font-weight: 600;
+  line-height: 1.7;
   text-wrap: balance;
 }
 
@@ -135,12 +128,24 @@
  * 한 줄 카드 안의 문단은 카드 글씨를 그대로 쓴다.
  * RichText가 <p class="rich">를 내보내는데 그게 16px·아래 여백을 도로 끌고 들어온다.
  */
-.card3-line .rich,
-.card3-line .rich-line {
+.card3-line .rich {
   margin: 0;
   font-size: inherit;
   font-weight: inherit;
   line-height: inherit;
+}
+
+/*
+ * 형광펜. 글줄을 따라가야 하니 블록이 아니라 인라인이다.
+ * 아래 45%만 칠해서 글자 위로 올라오지 않게 하고, 줄이 바뀌면 줄마다 따로 칠한다.
+ */
+.card3-line .rich-line {
+  display: inline;
+  margin: 0;
+  padding: 0 0.15em;
+  background-image: linear-gradient(transparent 55%, var(--highlight-bg) 55%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .card3-analogy {
