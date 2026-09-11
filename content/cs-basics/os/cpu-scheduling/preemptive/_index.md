@@ -3,7 +3,7 @@ id: preemptive
 title: 선점형
 order: 2
 card:
-  one_line: 운영체제가 실행 중인 프로세스의 CPU를 뺏을 수 있는 방식
+  one_line: '선점형은 운영체제가 실행 중인 프로세스에서 CPU를 뺏어 다른 프로세스에 줄 수 있는 방식이다.'
   analogy: ''
   keywords: []
 flow:

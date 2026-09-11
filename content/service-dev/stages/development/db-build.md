@@ -3,7 +3,7 @@ id: db-build
 title: DB 구축
 order: 3
 card:
-  one_line: 데이터를 테이블로 저장하고 SQL로 다루기
+  one_line: 'DB 구축은 데이터를 표로 정리해 저장하고 SQL로 다루게 만드는 일이다.'
   analogy: ''
   keywords: []
 flow:

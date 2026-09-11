@@ -164,24 +164,6 @@ export default function ConceptPanel({
         <NoteTab note={note} onChange={onNote} />
       ) : tab === 'basic' ? (
         <div className="panel-body">
-          <div className={hasFullCard ? 'card3' : 'card3 card3-bare'}>
-            {/*
-              div로 감싼다. RichText가 문단마다 <p>를 내보내는데 <p> 안의 <p>는
-              브라우저가 바깥 <p>를 먼저 닫아 버려서 구조가 통째로 어긋난다.
-            */}
-            <div className="card3-line">
-              <RichText text={node.card?.one_line ?? ''} {...richProps} />
-            </div>
-            {node.card?.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
-            {!!node.card?.keywords?.length && (
-              <p className="card3-keys">
-                {node.card.keywords.map((k) => (
-                  <em key={k}>{k}</em>
-                ))}
-              </p>
-            )}
-          </div>
-
           {node.isStub ? (
             <p className="stub-note">
               이 개념은 아직 내용을 쓰지 않았어요. 뼈대만 잡혀 있고, 곧 채울 예정이에요.
@@ -195,26 +177,60 @@ export default function ConceptPanel({
             )
           )}
 
+          {/*
+            외울 한 문장. **설명 뒤에** 둔다.
+            맨 위에 두면 아직 배경을 모르는 채로 읽어 눈에 안 들어오고, 설명을 읽고 나면 다시
+            올라가 보지 않는다. 배경을 이해한 직후에 나와야 "아, 그래서 이 말이구나"가 된다.
+            면접에서 그대로 튀어나올 수 있게 앞뒤가 맞는 완전한 문장으로 쓴다(HANDOFF 5-4).
+          */}
+          {node.card?.one_line && (
+            <section className="memo-line">
+              <h3 className="section-title">한 문장으로</h3>
+              <div className={hasFullCard ? 'card3' : 'card3 card3-bare'}>
+                {/*
+                  div로 감싼다. RichText가 문단마다 <p>를 내보내는데 <p> 안의 <p>는
+                  브라우저가 바깥 <p>를 먼저 닫아 버려서 구조가 통째로 어긋난다.
+                */}
+                <div className="card3-line">
+                  <RichText text={node.card.one_line} {...richProps} />
+                </div>
+                {node.card.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
+                {!!node.card.keywords?.length && (
+                  <p className="card3-keys">
+                    {node.card.keywords.map((k) => (
+                      <em key={k}>{k}</em>
+                    ))}
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
           {(node.flowPrev.length > 0 || node.flowNext.length > 0) && (
             <section>
               <h3 className="section-title">흐름</h3>
+              {/*
+                앞뒤를 **줄로 나눠** 보여준다. 전에는 "A —이유→ B"를 한 줄에 붙여 써서
+                링크·화살표·굵은 글씨가 뒤섞여 무엇이 무엇인지 안 읽혔다.
+                방향 표시, 갈 곳, 그 이유 — 셋을 각자 자리에 둔다.
+              */}
               <ul className="flow">
                 {node.flowPrev.map((f) => (
-                  <li key={`p-${f.id}`}>
-                    <button type="button" onClick={() => go(f.id)}>
+                  <li key={`p-${f.id}`} className="flow-prev">
+                    <span className="flow-dir">앞에서</span>
+                    <button type="button" className="flow-go" onClick={() => go(f.id)}>
                       {tree.byId[f.id]?.title ?? f.id}
                     </button>
-                    <span className="reason">—{f.reason}→</span>
-                    <b>{node.title}</b>
+                    <span className="flow-why">{f.reason}</span>
                   </li>
                 ))}
                 {node.flowNext.map((f) => (
-                  <li key={`n-${f.id}`}>
-                    <b>{node.title}</b>
-                    <span className="reason">—{f.reason}→</span>
-                    <button type="button" onClick={() => go(f.id)}>
+                  <li key={`n-${f.id}`} className="flow-next">
+                    <span className="flow-dir">다음으로</span>
+                    <button type="button" className="flow-go" onClick={() => go(f.id)}>
                       {tree.byId[f.id]?.title ?? f.id}
                     </button>
+                    <span className="flow-why">{f.reason}</span>
                   </li>
                 ))}
               </ul>

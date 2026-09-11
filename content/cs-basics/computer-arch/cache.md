@@ -3,7 +3,7 @@ id: cache
 title: 캐시 메모리
 order: 3
 card:
-  one_line: CPU와 메인 메모리 사이의 작고 빠른 임시 저장소
+  one_line: '캐시는 자주 쓰는 데이터를 CPU 가까이 두어 메인 메모리와의 속도 차이를 메우는 작고 빠른 임시 저장소다.'
   analogy: ''
   keywords: []
 flow:

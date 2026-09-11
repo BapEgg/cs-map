@@ -3,7 +3,7 @@ id: maintenance
 title: 유지보수
 order: 7
 card:
-  one_line: '버그 수정, 기능 개선, 장애 대응'
+  one_line: '유지보수는 출시 뒤에 버그를 고치고 기능을 다듬고 장애에 대응하는 일이다.'
   analogy: ''
   keywords: []
 flow:

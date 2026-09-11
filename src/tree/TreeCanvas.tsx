@@ -17,6 +17,7 @@ import {
   type Box,
   type Orientation,
 } from './layout';
+import { makeMeasurer } from './measure';
 import { useCamera, type Camera } from './useCamera';
 import './tree.css';
 
@@ -95,10 +96,23 @@ export default function TreeCanvas({
     if (handleRef) handleRef.current = { snapshot, restore };
   }, [handleRef, snapshot, restore]);
 
+  /**
+   * 글자 폭은 **이 기기의 실제 글꼴로** 잰다. 어림값을 쓰면 Pretendard가 없는 윈도우에서
+   * 맑은 고딕 폭이 달라 상자 오른쪽이 비고 글씨가 한쪽으로 몰려 보인다.
+   * body의 계산된 font-family를 그대로 넘겨 SVG 제목과 같은 대체 규칙을 타게 한다.
+   */
+  const measure = useMemo(
+    () =>
+      makeMeasurer(
+        typeof document !== 'undefined' ? getComputedStyle(document.body).fontFamily : '',
+      ),
+    [],
+  );
+
   /** 상태 개수가 너비에 들어가므로 배치와 같은 계산을 쓴다. */
   const widthOf = useCallback(
-    (node: ConceptNode) => nodeWidth(node, statusesOf(node.id, node, noted, marks).length),
-    [marks, noted],
+    (node: ConceptNode) => nodeWidth(node, statusesOf(node.id, node, noted, marks).length, measure),
+    [marks, noted, measure],
   );
 
   const layout = useMemo(
@@ -319,8 +333,15 @@ export default function TreeCanvas({
             const x = orientation === 'h' ? p.x : p.x - p.w / 2;
             const y = p.y - NODE_H / 2;
 
-            const titleX = PAD_L + (icon ? ICON_W : 0);
-            const title = fitTitle(node.title, titleSpace(p.w, icon, hasKids, statuses.length));
+            const space = titleSpace(p.w, icon, hasKids, statuses.length);
+            const title = fitTitle(node.title, space, measure);
+            /*
+             * 자리가 남으면 **가운데**에 둔다. 짧은 이름은 최소 폭(76)에 걸려 상자가
+             * 글씨보다 넓어지는데, 왼쪽에 붙여 두면 오른쪽만 비어 밀린 것처럼 보인다.
+             * 딱 맞는 상자에서는 slack이 0이라 자리가 안 바뀐다.
+             */
+            const slack = Math.max(0, space - title.width);
+            const titleX = PAD_L + (icon ? ICON_W : 0) + slack / 2;
             // 상태는 토글 앞, 노드 **안쪽**에 놓는다. 테두리에 걸치지 않게.
             const statusRight = p.w - (hasKids ? TOGGLE_W : 0) - 8;
 

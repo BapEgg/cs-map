@@ -4,7 +4,7 @@ title: 개발 단계
 order: 2
 track: dev
 card:
-  one_line: 기획부터 유지보수까지 **거쳐 가는 순서**
+  one_line: '개발 단계는 기획부터 유지보수까지 서비스가 거쳐 가는 순서다.'
   analogy: 집을 지을 때 설계도 → 골조 → 마감 → 입주 → 수리로 이어지는 것
   keywords: [기획, 설계, 배포, 출시, 유지보수]
 flow:

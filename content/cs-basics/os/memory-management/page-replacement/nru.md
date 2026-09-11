@@ -3,7 +3,7 @@ id: nru
 title: NRU
 order: 5
 card:
-  one_line: 최근에 참조되지 않은 페이지를 교체 (참조·변경 비트)
+  one_line: 'NRU는 참조 비트와 변경 비트를 보고 최근에 안 쓰인 페이지를 내보내는 교체 방식이다.'
   analogy: ''
   keywords: []
 flow:

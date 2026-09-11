@@ -3,7 +3,7 @@ id: register
 title: 레지스터
 order: 2
 card:
-  one_line: CPU 안의 가장 작고 빠른 저장 공간
+  one_line: '레지스터는 CPU 안에 있는 가장 작고 빠른 저장 공간으로, 지금 계산 중인 값을 담는다.'
   analogy: ''
   keywords: []
 ---

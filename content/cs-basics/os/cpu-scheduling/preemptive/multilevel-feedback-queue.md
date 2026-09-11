@@ -3,7 +3,7 @@ id: multilevel-feedback-queue
 title: 다단계 피드백 큐
 order: 4
 card:
-  one_line: 작업의 행동을 보고 큐 사이를 옮겨 다니게 함
+  one_line: '다단계 피드백 큐는 작업이 어떻게 행동하는지 보고 큐 사이를 옮겨 다니게 하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

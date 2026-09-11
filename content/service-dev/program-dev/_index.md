@@ -4,7 +4,7 @@ title: 프로그램 개발
 order: 1
 track: dev
 card:
-  one_line: 코드를 묶는 단위가 **어떻게 커져 왔는가**의 역사
+  one_line: '프로그램 개발은 코드를 묶는 단위가 함수에서 API까지 어떻게 커져 왔는지의 이야기다.'
   analogy: 벽돌 → 벽 → 방 → 집 → 단지로 묶는 단위가 커지는 것
   keywords: [함수, 클래스, 모듈, 컴포넌트, API]
 flow:

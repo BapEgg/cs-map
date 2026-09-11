@@ -3,7 +3,7 @@ id: backend
 title: 백엔드
 order: 2
 card:
-  one_line: '요청을 받아 데이터를 처리하는 서버 (API, CRUD)'
+  one_line: '백엔드는 요청을 받아 데이터를 처리하고 돌려주는 서버 쪽이다.'
   analogy: ''
   keywords: []
 flow:

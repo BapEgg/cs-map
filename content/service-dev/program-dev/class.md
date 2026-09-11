@@ -3,7 +3,7 @@ id: class
 title: 클래스
 order: 2
 card:
-  one_line: 데이터(변수)와 기능(함수)을 하나로 묶은 설계도
+  one_line: '클래스는 데이터와 기능을 하나로 묶어 둔 설계도다.'
   analogy: ''
   keywords: []
 flow:

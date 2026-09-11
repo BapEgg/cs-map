@@ -3,7 +3,7 @@ id: isa
 title: 명령어 집합(ISA)
 order: 3
 card:
-  one_line: CPU가 알아듣는 명령어의 목록과 형식
+  one_line: '명령어 집합은 CPU가 알아듣는 명령어의 목록과 형식을 정해 둔 약속이다.'
   analogy: ''
   keywords: []
 ---

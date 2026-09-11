@@ -3,7 +3,7 @@ id: sstf
 title: SSTF
 order: 2
 card:
-  one_line: 현재 헤드에서 가장 가까운 요청부터
+  one_line: 'SSTF는 지금 헤드 위치에서 가장 가까운 요청부터 처리하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

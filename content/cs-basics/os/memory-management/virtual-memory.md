@@ -3,7 +3,7 @@ id: virtual-memory
 title: 가상 메모리
 order: 3
 card:
-  one_line: 디스크 일부를 메모리처럼 써서 실제보다 큰 메모리를 제공
+  one_line: '가상 메모리는 디스크 일부를 메모리처럼 써서 실제 메모리보다 큰 공간을 프로그램에 제공하는 기법이다.'
   analogy: ''
   keywords: []
 flow:

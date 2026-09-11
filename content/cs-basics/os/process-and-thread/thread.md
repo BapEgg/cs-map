@@ -3,7 +3,7 @@ id: thread
 title: 쓰레드
 order: 3
 card:
-  one_line: 프로세스 안에서 메모리를 공유하며 도는 실행 흐름
+  one_line: '쓰레드는 프로세스 안에서 메모리를 공유하며 도는 실행 흐름이다.'
   analogy: ''
   keywords: []
 flow:

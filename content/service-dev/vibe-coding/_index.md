@@ -4,7 +4,7 @@ title: AI와 개발하기
 order: 3
 track: dev
 card:
-  one_line: AI에게 시킬 때 내가 맡아야 하는 몫
+  one_line: 'AI와 개발하기는 코드는 AI가 쓰더라도 무엇을 시킬지와 결과가 맞는지는 내가 맡는 일이다.'
   analogy: 기사에게 운전을 맡겨도 목적지와 경로는 내가 정한다
   keywords: [프롬프트, 컨텍스트, 하네스]
 flow:

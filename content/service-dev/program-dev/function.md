@@ -3,7 +3,7 @@ id: function
 title: 함수
 order: 1
 card:
-  one_line: 특정 기능을 하는 코드 묶음. 입력을 받아 결과를 돌려줌
+  one_line: '함수는 입력을 받아 정해진 일을 하고 결과를 돌려주는 코드 묶음이다.'
   analogy: ''
   keywords: []
 flow:

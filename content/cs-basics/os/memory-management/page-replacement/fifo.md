@@ -3,7 +3,7 @@ id: fifo
 title: FIFO
 order: 1
 card:
-  one_line: 가장 먼저 들어온 페이지를 교체
+  one_line: 'FIFO는 가장 먼저 들어온 페이지부터 내보내는 교체 방식이다.'
   analogy: ''
   keywords: []
 flow:

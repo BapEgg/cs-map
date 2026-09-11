@@ -3,7 +3,7 @@ id: round-robin
 title: Round Robin
 order: 1
 card:
-  one_line: 정해진 시간(타임 퀀텀)씩 돌아가며 실행
+  one_line: '라운드 로빈은 정해진 시간(타임 퀀텀)씩 모든 프로세스를 돌아가며 실행하는 방식이다.'
   analogy: ''
   keywords: []
 checked: 2026.09

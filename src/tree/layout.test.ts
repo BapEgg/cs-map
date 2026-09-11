@@ -117,7 +117,7 @@ describe('노드 너비', () => {
 
 describe('제목 자르기', () => {
   it('들어가면 그대로 둔다', () => {
-    expect(fitTitle('페이징', 200)).toEqual({ text: '페이징', clipped: false });
+    expect(fitTitle('페이징', 200)).toMatchObject({ text: '페이징', clipped: false });
   });
 
   it('넘치면 글씨를 줄이지 않고 잘라 쓴다', () => {

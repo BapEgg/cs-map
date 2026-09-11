@@ -3,7 +3,7 @@ id: source-control
 title: 소스 관리
 order: 4
 card:
-  one_line: 'Git/GitHub, 브랜치 전략(개발·운영)'
+  one_line: '소스 관리는 Git으로 변경 이력을 남겨 여러 명이 고치고 되돌릴 수 있게 하는 일이다.'
   analogy: ''
   keywords: []
 flow:

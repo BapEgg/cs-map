@@ -4,7 +4,7 @@ title: 메모리 관리
 order: 3
 sim: memory-layout
 card:
-  one_line: 한정된 메모리를 여러 프로세스에 나눠주는 방법
+  one_line: '메모리 관리는 한정된 메모리를 여러 프로세스가 서로 침범하지 않게 나눠 주는 일이다.'
   analogy: ''
   keywords: []
 flow:

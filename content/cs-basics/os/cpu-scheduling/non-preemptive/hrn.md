@@ -3,7 +3,7 @@ id: hrn
 title: HRN
 order: 3
 card:
-  one_line: (대기시간+실행시간)/실행시간이 큰 것부터 처리
+  one_line: 'HRN은 (대기 시간 + 실행 시간) / 실행 시간이 큰 것부터 처리해, 오래 기다린 작업이 밀리지 않게 한다.'
   analogy: ''
   keywords: []
 flow:

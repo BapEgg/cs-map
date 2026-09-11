@@ -3,7 +3,7 @@ id: program
 title: 프로그램
 order: 1
 card:
-  one_line: 디스크에 저장된 실행 파일
+  one_line: '프로그램은 디스크에 저장돼 있는 실행 파일이다.'
   analogy: ''
   keywords: []
 flow:

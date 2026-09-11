@@ -3,7 +3,7 @@ id: alu
 title: ALU
 order: 1
 card:
-  one_line: '산술(+,−,×,÷)과 논리(AND, OR, NOT) 연산 회로'
+  one_line: 'ALU는 CPU 안에서 산술 연산과 논리 연산을 실제로 수행하는 회로다.'
   analogy: ''
   keywords: []
 ---

@@ -3,7 +3,7 @@ id: context-switch
 title: 문맥 교환
 order: 4
 card:
-  one_line: CPU가 실행 대상을 바꿀 때 상태를 저장하고 복원하는 일
+  one_line: '문맥 교환은 CPU가 실행 대상을 바꿀 때 지금 상태를 저장하고 다음 상태를 복원하는 일이다.'
   analogy: ''
   keywords: []
 flow:

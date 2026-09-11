@@ -3,7 +3,7 @@ id: scan
 title: SCAN
 order: 3
 card:
-  one_line: 엘리베이터처럼 한 방향 끝까지 가며 처리 후 반대로
+  one_line: 'SCAN은 엘리베이터처럼 한 방향 끝까지 가며 처리한 뒤 반대로 도는 방식이다.'
   analogy: ''
   keywords: []
 flow:

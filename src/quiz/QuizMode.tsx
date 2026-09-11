@@ -132,7 +132,7 @@ export default function QuizMode({ tree, marks, onMark, onClose, onGoTo }: Props
                 onClick={() => setKind('basic')}
               >
                 기초 개념
-                <em>제목을 보고 한 줄 정의를 떠올립니다</em>
+                <em>제목을 보고 한 문장으로 말해 봅니다</em>
               </button>
               <button
                 className={kind === 'interview' ? 'on' : undefined}
@@ -246,7 +246,7 @@ export default function QuizMode({ tree, marks, onMark, onClose, onGoTo }: Props
           <>
             <p className="quiz-ask">
               {q.kind === 'basic'
-                ? '한 줄 정의를 떠올려 보세요.'
+                ? '면접에서 답하듯 한 문장으로 말해 보세요.'
                 : '먼저 말로 답해보고 나서 펼치세요.'}
             </p>
             <button className="btn btn-primary quiz-reveal" onClick={() => setShown(true)}>

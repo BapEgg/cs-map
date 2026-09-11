@@ -3,7 +3,7 @@ id: sjf
 title: SJF
 order: 2
 card:
-  one_line: 실행 시간이 가장 짧은 작업부터 처리
+  one_line: 'SJF는 실행 시간이 가장 짧은 작업부터 처리해 평균 대기 시간을 줄인다.'
   analogy: ''
   keywords: []
 flow:

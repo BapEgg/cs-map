@@ -3,7 +3,7 @@ id: launch
 title: 출시
 order: 6
 card:
-  one_line: '앱스토어 등록, 도메인 연결, HTTPS 설정'
+  one_line: '출시는 앱스토어 등록·도메인 연결·HTTPS 설정을 마쳐 사람들에게 공개하는 단계다.'
   analogy: ''
   keywords: []
 flow:

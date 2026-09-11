@@ -3,7 +3,7 @@ id: harness
 title: 하네스
 order: 3
 card:
-  one_line: 결과가 맞는지 **기계가 대신 확인**하게 만들기
+  one_line: '하네스는 테스트·타입 검사·린트로 결과가 맞는지 기계가 대신 확인하게 만든 장치다.'
   analogy: 안전벨트는 사고를 막지 않고 사고를 견디게 한다
   keywords: [테스트, 타입, 린트]
 flow:

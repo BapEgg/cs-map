@@ -3,7 +3,7 @@ id: module
 title: 모듈
 order: 4
 card:
-  one_line: 관련 코드를 모아둔 파일 단위
+  one_line: '모듈은 관련 있는 코드를 한 파일에 모아 둔 단위다.'
   analogy: ''
   keywords: []
 flow:

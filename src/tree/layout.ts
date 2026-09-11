@@ -46,7 +46,14 @@ const LEV_H = 116; // 세로에서 깊이 한 칸
 const MIN_W = 76;
 const MAX_W = 264;
 
-/** 글자 폭 어림. 한글은 넓고 영문은 좁다. 배치와 그리기가 같은 값을 써야 해서 여기 둔다. */
+/** 글자 폭을 재는 함수. 브라우저에서는 실제 글꼴로 재고(measure.ts), 테스트에서는 어림값을 쓴다. */
+export type Measure = (text: string, size: number) => number;
+
+/**
+ * 글자 폭 어림. 한글은 넓고 영문은 좁다. **어림값이라 기기마다 어긋난다** —
+ * Pretendard가 없는 윈도우에서는 맑은 고딕으로 떨어지는데 한글 폭이 이 값보다 좁아서
+ * 상자 오른쪽이 비고 글씨가 왼쪽으로 몰려 보였다. 화면에서는 measure.ts가 실제로 잰다.
+ */
 export function textWidth(text: string, size: number) {
   let w = 0;
   for (const ch of text) w += ch.codePointAt(0)! > 0x2e80 ? size * 0.98 : size * 0.55;
@@ -57,7 +64,7 @@ export const TITLE_SIZE = 14;
 
 /** 노드 안쪽 자리. 그리는 쪽과 너비 계산이 같은 값을 봐야 글씨가 안 잘린다. */
 export const PAD_L = 12;
-export const PAD_R = 10;
+export const PAD_R = 12; // 왼쪽과 같게. 잎은 토글이 없어 좌우가 그대로 드러난다.
 export const ICON_W = 22;
 export const TOGGLE_W = 26;
 /** 상태 표시 하나가 차지하는 폭. */
@@ -69,11 +76,15 @@ export const STATUS_W = 16;
  *
  * @param statusCount 이 노드에 붙는 상태 표시 개수(시각화·심화·메모·퀴즈)
  */
-export function nodeWidth(node: ConceptNode, statusCount = 0): number {
+export function nodeWidth(
+  node: ConceptNode,
+  statusCount = 0,
+  measure: Measure = textWidth,
+): number {
   const icon = node.depth === 1 ? ICON_W : 0;
   const toggle = node.childIds.length > 0 ? TOGGLE_W : 0;
   const raw =
-    PAD_L + icon + textWidth(node.title, TITLE_SIZE) + statusCount * STATUS_W + toggle + PAD_R;
+    PAD_L + icon + measure(node.title, TITLE_SIZE) + statusCount * STATUS_W + toggle + PAD_R;
   // 올림으로 잡는다. 내림·반올림하면 딱 맞는 제목이 1px 차이로 잘려 "…"가 붙는다.
   return Math.ceil(Math.min(MAX_W, Math.max(MIN_W, raw)));
 }
@@ -86,12 +97,13 @@ export function titleSpace(w: number, hasIcon: boolean, hasToggle: boolean, stat
 }
 
 /** 폭에 맞게 잘라낸 제목. 잘렸으면 `full`로 원래 이름을 알려준다. */
-export function fitTitle(title: string, space: number) {
-  // 글자 폭이 어림값이라 0.5px쯤은 봐준다. 안 그러면 딱 맞는 이름이 잘린다.
-  if (textWidth(title, TITLE_SIZE) <= space + 0.5) return { text: title, clipped: false };
+export function fitTitle(title: string, space: number, measure: Measure = textWidth) {
+  // 반올림으로 0.5px쯤은 봐준다. 안 그러면 딱 맞는 이름이 잘린다.
+  const width = measure(title, TITLE_SIZE);
+  if (width <= space + 0.5) return { text: title, width, clipped: false };
   let cut = title;
-  while (cut.length > 1 && textWidth(cut + '…', TITLE_SIZE) > space) cut = cut.slice(0, -1);
-  return { text: cut + '…', clipped: true };
+  while (cut.length > 1 && measure(cut + '…', TITLE_SIZE) > space) cut = cut.slice(0, -1);
+  return { text: cut + '…', width: measure(cut + '…', TITLE_SIZE), clipped: true };
 }
 
 /**

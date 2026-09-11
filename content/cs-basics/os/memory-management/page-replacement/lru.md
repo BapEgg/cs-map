@@ -3,7 +3,7 @@ id: lru
 title: LRU
 order: 3
 card:
-  one_line: 가장 오랫동안 사용하지 않은 페이지를 교체
+  one_line: 'LRU는 가장 오랫동안 쓰지 않은 페이지를 내보내는 교체 방식이다.'
   analogy: ''
   keywords: []
 flow:

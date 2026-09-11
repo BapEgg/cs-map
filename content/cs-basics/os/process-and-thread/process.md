@@ -3,7 +3,7 @@ id: process
 title: 프로세스
 order: 2
 card:
-  one_line: 메모리에 올라가 실행 중인 프로그램
+  one_line: '프로세스는 메모리에 올라가 실행 중인 프로그램이다.'
   analogy: ''
   keywords: []
 flow:

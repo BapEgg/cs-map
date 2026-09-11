@@ -3,7 +3,7 @@ id: context
 title: 컨텍스트
 order: 2
 card:
-  one_line: 판단에 필요한 **배경을 쥐여 주는** 일
+  one_line: '컨텍스트는 AI가 판단할 수 있도록 관련 코드·규칙·이력 같은 배경을 쥐여 주는 일이다.'
   analogy: 남의 집 수리를 맡기려면 도면부터 보여줘야 한다
   keywords: [코드, 규칙, 이력]
 flow:

@@ -3,7 +3,7 @@ id: paging
 title: 페이징
 order: 2
 card:
-  one_line: 메모리를 같은 크기의 페이지로 잘라 배치
+  one_line: '페이징은 메모리를 같은 크기의 페이지로 잘라 필요한 곳에 배치하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

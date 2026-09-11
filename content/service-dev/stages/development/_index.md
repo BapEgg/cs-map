@@ -3,7 +3,7 @@ id: development
 title: 개발
 order: 3
 card:
-  one_line: 프론트엔드·백엔드·DB를 만들고 연결하기
+  one_line: '개발은 프론트엔드·백엔드·DB를 각각 만들고 연결하는 단계다.'
   analogy: ''
   keywords: []
 flow:

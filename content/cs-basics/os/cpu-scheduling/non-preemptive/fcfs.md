@@ -3,7 +3,7 @@ id: fcfs
 title: FCFS
 order: 1
 card:
-  one_line: 먼저 온 순서대로 처리
+  one_line: 'FCFS는 먼저 온 순서대로 처리하는 가장 단순한 스케줄링이다.'
   analogy: ''
   keywords: []
 flow:

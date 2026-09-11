@@ -3,7 +3,7 @@ id: monetization
 title: 수익화
 order: 8
 card:
-  one_line: '광고, 구독, 유료 서비스'
+  one_line: '수익화는 광고·구독·유료 기능으로 서비스가 돈을 벌게 하는 단계다.'
   analogy: ''
   keywords: []
 flow:

@@ -3,7 +3,7 @@ id: prompt
 title: 프롬프트
 order: 1
 card:
-  one_line: 무엇을 원하는지 **오해 없이** 적는 일
+  one_line: '프롬프트는 무엇을 원하는지 목표·제약·예시로 오해 없이 적는 일이다.'
   analogy: 주문서에 "맛있게"라고 쓰면 아무거나 온다
   keywords: [목표, 제약, 예시]
 flow:

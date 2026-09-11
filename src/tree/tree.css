@@ -19,10 +19,18 @@
   cursor: grabbing;
 }
 
-/* 키보드로 지도에 들어왔을 때. 지도 전체에 한 번만 그린다. */
-.tree-svg:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+/*
+ * 키보드로 지도에 들어왔을 때. **지도 전체에 테두리를 두르지 않는다.**
+ * 그건 지도가 아니라 화면이 눌린 것처럼 보였다. 방향키가 옮기는 건 고른 노드니까
+ * 초점 표시도 고른 노드에 붙인다 — 상자 바깥에 한 겹 더.
+ */
+.tree-svg {
+  outline: none;
+}
+
+.tree-svg:focus-visible .tree-node.selected .tree-node-box {
+  stroke-width: 2;
+  filter: drop-shadow(0 0 0 var(--node-select)) drop-shadow(0 0 3px var(--node-select));
 }
 
 /*

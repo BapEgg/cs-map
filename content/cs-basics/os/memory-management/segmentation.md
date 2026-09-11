@@ -3,7 +3,7 @@ id: segmentation
 title: 세그멘테이션
 order: 1
 card:
-  one_line: 코드·데이터·스택 같은 논리 단위로 나눠 배치
+  one_line: '세그멘테이션은 메모리를 코드·데이터·스택 같은 논리 단위로 나눠 배치하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

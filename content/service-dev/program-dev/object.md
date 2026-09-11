@@ -3,7 +3,7 @@ id: object
 title: 객체 / 인스턴스
 order: 3
 card:
-  one_line: 클래스로 메모리에 실제로 만든 것
+  one_line: '객체는 클래스를 바탕으로 메모리에 실제로 만들어 낸 것이다.'
   analogy: ''
   keywords: []
 flow:

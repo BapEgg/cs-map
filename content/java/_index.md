@@ -4,7 +4,7 @@ title: Java
 order: 2
 track: dev
 card:
-  one_line: 어느 컴퓨터에서든 같게 돌게 만든 **언어와 실행 환경**
+  one_line: '자바는 어느 컴퓨터에서든 같게 돌도록 만든 언어와 실행 환경이다.'
   analogy: 나라마다 콘센트가 달라도 통하는 여행용 어댑터
   keywords: [JVM, 바이트코드, GC]
 flow:

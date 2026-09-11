@@ -3,7 +3,7 @@ id: risc
 title: RISC
 order: 2
 card:
-  one_line: 단순한 명령어만 두고 빠르게 많이 실행하는 방식 (ARM)
+  one_line: 'RISC는 단순한 명령어만 두고 그걸 빠르게 많이 실행하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

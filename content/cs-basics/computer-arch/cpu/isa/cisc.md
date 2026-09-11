@@ -3,7 +3,7 @@ id: cisc
 title: CISC
 order: 1
 card:
-  one_line: 복잡하고 강력한 명령어를 많이 갖춘 방식 (x86)
+  one_line: 'CISC는 복잡하고 강력한 명령어를 많이 갖춰 명령 하나로 많은 일을 하게 한 방식이다.'
   analogy: ''
   keywords: []
 flow:

@@ -3,7 +3,7 @@ id: process-and-thread
 title: 프로세스와 쓰레드
 order: 1
 card:
-  one_line: 실행 중인 프로그램과 그 안의 실행 흐름
+  one_line: '프로세스는 실행 중인 프로그램이고, 쓰레드는 그 안에서 도는 실행 흐름이다.'
   analogy: ''
   keywords: []
 flow:

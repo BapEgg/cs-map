@@ -4,7 +4,7 @@ title: Spring
 order: 3
 track: dev
 card:
-  one_line: 서버에서 반복되는 일을 **대신 처리해 주는** 틀
+  one_line: '스프링은 서버에서 반복되는 일을 대신 처리해 주는 틀이다.'
   analogy: 집을 지을 때마다 기둥을 깎지 않고 이미 세워진 골조를 쓰는 것
   keywords: [DI, AOP, MVC, Boot]
 flow:

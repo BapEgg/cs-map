@@ -3,7 +3,7 @@ id: api
 title: API
 order: 7
 card:
-  one_line: 프로그램끼리 기능을 주고받는 약속(인터페이스)
+  one_line: 'API는 프로그램끼리 기능을 주고받기 위해 정해 둔 약속이다.'
   analogy: ''
   keywords: []
 flow:

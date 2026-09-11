@@ -12,7 +12,7 @@ export default function NoteTab({ note, onChange }: Props) {
   return (
     <div className="panel-body note">
       <label className="note-field">
-        <span>내 말로 쓰는 한 줄 정의</span>
+        <span>내 말로 다시 쓰는 한 문장</span>
         <input
           type="text"
           value={value.myLine}

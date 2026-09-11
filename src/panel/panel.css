@@ -105,17 +105,21 @@
   margin-bottom: var(--sp-5);
 }
 
-/* 한 줄 정의 3줄 카드. HANDOFF 5-4. */
+/*
+ * 외울 한 문장(3줄 카드, HANDOFF 5-4). 설명 뒤에 온다.
+ * 왼쪽에 강조색 띠를 둬서 "여기가 외울 것"임을 한눈에 알린다.
+ */
 .card3 {
   padding: var(--sp-4);
   margin-bottom: var(--sp-5);
   background: var(--surface-sunken);
+  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
 }
 
-/* 비유·키워드가 아직 없을 때. 빈 회색 상자로 보이지 않게 판을 벗긴다. */
+/* 비유·키워드가 아직 없을 때. 판은 벗기되 왼쪽 띠는 남겨 자리를 알린다. */
 .card3-bare {
-  padding: 0 0 var(--sp-1);
+  padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
   background: none;
 }
 
@@ -222,36 +226,83 @@ button.term {
 
 button.term:hover {
   color: var(--term-underline);
+  text-decoration-color: currentColor;
+  background: var(--accent-soft);
+  border-radius: 3px;
 }
 
+/*
+ * 흐름. 한 줄에 "방향 · 갈 곳 · 이유"를 격자로 놓는다.
+ * 전에는 "A —이유→ B"를 글줄로 붙여 써서 링크·화살표·굵은 글씨가 뒤섞여 안 읽혔다.
+ * 이유는 갈 곳 아래 작은 글씨로 — 주인공은 갈 곳이고, 이유는 그 까닭이다.
+ */
 .flow {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 
 .flow li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
+  display: grid;
+  grid-template-columns: 4.5em 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
 }
 
-.flow button {
+.flow-dir {
+  grid-row: 1 / span 2;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.flow-dir::before {
+  display: inline-block;
+  width: 1.2em;
+  color: var(--accent);
+}
+
+.flow-prev .flow-dir::before {
+  content: '←';
+}
+
+.flow-next .flow-dir::before {
+  content: '→';
+}
+
+.flow-go {
   font: inherit;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--accent);
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
+  text-align: left;
+  justify-self: start;
   text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--move-fast) ease;
 }
 
-.flow .reason {
-  font-size: 12px;
-  color: var(--connective);
+.flow-go:hover {
+  text-decoration-color: currentColor;
+}
+
+.flow-why {
+  grid-column: 2;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 .hint {
@@ -276,6 +327,18 @@ button.term:hover {
   border-radius: var(--radius);
   padding: var(--sp-3);
   cursor: pointer;
+  transition:
+    border-color var(--move-fast) ease,
+    background var(--move-fast) ease;
+}
+
+/*
+ * 눌러서 펼치는 것임을 커서가 닿는 순간 알린다.
+ * 전에는 평범한 상자처럼 보여서 뭘 할 수 있는지 감이 안 왔다.
+ */
+.qa-q:hover {
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .qa-a {

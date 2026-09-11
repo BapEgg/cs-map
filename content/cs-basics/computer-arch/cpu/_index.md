@@ -3,7 +3,7 @@ id: cpu
 title: CPU
 order: 2
 card:
-  one_line: 명령어를 가져와(fetch) 해석하고(decode) 실행하는 장치
+  one_line: 'CPU는 명령어를 가져와 해석하고 실행하는 장치다.'
   analogy: ''
   keywords: []
 flow:

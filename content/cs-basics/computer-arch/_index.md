@@ -4,7 +4,7 @@ title: 컴퓨터 구조
 order: 1
 track: cs
 card:
-  one_line: CPU·메모리·디스크가 협력해 명령을 실행하는 **방식**
+  one_line: '컴퓨터 구조는 CPU·메모리·디스크가 어떻게 협력해 명령을 실행하는지를 다룬다.'
   analogy: 주방에서 요리사·도마·냉장고가 각자 맡은 일을 나눠 하는 것
   keywords: [폰 노이만, CPU, 캐시, 메모리]
 flow:

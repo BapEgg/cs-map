@@ -3,7 +3,7 @@ id: main-memory
 title: 메인 메모리
 order: 4
 card:
-  one_line: 실행 중인 프로그램과 데이터가 올라가는 작업 공간(RAM)
+  one_line: '메인 메모리는 실행 중인 프로그램과 데이터가 올라가는 작업 공간이다.'
   analogy: ''
   keywords: []
 flow:

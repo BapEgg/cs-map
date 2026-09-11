@@ -3,7 +3,7 @@ id: page-replacement
 title: 페이지 교체 기법
 order: 4
 card:
-  one_line: 메모리가 꽉 찼을 때 어떤 페이지를 내보낼지 결정
+  one_line: '페이지 교체는 메모리가 꽉 찼을 때 어떤 페이지를 내보낼지 정하는 규칙이다.'
   analogy: ''
   keywords: []
 flow:

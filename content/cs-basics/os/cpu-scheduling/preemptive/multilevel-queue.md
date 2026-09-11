@@ -3,7 +3,7 @@ id: multilevel-queue
 title: 다단계 큐
 order: 3
 card:
-  one_line: 작업 종류별로 큐를 나누고 우선순위를 둠
+  one_line: '다단계 큐는 작업을 종류별로 다른 큐에 나누고 큐마다 우선순위를 두는 방식이다.'
   analogy: ''
   keywords: []
 flow:

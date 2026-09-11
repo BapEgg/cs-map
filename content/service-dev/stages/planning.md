@@ -3,7 +3,7 @@ id: planning
 title: 기획
 order: 1
 card:
-  one_line: 'MVP, 타깃 유저, 핵심 기능, 차별화 정하기'
+  one_line: '기획은 만들기 전에 최소 기능(MVP)·타깃 사용자·핵심 기능·차별점을 정하는 단계다.'
   analogy: ''
   keywords: []
 flow:

@@ -3,7 +3,7 @@ id: disk
 title: 디스크
 order: 5
 card:
-  one_line: 전원이 꺼져도 데이터가 남는 큰 저장 장치
+  one_line: '디스크는 전원이 꺼져도 데이터가 남는 큰 저장 장치다.'
   analogy: ''
   keywords: []
 flow:

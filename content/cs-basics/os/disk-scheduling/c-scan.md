@@ -3,7 +3,7 @@ id: c-scan
 title: C-SCAN
 order: 4
 card:
-  one_line: 한 방향으로만 처리하고 끝에 가면 처음으로 돌아감
+  one_line: 'C-SCAN은 한 방향으로만 처리하고 끝에 닿으면 처음으로 돌아와 다시 시작하는 방식이다.'
   analogy: ''
   keywords: []
 flow:

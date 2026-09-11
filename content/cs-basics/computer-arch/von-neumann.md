@@ -3,7 +3,7 @@ id: von-neumann
 title: 폰 노이만 구조
 order: 1
 card:
-  one_line: 프로그램과 데이터를 같은 메모리에 저장하는 설계
+  one_line: '폰 노이만 구조는 프로그램과 데이터를 같은 메모리에 두고 CPU가 순서대로 꺼내 실행하는 설계다.'
   analogy: ''
   keywords: []
 flow:

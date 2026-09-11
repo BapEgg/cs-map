@@ -3,7 +3,7 @@ id: frontend
 title: 프론트엔드
 order: 1
 card:
-  one_line: 사용자가 보고 누르는 화면
+  one_line: '프론트엔드는 사용자가 직접 보고 누르는 화면 쪽이다.'
   analogy: ''
   keywords: []
 flow:
