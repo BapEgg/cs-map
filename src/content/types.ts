@@ -28,6 +28,11 @@ export type FlowField = FlowRef | FlowRef[];
 export interface ConceptMeta {
   id: string;
   title: string;
+  /**
+   * 본문에서 이 개념을 부르는 다른 이름. 자동 링크가 이것도 잡는다.
+   * 제목만으로는 안 걸리는 경우에 쓴다. 예: `FCFS (디스크)`는 본문에서 그냥 `FCFS`라고 쓴다.
+   */
+  aliases?: string[];
   /** 형제들 사이 순서. 없으면 제목순. */
   order?: number;
   track?: Track;
@@ -57,6 +62,8 @@ export interface ConceptNode extends ConceptMeta {
   flowPrev: FlowRef[];
   /** 이 개념에서 뻗어 나가는 갈래. */
   flowNext: FlowRef[];
+  /** 본문에 `## 심화`가 있는지. 트리 뱃지에 쓴다. */
+  hasDeep: boolean;
 }
 
 /** 트리 노드가 아닌 용어 사전 항목. */

@@ -1,6 +1,7 @@
 ---
 id: disk-fcfs
 title: FCFS (디스크)
+aliases: [FCFS]
 order: 1
 card:
   one_line: 요청이 들어온 순서대로 처리

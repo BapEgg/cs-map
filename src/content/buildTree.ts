@@ -82,6 +82,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
     const node: ConceptNode = {
       id,
       title,
+      aliases: asStringArray(data.aliases),
       order: typeof data.order === 'number' ? data.order : undefined,
       track: data.track === 'cs' || data.track === 'dev' ? (data.track as Track) : undefined,
       card: (data.card ?? undefined) as ConceptNode['card'],
@@ -94,6 +95,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
       sources: asStringArray(data.sources),
       path: rel,
       body,
+      hasDeep: /^##\s*심화\s*$/m.test(body),
       depth: 0,
       parentId: null,
       childIds: [],

@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadContent } from './content/load';
-import type { ContentTree } from './content/types';
+import ConceptPanel from './panel/ConceptPanel';
+import { buildTermIndex } from './panel/termIndex';
+import TreeCanvas from './tree/TreeCanvas';
+import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
-import Player from './viz/Player';
-import MemoryLayoutView from './viz/scenes/MemoryLayoutView';
-import { buildMemoryLayoutScene } from './viz/scenes/memoryLayout';
 import './App.css';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
@@ -13,90 +13,111 @@ const THEME_LABEL: Record<ThemeMode, string> = {
   system: '시스템',
 };
 
-/** **강조**만 처리한다. 본격적인 본문 렌더는 M1에서. */
-function OneLine({ text }: { text: string }) {
-  const parts = text.split(/\*\*(.+?)\*\*/g);
-  return (
-    <span className="node-one-line">
-      {parts.map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part))}
-    </span>
-  );
-}
-
-function Node({ id, tree }: { id: string; tree: ContentTree }) {
-  const node = tree.byId[id];
-  const depth = Math.min(node.depth, 5);
-  return (
-    <li>
-      <div className="node">
-        <span
-          className="node-title"
-          style={{
-            background: `var(--depth-${depth})`,
-            color: `var(--depth-${depth}-text)`,
-          }}
-        >
-          {node.title}
-        </span>
-        {node.card?.one_line && <OneLine text={node.card.one_line} />}
-        {node.flowNext.map((f) => (
-          <span key={f.id} className="flow-reason">
-            → {f.reason}
-          </span>
-        ))}
-      </div>
-      {node.childIds.length > 0 && (
-        <ul>
-          {node.childIds.map((childId) => (
-            <Node key={childId} id={childId} tree={tree} />
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-}
-
 export default function App() {
   const { mode, cycle } = useTheme();
   const tree = useMemo(() => loadContent(), []);
-  const scene = useMemo(() => buildMemoryLayoutScene(), []);
-  const count = Object.keys(tree.byId).length;
+  const index = useMemo(() => buildTermIndex(tree), [tree]);
+
+  const [orientation, setOrientation] = useState<Orientation>('h');
+  const [selected, setSelected] = useState<string | null>(null);
+  /** "이 가지만 크게 보기"로 파고든 자취. 마지막이 지금 루트다. */
+  const [roots, setRoots] = useState<string[]>([tree.rootId]);
+  const root = roots[roots.length - 1];
+  const [open, setOpen] = useState<Set<string>>(() => new Set([tree.rootId]));
+
+  const toggle = useCallback((id: string) => {
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  /** 그 개념으로 간다. 가는 길의 조상들을 모두 펼쳐 트리에서도 보이게 한다. */
+  const goTo = useCallback(
+    (id: string) => {
+      if (!tree.byId[id]) return;
+      setOpen((prev) => {
+        const next = new Set(prev);
+        let cursor = tree.byId[id].parentId;
+        while (cursor) {
+          next.add(cursor);
+          cursor = tree.byId[cursor].parentId;
+        }
+        return next;
+      });
+      setSelected(id);
+    },
+    [tree.byId],
+  );
+
+  // Esc: 파고든 가지에서 한 단계 나온다.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && roots.length > 1) setRoots((r) => r.slice(0, -1));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [roots.length]);
+
+  const node = selected ? tree.byId[selected] : null;
+  const canZoomBranch = node && node.childIds.length > 0 && node.id !== root;
 
   return (
     <div className="app">
-      <div className="topbar">
+      <header className="bar">
         <h1>CS 지식 지도</h1>
-        <button className="theme-toggle" onClick={cycle}>
-          테마: {THEME_LABEL[mode]}
-        </button>
-      </div>
-      <p>
-        M0 세팅 확인용 화면이다. content/ 의 마크다운 {count}개를 읽어 트리로 만들었다. 실제 지도
-        화면은 M1에서 만든다.
-      </p>
 
-      <div className="legend">
-        깊이별 색:
-        {[0, 1, 2, 3, 4, 5].map((d) => (
-          <span key={d} style={{ background: `var(--depth-${d})` }} />
-        ))}
-        진할수록 큰 개념
-      </div>
+        <nav className="bar-roots">
+          📍
+          {roots.map((rid, i) => (
+            <span key={rid}>
+              {i > 0 && <span className="sep">›</span>}
+              {i === roots.length - 1 ? (
+                <b>{tree.byId[rid].title}</b>
+              ) : (
+                <button type="button" onClick={() => setRoots((r) => r.slice(0, i + 1))}>
+                  {tree.byId[rid].title}
+                </button>
+              )}
+            </span>
+          ))}
+        </nav>
 
-      {tree.rootId ? (
-        <ul className="tree">
-          <Node id={tree.rootId} tree={tree} />
-        </ul>
-      ) : (
-        <p>content/ 에서 루트를 못 찾았다.</p>
-      )}
+        <div className="bar-tools">
+          {canZoomBranch && (
+            <button onClick={() => setRoots((r) => [...r, node.id])}>이 가지만 보기</button>
+          )}
+          <button onClick={() => setOrientation((o) => (o === 'h' ? 'v' : 'h'))}>
+            {orientation === 'h' ? '좌→우' : '위→아래'}
+          </button>
+          <button onClick={cycle}>테마: {THEME_LABEL[mode]}</button>
+        </div>
+      </header>
 
-      <h2 className="section">시각화 시안 · 메모리 영역</h2>
-      <p className="section-note">
-        스타일 확정용 첫 장면이다. 무대를 먼저 세우고 그 위에서 프로그램을 돌린다. 화면에 들어오면
-        알아서 재생된다.
-      </p>
-      <Player scene={scene} render={(state) => <MemoryLayoutView state={state} />} />
+      <main className="map">
+        <TreeCanvas
+          byId={tree.byId}
+          root={root}
+          open={open}
+          selected={selected}
+          orientation={orientation}
+          onToggle={toggle}
+          onSelect={setSelected}
+        />
+        {selected ? (
+          <ConceptPanel key={selected} tree={tree} index={index} id={selected} onGoTo={goTo} />
+        ) : (
+          <aside className="panel panel-empty">
+            <p>왼쪽 지도에서 개념을 누르면 여기에 설명이 열립니다.</p>
+            <p className="muted">
+              드래그로 이동, 휠로 스크롤, Ctrl+휠로 확대. 설명 속 밑줄 친 용어를 누르면 그 자리에서
+              뜻을 볼 수 있어요.
+            </p>
+          </aside>
+        )}
+      </main>
 
       {tree.problems.length > 0 && (
         <div className="problems">

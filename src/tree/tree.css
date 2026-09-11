@@ -1,0 +1,127 @@
+.tree-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tree-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.tree-svg.dragging {
+  cursor: grabbing;
+}
+
+.tree-links path {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  opacity: 0.65;
+}
+
+.tree-node {
+  cursor: pointer;
+}
+
+.tree-node-box {
+  transition: filter 0.15s ease;
+}
+
+.tree-node:hover .tree-node-box {
+  filter: brightness(1.08);
+}
+
+/* 선택해도 노드 색은 안 바꾼다. 깊이별 색이 뜻을 잃으면 안 되니까 테두리로만 표시한다. */
+.tree-node.selected .tree-node-box {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.tree-node-title {
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tree-toggle circle {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.tree-toggle text {
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--text);
+  pointer-events: none;
+  user-select: none;
+}
+
+.tree-tools {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tree-tools button {
+  width: 32px;
+  height: 32px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.tree-tools button:hover {
+  border-color: var(--border-strong);
+}
+
+.tree-legend {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text-faint);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.tree-legend i {
+  width: 16px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.tree-legend em {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+  font-style: normal;
+}
+
+.tree-legend i.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}

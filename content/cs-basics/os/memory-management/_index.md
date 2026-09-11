@@ -2,6 +2,7 @@
 id: memory-management
 title: 메모리 관리
 order: 3
+sim: memory-layout
 card:
   one_line: 한정된 메모리를 여러 프로세스에 나눠주는 방법
   analogy: ''
