@@ -17,6 +17,13 @@ export interface FlowRef {
   reason: string;
 }
 
+/**
+ * frontmatter에서는 하나만 쓸 때 `next: { id: x, reason: y }`로 써도 되고
+ * 여러 개일 때는 배열로 써도 된다. 로더가 배열로 맞춘다.
+ * (한 개념으로 여러 갈래가 흘러들 수 있다. 예: FIFO도 OPT도 LRU로 이어진다.)
+ */
+export type FlowField = FlowRef | FlowRef[];
+
 /** 마크다운 frontmatter에 들어가는 것 전부. */
 export interface ConceptMeta {
   id: string;
@@ -25,7 +32,6 @@ export interface ConceptMeta {
   order?: number;
   track?: Track;
   card?: ConceptCard;
-  flow?: { prev?: FlowRef; next?: FlowRef };
   /** 비교표로 묶을 형제들. */
   compare?: string[];
   /** 이론 ↔ 실무 교차 링크. HANDOFF 5-6. */
@@ -47,6 +53,10 @@ export interface ConceptNode extends ConceptMeta {
   depth: number;
   parentId: string | null;
   childIds: string[];
+  /** 이 개념으로 흘러든 갈래. frontmatter의 `flow.prev`를 배열로 맞춘 것. */
+  flowPrev: FlowRef[];
+  /** 이 개념에서 뻗어 나가는 갈래. */
+  flowNext: FlowRef[];
 }
 
 /** 트리 노드가 아닌 용어 사전 항목. */
@@ -55,8 +65,11 @@ export interface GlossaryEntry {
   aliases?: string[];
   /** 트리 개념이면 그 id. 아니면 null. */
   link?: string | null;
-  /** 자동 링크의 문맥 스코프. 가까운 쪽을 우선한다. HANDOFF 5-3. */
-  scope?: string;
+  /**
+   * 이 용어가 통하는 가지들의 노드 id. 자동 링크가 문맥을 무시하는 걸 막는다.
+   * 예: 디스크 스케줄링 문맥의 FCFS가 CPU 스케줄링의 FCFS로 연결되면 안 된다. HANDOFF 5-3.
+   */
+  scope?: string[];
   sim?: string;
   body: string;
 }

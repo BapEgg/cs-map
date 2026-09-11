@@ -72,7 +72,28 @@ describe('buildTree', () => {
     const t = buildTree(files);
     expect(t.byId.TLB).toBeUndefined();
     expect(t.glossary).toHaveLength(1);
-    expect(t.glossary[0]).toMatchObject({ term: 'TLB', aliases: ['TLB 히트'], scope: 'cs-basics/os' });
+    expect(t.glossary[0]).toMatchObject({
+      term: 'TLB',
+      aliases: ['TLB 히트'],
+      scope: ['cs-basics/os'],
+    });
+  });
+
+  it('흐름은 하나로 써도 여럿으로 써도 배열로 맞춘다', () => {
+    const t = buildTree({
+      ...files,
+      'cs-basics/os/lru.md': md(
+        'id: lru\ntitle: LRU\nflow:\n  prev:\n    - { id: paging, reason: 하나 }\n    - { id: segmentation, reason: 둘 }',
+      ),
+    });
+    expect(t.problems).toEqual([]);
+    // 한 개념으로 여러 갈래가 흘러들 수 있다
+    expect(t.byId.lru.flowPrev.map((f) => f.id)).toEqual(['paging', 'segmentation']);
+    expect(t.byId.lru.flowNext).toEqual([]);
+    // 하나만 쓴 쪽도 배열이 된다
+    expect(t.byId.segmentation.flowNext).toEqual([
+      { id: 'paging', reason: '빈 공간이 조각나서' },
+    ]);
   });
 
   it('id가 겹치면 문제로 남긴다', () => {

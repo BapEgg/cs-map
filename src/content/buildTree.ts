@@ -1,5 +1,5 @@
 import { parseFrontmatter } from './frontmatter';
-import type { ConceptNode, ContentTree, GlossaryEntry, Track } from './types';
+import type { ConceptNode, ContentTree, FlowRef, GlossaryEntry, Track } from './types';
 
 const INDEX = '_index.md';
 
@@ -16,8 +16,21 @@ const parentDir = (dir: string): string | null => {
 
 const isIndex = (rel: string) => rel === INDEX || rel.endsWith(`/${INDEX}`);
 
-const asStringArray = (v: unknown): string[] | undefined =>
-  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : undefined;
+const asStringArray = (v: unknown): string[] | undefined => {
+  if (typeof v === 'string') return [v];
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : undefined;
+};
+
+/** `next: {id, reason}` 하나로 써도 되고 배열로 써도 된다. 배열로 맞춘다. */
+const asFlowRefs = (v: unknown): FlowRef[] => {
+  const one = (x: unknown): FlowRef | null => {
+    if (x === null || typeof x !== 'object') return null;
+    const { id, reason } = x as Partial<FlowRef>;
+    return typeof id === 'string' ? { id, reason: typeof reason === 'string' ? reason : '' } : null;
+  };
+  const list = Array.isArray(v) ? v : [v];
+  return list.map(one).filter((x): x is FlowRef => x !== null);
+};
 
 /**
  * content/ 아래 마크다운을 트리로 만든다. **폴더 구조가 곧 트리 구조다.**
@@ -46,7 +59,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
         term,
         aliases: asStringArray(data.aliases),
         link: typeof data.link === 'string' ? data.link : null,
-        scope: typeof data.scope === 'string' ? data.scope : undefined,
+        scope: asStringArray(data.scope),
         sim: typeof data.sim === 'string' ? data.sim : undefined,
         body,
       });
@@ -65,13 +78,15 @@ export function buildTree(files: Record<string, string>): ContentTree {
     }
 
     const dir = dirOf(rel);
+    const flow = (data.flow ?? {}) as { prev?: unknown; next?: unknown };
     const node: ConceptNode = {
       id,
       title,
       order: typeof data.order === 'number' ? data.order : undefined,
       track: data.track === 'cs' || data.track === 'dev' ? (data.track as Track) : undefined,
       card: (data.card ?? undefined) as ConceptNode['card'],
-      flow: (data.flow ?? undefined) as ConceptNode['flow'],
+      flowPrev: asFlowRefs(flow.prev),
+      flowNext: asFlowRefs(flow.next),
       compare: asStringArray(data.compare),
       see_also: asStringArray(data.see_also),
       sim: typeof data.sim === 'string' ? data.sim : undefined,
@@ -146,7 +161,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
   for (const node of Object.values(byId)) {
     check(node, node.see_also, 'see_also');
     check(node, node.compare, 'compare');
-    check(node, [node.flow?.prev?.id, node.flow?.next?.id].filter((x): x is string => !!x), 'flow');
+    check(node, [...node.flowPrev, ...node.flowNext].map((f) => f.id), 'flow');
   }
   for (const entry of glossary) {
     if (entry.link && !byId[entry.link]) {

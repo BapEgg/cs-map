@@ -39,7 +39,11 @@ function Node({ id, tree }: { id: string; tree: ContentTree }) {
           {node.title}
         </span>
         {node.card?.one_line && <OneLine text={node.card.one_line} />}
-        {node.flow?.next && <span className="flow-reason">→ {node.flow.next.reason}</span>}
+        {node.flowNext.map((f) => (
+          <span key={f.id} className="flow-reason">
+            → {f.reason}
+          </span>
+        ))}
       </div>
       {node.childIds.length > 0 && (
         <ul>

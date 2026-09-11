@@ -8,7 +8,7 @@ card:
   analogy: 기사에게 길을 맡겨도 목적지 이름은 내가 알아야 한다
   keywords: [LLM, 개발환경, 빌드, 배포]
 flow:
-  prev: { id: process, reason: 이 흐름을 AI에게 시키려면 }
+  prev: { id: dev-stages, reason: 이 흐름을 AI에게 시키려면 }
 ---
 
 ## 왜 나왔나

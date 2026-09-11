@@ -8,7 +8,7 @@ card:
   analogy: 벽돌 → 벽 → 방 → 집 → 단지로 묶는 단위가 커지는 것
   keywords: [함수, 클래스, 모듈, 컴포넌트, API]
 flow:
-  next: { id: process, reason: 이렇게 만든 코드를 서비스로 내놓으려면 }
+  next: { id: dev-stages, reason: 이렇게 만든 코드를 서비스로 내놓으려면 }
 ---
 
 ## 왜 나왔나

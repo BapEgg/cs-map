@@ -1,0 +1,15 @@
+---
+id: preemptive
+title: 선점형
+order: 2
+card:
+  one_line: 운영체제가 실행 중인 프로세스의 CPU를 뺏을 수 있는 방식
+  analogy: ''
+  keywords: []
+flow:
+  prev: { id: non-preemptive, reason: 긴 작업이 CPU를 독점해서 }
+---
+
+## 왜 나왔나
+
+여러 사용자가 동시에 쓰는 시분할 시스템에선 모두가 빠른 응답을 받아야 해서, **CPU를 중간에 뺏어올 수** 있어야 했다.
