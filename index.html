@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 지식 지도</title>
+    <script>
+      // 첫 페인트 전에 테마를 정해 깜빡임을 막는다.
+      (() => {
+        try {
+          const saved = localStorage.getItem('csmap.theme');
+          const mode = saved === 'light' || saved === 'dark' ? saved : null;
+          const dark = mode
+            ? mode === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

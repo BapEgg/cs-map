@@ -5,14 +5,19 @@ CS 기초~심화를 “개념 지도”로 모아, 클릭해서 파고들고 애
 동작하는 프로토타입은 `docs/prototype/cs-map-v3.html`(단일 HTML), 원본 손필기는 `docs/reference/`에 있다.
 
 ## 스택
-- Vite + React + TypeScript, 테스트는 Vitest, 배포는 Vercel 또는 Cloudflare Pages
+
+- Vite + React + TypeScript, 테스트는 Vitest, 배포는 **Vercel**(push 시 자동 배포)
 - 콘텐츠: `content/` 아래 개념 1개 = 마크다운 1개(frontmatter + 본문). 폴더 구조 = 트리 구조. 옵시디언으로 편집 가능해야 한다.
 - 코드와 콘텐츠를 섞지 않는다. 개념 텍스트를 컴포넌트에 하드코딩하지 않는다.
+- 최상위는 **5갈래**: CS 기초 / Java / Spring / 데이터베이스 / 서비스 개발 전체 과정 (HANDOFF 5-5)
 
 ## 명령어
-- (M0에서 확정 후 여기에 기록) `npm run dev` / `npm run build` / `npm test`
+
+- `npm run dev` 개발 서버 · `npm run build` 타입 검사 + 빌드 · `npm test` 테스트
+- `npm run lint` 린트 · `npm run format` 포맷
 
 ## 반드시 지킬 것
+
 - **큰 작업 전에는 사용자에게 계획을 먼저 설명하고 동의를 받는다.**
 - 사용자와는 한국어로 소통한다. 결과물에는 “이번에 바뀐 점” 목록을 붙이고, 항목별 한줄평을 받는다.
 - 학습 도구다. 사실 정확성이 최우선이다. 심화 내용은 교재·공식 문서로 확인하고 `sources`와 `checked`를 남긴다.

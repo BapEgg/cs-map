@@ -1,0 +1,123 @@
+.app {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.topbar h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.topbar p {
+  margin: 0 0 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--border-strong);
+}
+
+.tree,
+.tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree ul {
+  margin-left: 18px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+}
+
+.tree li {
+  margin: 6px 0;
+}
+
+.node {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.node-title {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.node-one-line {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.node-one-line strong {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+  font-weight: 600;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+.flow-reason {
+  color: var(--connective);
+  font-size: 12px;
+}
+
+.problems {
+  margin-top: 32px;
+  padding: 14px 16px;
+  border: 1px solid var(--mark-unsure);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.problems h2 {
+  font-size: 14px;
+  margin: 0 0 8px;
+  color: var(--mark-unsure);
+}
+
+.problems li {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.legend {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 20px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.legend span {
+  width: 22px;
+  height: 12px;
+  border-radius: 3px;
+}
