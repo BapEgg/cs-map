@@ -55,14 +55,19 @@ export default function App() {
     return ids;
   }, [study.data.notes]);
 
-  const toggle = useCallback((id: string) => {
-    setOpen((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  /** 그 개념까지 내려가는 길에 있는 노드들. 이것만 펼쳐 두면 지도가 한 줄기로 유지된다. */
+  const pathOf = useCallback(
+    (id: string) => {
+      const set = new Set<string>();
+      let cursor: string | null = id;
+      while (cursor) {
+        set.add(cursor);
+        cursor = tree.byId[cursor]?.parentId ?? null;
+      }
+      return set;
+    },
+    [tree.byId],
+  );
 
   /** 개념을 고른다. 본 기록을 남겨 다음에 열었을 때 이어서 볼 수 있게 한다. */
   const select = useCallback(
@@ -73,23 +78,46 @@ export default function App() {
     [touch],
   );
 
+  /**
+   * 트리에서 노드 본체를 눌렀을 때. 고르고 그 갈래로 들어간다. **접지는 않는다.**
+   *
+   * 한 층에 한 갈래만 펼친다(아코디언). 형제를 다 펼쳐두면 개념이 늘어날수록
+   * 지도가 옆으로 끝없이 넓어져서 전체를 잃는다.
+   */
+  const clickNode = useCallback(
+    (id: string) => {
+      select(id);
+      if (tree.byId[id].childIds.length > 0) setOpen(pathOf(id));
+    },
+    [pathOf, select, tree.byId],
+  );
+
+  /** ＋/－ 를 눌렀을 때. 접기·펴기만 한다. */
+  const toggle = useCallback(
+    (id: string) => {
+      setOpen((prev) => {
+        if (!prev.has(id)) return pathOf(id);
+        // 접을 때는 그 아래도 같이 접는다. 다시 열었을 때 예전 상태가 튀어나오지 않게.
+        const next = new Set<string>();
+        for (const opened of prev) {
+          if (opened !== id && !pathOf(opened).has(id)) next.add(opened);
+        }
+        return next;
+      });
+    },
+    [pathOf],
+  );
+
   /** 그 개념으로 간다. 가는 길의 조상들을 모두 펼쳐 트리에서도 보이게 한다. */
   const goTo = useCallback(
     (id: string) => {
       if (!tree.byId[id]) return;
-      setOpen((prev) => {
-        const next = new Set(prev);
-        let cursor = tree.byId[id].parentId;
-        while (cursor) {
-          next.add(cursor);
-          cursor = tree.byId[cursor].parentId;
-        }
-        return next;
-      });
+      // 가는 길만 펼친다. 트리에서 누를 때와 같은 규칙이라 지도가 예상대로 움직인다.
+      setOpen(pathOf(tree.byId[id].parentId ?? id));
       select(id);
       setOverlay(null);
     },
-    [select, tree.byId],
+    [pathOf, select, tree.byId],
   );
 
   // Esc: 덮어쓴 화면을 먼저 닫고, 없으면 파고든 가지에서 한 단계 나온다.
@@ -173,8 +201,8 @@ export default function App() {
           orientation={orientation}
           marks={study.data.marks}
           noted={notedIds}
+          onNodeClick={clickNode}
           onToggle={toggle}
-          onSelect={select}
         />
         {selected ? (
           <ConceptPanel

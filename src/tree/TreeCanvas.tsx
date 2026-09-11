@@ -15,8 +15,10 @@ interface Props {
   marks: Record<string, { known: boolean }>;
   /** 메모를 남긴 개념. */
   noted: Set<string>;
+  /** 노드 본체를 눌렀을 때. 고르고, 그 갈래로 들어간다. 접지는 않는다. */
+  onNodeClick: (id: string) => void;
+  /** ＋/－ 표시를 눌렀을 때. 접기·펴기만 한다. */
   onToggle: (id: string) => void;
-  onSelect: (id: string) => void;
 }
 
 export default function TreeCanvas({
@@ -27,8 +29,8 @@ export default function TreeCanvas({
   orientation,
   marks,
   noted,
+  onNodeClick,
   onToggle,
-  onSelect,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const { cam, smooth, dragging, didDrag, onPointerDown, fit, zoomBy, ensureVisible } =
@@ -77,13 +79,32 @@ export default function TreeCanvas({
     ensureVisible({ x: p.x - 30, y: p.y - NODE_H, w: w + 60, h: NODE_H * 2 });
   }, [selected, layout, ensureVisible]);
 
+  /**
+   * 흐리게 하지 않을 노드들: 고른 개념, 거기까지 가는 길, 그 아래 자식, **그리고 형제**.
+   *
+   * 나머지를 흐리게 해야 "지금 보고 있는 게 어디인지"가 한눈에 들어온다.
+   * 테두리 색 하나로는 노드 수십 개 중에서 못 찾는다.
+   *
+   * 형제를 살려 두는 이유는 설명 패널의 '흐름'이 바로 그 형제들을 가리키기 때문이다.
+   * (세그멘테이션 → 페이징 → 가상 메모리)
+   */
+  const focused = useMemo(() => {
+    if (!selected || !byId[selected]) return null;
+    const set = new Set<string>(byId[selected].childIds);
+    const parent = byId[selected].parentId;
+    for (const sib of parent ? byId[parent].childIds : []) set.add(sib);
+    let cursor: string | null = selected;
+    while (cursor) {
+      set.add(cursor);
+      cursor = byId[cursor]?.parentId ?? null;
+    }
+    return set;
+  }, [byId, selected]);
+
   const handleNode = (id: string) => {
     if (didDrag()) return;
-    onSelect(id);
-    if (byId[id].childIds.length > 0) {
-      if (!open.has(id)) lastOpened.current = id;
-      onToggle(id);
-    }
+    if (byId[id].childIds.length > 0 && !open.has(id)) lastOpened.current = id;
+    onNodeClick(id);
   };
 
   return (
@@ -106,6 +127,7 @@ export default function TreeCanvas({
             {layout.links.map(({ from, to }) => (
               <path
                 key={`${from}-${to}`}
+                className={focused && !(focused.has(from) && focused.has(to)) ? 'dim' : undefined}
                 d={linkPath(layout.pos[from], layout.pos[to], layout.width[from], orientation)}
                 fill="none"
               />
@@ -139,7 +161,9 @@ export default function TreeCanvas({
             return (
               <g
                 key={id}
-                className={`tree-node depth-${depth}${id === selected ? ' selected' : ''}`}
+                className={`tree-node depth-${depth}${id === selected ? ' selected' : ''}${
+                  focused && !focused.has(id) ? ' dim' : ''
+                }`}
                 transform={`translate(${x} ${y})`}
                 onClick={() => handleNode(id)}
                 role="treeitem"
@@ -152,10 +176,26 @@ export default function TreeCanvas({
                 <text className="tree-node-title" x={titleX} y={NODE_H / 2 + 4.5} fontSize={fs}>
                   {node.title}
                 </text>
+                {/*
+                 * 접기·펴기는 ＋/－ 를 눌러야 한다. 노드 본체를 누르는 건 "여기로 들어가기"다.
+                 * 둘을 한 클릭에 몰면, 이미 열린 가지를 눌렀을 때 들어가려던 건지
+                 * 닫으려던 건지 알 수 없다.
+                 */}
                 {hasKids && (
-                  <text className="tree-toggle" x={w - 11} y={NODE_H / 2 + 5} textAnchor="middle">
-                    {isOpen ? '−' : '+'}
-                  </text>
+                  <g
+                    className="tree-toggle"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!didDrag()) onToggle(id);
+                    }}
+                    role="button"
+                    aria-label={`${node.title} ${isOpen ? '접기' : '펴기'}`}
+                  >
+                    <rect x={w - 24} y={0} width={24} height={NODE_H} fill="transparent" />
+                    <text x={w - 12} y={NODE_H / 2 + 5} textAnchor="middle">
+                      {isOpen ? '−' : '+'}
+                    </text>
+                  </g>
                 )}
                 {dots.length > 0 && (
                   <g transform={`translate(${titleX} ${NODE_H - 1})`}>
