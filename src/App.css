@@ -70,6 +70,7 @@
 }
 
 .map {
+  position: relative; /* 퀴즈·메모 화면이 이 위를 덮는다 */
   display: flex;
   gap: 12px;
   flex: 1 1 auto;

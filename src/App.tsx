@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadContent } from './content/load';
 import ConceptPanel from './panel/ConceptPanel';
+import NotesOverview from './panel/NotesOverview';
 import { buildTermIndex } from './panel/termIndex';
+import QuizMode from './quiz/QuizMode';
+import { isBlank } from './store/studyStore';
+import { useStudy } from './store/useStudy';
 import TreeCanvas from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
@@ -24,6 +28,16 @@ export default function App() {
   const [roots, setRoots] = useState<string[]>([tree.rootId]);
   const root = roots[roots.length - 1];
   const [open, setOpen] = useState<Set<string>>(() => new Set([tree.rootId]));
+  const [overlay, setOverlay] = useState<'quiz' | 'notes' | null>(null);
+  const study = useStudy();
+
+  const notedIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [id, note] of Object.entries(study.data.notes)) {
+      if (!isBlank(note)) ids.add(id);
+    }
+    return ids;
+  }, [study.data.notes]);
 
   const toggle = useCallback((id: string) => {
     setOpen((prev) => {
@@ -48,18 +62,21 @@ export default function App() {
         return next;
       });
       setSelected(id);
+      setOverlay(null);
     },
     [tree.byId],
   );
 
-  // Esc: 파고든 가지에서 한 단계 나온다.
+  // Esc: 덮어쓴 화면을 먼저 닫고, 없으면 파고든 가지에서 한 단계 나온다.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && roots.length > 1) setRoots((r) => r.slice(0, -1));
+      if (e.key !== 'Escape') return;
+      if (overlay) setOverlay(null);
+      else if (roots.length > 1) setRoots((r) => r.slice(0, -1));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [roots.length]);
+  }, [overlay, roots.length]);
 
   const node = selected ? tree.byId[selected] : null;
   const canZoomBranch = node && node.childIds.length > 0 && node.id !== root;
@@ -89,6 +106,10 @@ export default function App() {
           {canZoomBranch && (
             <button onClick={() => setRoots((r) => [...r, node.id])}>이 가지만 보기</button>
           )}
+          <button onClick={() => setOverlay('quiz')}>퀴즈</button>
+          <button onClick={() => setOverlay('notes')}>
+            내 메모{notedIds.size > 0 && ` ${notedIds.size}`}
+          </button>
           <button onClick={() => setOrientation((o) => (o === 'h' ? 'v' : 'h'))}>
             {orientation === 'h' ? '좌→우' : '위→아래'}
           </button>
@@ -103,11 +124,21 @@ export default function App() {
           open={open}
           selected={selected}
           orientation={orientation}
+          marks={study.data.marks}
+          noted={notedIds}
           onToggle={toggle}
           onSelect={setSelected}
         />
         {selected ? (
-          <ConceptPanel key={selected} tree={tree} index={index} id={selected} onGoTo={goTo} />
+          <ConceptPanel
+            key={selected}
+            tree={tree}
+            index={index}
+            id={selected}
+            onGoTo={goTo}
+            note={study.data.notes[selected]}
+            onNote={(patch) => study.setNote(selected, patch)}
+          />
         ) : (
           <aside className="panel panel-empty">
             <p>왼쪽 지도에서 개념을 누르면 여기에 설명이 열립니다.</p>
@@ -116,6 +147,26 @@ export default function App() {
               뜻을 볼 수 있어요.
             </p>
           </aside>
+        )}
+
+        {overlay === 'quiz' && (
+          <QuizMode
+            tree={tree}
+            marks={study.data.marks}
+            onMark={study.setMark}
+            onClearMarks={study.clearMarks}
+            onClose={() => setOverlay(null)}
+            onGoTo={goTo}
+          />
+        )}
+        {overlay === 'notes' && (
+          <NotesOverview
+            tree={tree}
+            data={study.data}
+            onImport={study.importJson}
+            onGoTo={goTo}
+            onClose={() => setOverlay(null)}
+          />
         )}
       </main>
 

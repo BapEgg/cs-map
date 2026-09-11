@@ -3,18 +3,22 @@ import type { ContentTree } from '../content/types';
 import Player from '../viz/Player';
 import MemoryLayoutView from '../viz/scenes/MemoryLayoutView';
 import { buildMemoryLayoutScene } from '../viz/scenes/memoryLayout';
+import type { ConceptNote } from '../store/studyStore';
+import NoteTab from './NoteTab';
 import { parseBody } from './parseBody';
 import RichText from './RichText';
 import type { TermIndex, TermTarget } from './termIndex';
 import './panel.css';
 
-type Tab = 'basic' | 'deep';
+type Tab = 'basic' | 'deep' | 'note';
 
 interface Props {
   tree: ContentTree;
   index: TermIndex;
   id: string;
   onGoTo: (id: string) => void;
+  note: ConceptNote | undefined;
+  onNote: (patch: Partial<ConceptNote>) => void;
 }
 
 /** 용어를 눌러 들어간 자취. "📖 지역성 › 캐시 라인"처럼 쌓인다. */
@@ -23,7 +27,7 @@ interface TermCrumb {
   body: string;
 }
 
-export default function ConceptPanel({ tree, index, id, onGoTo }: Props) {
+export default function ConceptPanel({ tree, index, id, onGoTo, note, onNote }: Props) {
   const node = tree.byId[id];
   const [tab, setTab] = useState<Tab>('basic');
   const [terms, setTerms] = useState<TermCrumb[]>([]);
@@ -106,9 +110,20 @@ export default function ConceptPanel({ tree, index, id, onGoTo }: Props) {
         >
           심화
         </button>
+        <button
+          role="tab"
+          aria-selected={tab === 'note'}
+          className={tab === 'note' ? 'on' : undefined}
+          onClick={() => setTab('note')}
+        >
+          내 메모
+          {note?.unsure && <span className="tab-dot" title="헷갈림 표시" />}
+        </button>
       </div>
 
-      {tab === 'basic' ? (
+      {tab === 'note' ? (
+        <NoteTab note={note} onChange={onNote} />
+      ) : tab === 'basic' ? (
         <div className="panel-body">
           <div className="card3">
             <p className="card3-line">

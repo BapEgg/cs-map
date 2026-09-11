@@ -10,6 +10,10 @@ interface Props {
   open: Set<string>;
   selected: string | null;
   orientation: Orientation;
+  /** 퀴즈 결과. 기억났으면 초록, 헷갈렸으면 주황 점. */
+  marks: Record<string, { known: boolean }>;
+  /** 메모를 남긴 개념. */
+  noted: Set<string>;
   onToggle: (id: string) => void;
   onSelect: (id: string) => void;
 }
@@ -37,6 +41,8 @@ export default function TreeCanvas({
   open,
   selected,
   orientation,
+  marks,
+  noted,
   onToggle,
   onSelect,
 }: Props) {
@@ -176,14 +182,18 @@ export default function TreeCanvas({
                   </g>
                 )}
 
-                {(node.hasDeep || node.sim) && (
-                  <g className="tree-badges" transform={`translate(6 ${NODE_H - 5})`}>
-                    {node.hasDeep && <circle r={3.5} fill="var(--badge-deep)" />}
-                    {node.sim && (
-                      <circle cx={node.hasDeep ? 10 : 0} r={3.5} fill="var(--badge-sim)" />
-                    )}
-                  </g>
-                )}
+                <g className="tree-badges" transform={`translate(6 ${NODE_H - 5})`}>
+                  {[
+                    node.hasDeep && 'var(--badge-deep)',
+                    node.sim && 'var(--badge-sim)',
+                    noted.has(id) && 'var(--accent)',
+                    id in marks && (marks[id].known ? 'var(--mark-known)' : 'var(--mark-unsure)'),
+                  ]
+                    .filter((c): c is string => typeof c === 'string')
+                    .map((color, i) => (
+                      <circle key={color} cx={i * 10} r={3.5} fill={color} />
+                    ))}
+                </g>
               </g>
             );
           })}
@@ -211,6 +221,7 @@ export default function TreeCanvas({
         <em>
           <i className="dot" style={{ background: 'var(--badge-deep)' }} /> 심화
           <i className="dot" style={{ background: 'var(--badge-sim)' }} /> 눈으로 보기
+          <i className="dot" style={{ background: 'var(--accent)' }} /> 내 메모
         </em>
       </div>
     </div>
