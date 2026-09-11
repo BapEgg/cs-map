@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { loadContent } from './content/load';
 import ConceptPanel, { type PanelPlace } from './panel/ConceptPanel';
 import NotesOverview from './panel/NotesOverview';
@@ -8,7 +8,7 @@ import { buildTermIndex } from './panel/termIndex';
 import QuizMode from './quiz/QuizMode';
 import { isBlank } from './store/studyStore';
 import { useStudy } from './store/useStudy';
-import TreeCanvas from './tree/TreeCanvas';
+import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
 import VizStage from './viz/VizStage';
@@ -23,6 +23,8 @@ const THEME_LABEL: Record<ThemeMode, string> = {
 /** 어디서 어떻게 읽고 있었는지. 돌아가기가 이걸 되살린다. */
 interface Visit extends PanelPlace {
   id: string;
+  /** 그때 지도를 보던 자리와 배율. */
+  cam?: { x: number; y: number; k: number };
 }
 
 export default function App() {
@@ -32,6 +34,8 @@ export default function App() {
 
   const study = useStudy();
   const { touch } = study;
+  /** 지도의 카메라 손잡이. 뒤로 갈 때 보던 자리로 되돌리는 데 쓴다. */
+  const treeRef = useRef<TreeHandle | null>(null);
 
   const [orientation, setOrientation] = useState<Orientation>('h');
   /** "이 가지만 크게 보기"로 파고든 자취. 마지막이 지금 루트다. */
@@ -131,7 +135,10 @@ export default function App() {
   const navigate = useCallback(
     (targetId: string, from: PanelPlace) => {
       if (!tree.byId[targetId] || targetId === selected) return;
-      if (selected) setTrail((t) => [...t, { id: selected, ...from }]);
+      // 스냅샷은 **여기서** 찍는다. setTrail 업데이터 안에서 찍으면 업데이터가 나중에
+      // 실행되면서 이미 옮겨간 카메라를 떠 버린다.
+      const cam = treeRef.current?.snapshot();
+      if (selected) setTrail((t) => [...t, { id: selected, ...from, cam }]);
       setRestore(undefined);
       reveal(targetId);
     },
@@ -155,6 +162,13 @@ export default function App() {
     setTrail((t) => t.slice(0, -1));
     setRestore({ tab: last.tab, scroll: last.scroll });
     reveal(last.id);
+    /*
+     * 지도도 그때 보던 자리·배율로 되돌린다.
+     * 여기서 바로 부른다. requestAnimationFrame으로 미루면 탭이 안 보일 때 아예 안 돌아
+     * 복원이 통째로 건너뛰어진다. restore가 "잠깐 자동 이동 금지"를 걸어두므로,
+     * 뒤이어 도는 reveal의 따라가기 효과가 이 자리를 덮어쓰지 못한다.
+     */
+    if (last.cam) treeRef.current?.restore(last.cam);
   }, [reveal, trail]);
 
   /**
@@ -305,6 +319,7 @@ export default function App() {
           noted={notedIds}
           onNodeClick={clickNode}
           onToggle={toggle}
+          handleRef={treeRef}
         />
         {selected ? (
           <ConceptPanel

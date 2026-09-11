@@ -59,9 +59,17 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     [setCam, viewSize],
   );
 
+  /**
+   * 되돌리는 동안에는 자동 이동을 막는다.
+   * 뒤로 갈 때 "보던 자리로 복원" 직후에 "선택이 바뀌었으니 따라가기"가 한 번 더 밀어서
+   * 복원한 자리가 몇십 px씩 어긋났다.
+   */
+  const holdUntil = useRef(0);
+
   /** 그 자리가 화면 안에 오도록 살짝 밀어준다. 노드를 펼치거나 다른 개념으로 건너뛸 때 쓴다. */
   const ensureVisible = useCallback(
     (box: Box) => {
+      if (Date.now() < holdUntil.current) return;
       const { w, h } = viewSize();
       const c = camRef.current;
       const pad = 80;
@@ -138,6 +146,16 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     [setCam],
   );
 
+  /** 지금 카메라를 그대로 떠 둔다. 뒤로 갈 때 이 자리로 되돌리려고. */
+  const snapshot = useCallback(() => ({ ...camRef.current }), []);
+  const restore = useCallback(
+    (c: Camera) => {
+      holdUntil.current = Date.now() + 400;
+      setCam({ ...c }, true);
+    },
+    [setCam],
+  );
+
   return {
     cam,
     smooth,
@@ -148,5 +166,7 @@ export function useCamera(svgRef: React.RefObject<SVGSVGElement | null>) {
     fit,
     zoomBy,
     ensureVisible,
+    snapshot,
+    restore,
   };
 }

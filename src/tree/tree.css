@@ -228,3 +228,34 @@
 .tree-legend i.dot:first-child {
   margin-left: 0;
 }
+
+/*
+ * 펼쳤을 때 새 자식이 부모 자리에서 나오는 느낌.
+ * 전체를 다시 배치하거나 줌을 건드리지 않고, 새로 생긴 것만 짧게 움직인다.
+ * 바운스 같은 장식은 넣지 않는다. 방향만 알려주면 된다.
+ */
+@keyframes node-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--from-y, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.node-in {
+  animation: node-in var(--move) var(--ease-out);
+}
+
+/* 움직임을 줄여 달라고 한 사람에게는 위치만 바꾸고 끝낸다. */
+@media (prefers-reduced-motion: reduce) {
+  .node-in {
+    animation: none;
+  }
+
+  .tree-cam {
+    transition: none !important;
+  }
+}

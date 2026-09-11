@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { ConceptNode } from '../content/types';
 import SubjectIcon from './SubjectIcon';
 import { NODE_H, TITLE_SIZE, layoutTree, linkPath, textWidth, type Orientation } from './layout';
-import { useCamera } from './useCamera';
+import { useCamera, type Camera } from './useCamera';
 import './tree.css';
 
 interface Props {
@@ -19,6 +19,13 @@ interface Props {
   onNodeClick: (id: string) => void;
   /** ＋/－ 표시를 눌렀을 때. 접기·펴기만 한다. */
   onToggle: (id: string) => void;
+  /** 카메라를 떠 두고 되돌리기 위한 손잡이. 뒤로 갈 때 보던 자리로 돌아간다. */
+  handleRef?: React.RefObject<TreeHandle | null>;
+}
+
+export interface TreeHandle {
+  snapshot(): Camera;
+  restore(cam: Camera): void;
 }
 
 export default function TreeCanvas({
@@ -31,10 +38,26 @@ export default function TreeCanvas({
   noted,
   onNodeClick,
   onToggle,
+  handleRef,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const { cam, smooth, dragging, didDrag, onPointerDown, fit, zoomBy, ensureVisible } =
-    useCamera(svgRef);
+  const {
+    cam,
+    smooth,
+    dragging,
+    didDrag,
+    onPointerDown,
+    fit,
+    zoomBy,
+    ensureVisible,
+    snapshot,
+    restore,
+  } = useCamera(svgRef);
+
+  // 카메라 손잡이를 App에 넘긴다. 뒤로 갈 때 보던 자리·배율을 그대로 되돌리려고.
+  useEffect(() => {
+    if (handleRef) handleRef.current = { snapshot, restore };
+  }, [handleRef, snapshot, restore]);
 
   const layout = useMemo(
     () => layoutTree(byId, root, open, orientation),
@@ -177,7 +200,7 @@ export default function TreeCanvas({
           className="tree-cam"
           style={{
             transform: `translate(${cam.x}px, ${cam.y}px) scale(${cam.k})`,
-            transition: smooth ? 'transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)' : 'none',
+            transition: smooth ? 'transform var(--move) var(--ease-out)' : 'none',
           }}
         >
           <g className="tree-links">
@@ -227,12 +250,28 @@ export default function TreeCanvas({
                 aria-expanded={hasKids ? isOpen : undefined}
                 aria-selected={id === selected}
                 tabIndex={-1}
+                style={
+                  node.parentId && layout.pos[node.parentId]
+                    ? ({
+                        '--from-x': `${layout.pos[node.parentId].x - p.x}px`,
+                        '--from-y': `${layout.pos[node.parentId].y - p.y}px`,
+                      } as React.CSSProperties)
+                    : undefined
+                }
               >
-                <rect className="tree-node-box" width={w} height={NODE_H} rx={8} />
-                {icon && <SubjectIcon id={id} x={padL} y={(NODE_H - 16) / 2} />}
-                <text className="tree-node-title" x={titleX} y={NODE_H / 2 + 4.5} fontSize={fs}>
-                  {node.title}
-                </text>
+                {/*
+                 * 바깥 g는 자리, 안쪽 g는 등장. 둘을 한 요소에 겹치면 위치가 깨진다.
+                 * 등장 애니메이션은 **요소가 새로 생길 때 한 번만** 돈다. React key가 그대로면
+                 * 같은 요소가 유지되므로 이미 있던 노드는 다시 움직이지 않는다.
+                 * 따로 "새로 나타났는지"를 세지 않아도 되는 게 이 방식의 값어치다.
+                 */}
+                <g className="node-in">
+                  <rect className="tree-node-box" width={w} height={NODE_H} rx={8} />
+                  {icon && <SubjectIcon id={id} x={padL} y={(NODE_H - 16) / 2} />}
+                  <text className="tree-node-title" x={titleX} y={NODE_H / 2 + 4.5} fontSize={fs}>
+                    {node.title}
+                  </text>
+                </g>
                 {/*
                  * 접기·펴기는 ＋/－ 를 눌러야 한다. 노드 본체를 누르는 건 "여기로 들어가기"다.
                  * 둘을 한 클릭에 몰면, 이미 열린 가지를 눌렀을 때 들어가려던 건지
