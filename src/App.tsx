@@ -2,6 +2,9 @@ import { useMemo } from 'react';
 import { loadContent } from './content/load';
 import type { ContentTree } from './content/types';
 import { useTheme, type ThemeMode } from './theme/useTheme';
+import Player from './viz/Player';
+import MemoryLayoutView from './viz/scenes/MemoryLayoutView';
+import { buildMemoryLayoutScene } from './viz/scenes/memoryLayout';
 import './App.css';
 
 const THEME_LABEL: Record<ThemeMode, string> = {
@@ -52,6 +55,7 @@ function Node({ id, tree }: { id: string; tree: ContentTree }) {
 export default function App() {
   const { mode, cycle } = useTheme();
   const tree = useMemo(() => loadContent(), []);
+  const scene = useMemo(() => buildMemoryLayoutScene(), []);
   const count = Object.keys(tree.byId).length;
 
   return (
@@ -82,6 +86,13 @@ export default function App() {
       ) : (
         <p>content/ 에서 루트를 못 찾았다.</p>
       )}
+
+      <h2 className="section">시각화 시안 · 메모리 영역</h2>
+      <p className="section-note">
+        스타일 확정용 첫 장면이다. 무대를 먼저 세우고 그 위에서 프로그램을 돌린다. 화면에 들어오면
+        알아서 재생된다.
+      </p>
+      <Player scene={scene} render={(state) => <MemoryLayoutView state={state} />} />
 
       {tree.problems.length > 0 && (
         <div className="problems">

@@ -56,9 +56,12 @@
   --viz-cell: transparent;
   --viz-cell-border: #e8eaf0;
   --viz-cell-text: #f2f4f8;
+  --viz-band: rgb(255 255 255 / 0.04); /* 무대의 영역 바탕 */
+  --viz-frame-bg: rgb(255 255 255 / 0.07); /* 함수 프레임 묶음 */
   --viz-current: #b5b02e; /* 지금 보고 있는 것 */
-  --viz-compare: #a8484b; /* 비교 대상 */
-  --viz-done: #4f8f63; /* 확정된 것 */
+  --viz-compare: #a8484b; /* 사라지는 것 */
+  --viz-done: #4f8f63; /* 값이 확정된 것 */
+  --viz-on-role: #10151d; /* 역할색 위에 얹는 글씨 */
   --viz-label: #f2f4f8;
   --viz-label-muted: #9aa3b4;
 
@@ -114,9 +117,12 @@
   --viz-bg: #161c26;
   --viz-cell-border: #cdd3de;
   --viz-cell-text: #f2f4f8;
+  --viz-band: rgb(255 255 255 / 0.05);
+  --viz-frame-bg: rgb(255 255 255 / 0.08);
   --viz-current: #c8c23a;
   --viz-compare: #c25a5e;
   --viz-done: #5fa876;
+  --viz-on-role: #10151d;
   --viz-label: #f2f4f8;
   --viz-label-muted: #9aa3b4;
 

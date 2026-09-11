@@ -1,0 +1,271 @@
+.viz {
+  background: var(--viz-bg);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px 14px;
+  color: var(--viz-label);
+  outline: none;
+}
+
+.viz:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.viz-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.viz-head h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--viz-label);
+}
+
+.viz-phase {
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.viz-phase-stage {
+  color: var(--viz-current);
+}
+
+.viz-phase-run {
+  color: var(--viz-done);
+}
+
+.viz-body {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 코드와 그림을 나란히. 실행 중인 줄이 켜지면 옆 그림이 변한다. */
+.viz-code {
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 420px;
+  margin: 0;
+  padding: 12px 0;
+  font-family: 'Consolas', 'D2Coding', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+
+.viz-code code {
+  display: block;
+  padding: 0 10px 0 0;
+  white-space: pre;
+  color: var(--viz-label-muted);
+  border-left: 3px solid transparent;
+  transition:
+    color 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.viz-code code.on {
+  color: var(--viz-label);
+  background: color-mix(in srgb, var(--viz-current) 18%, transparent);
+  border-left-color: var(--viz-current);
+}
+
+.viz-code-num {
+  display: inline-block;
+  width: 26px;
+  text-align: right;
+  margin-right: 12px;
+  color: var(--viz-label-muted);
+  opacity: 0.5;
+}
+
+.viz-stage {
+  flex: 1 1 400px;
+  min-width: 300px;
+  max-width: 490px;
+  margin: 0 auto;
+}
+
+.viz-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/*
+ * 트윈. 상태가 순간적으로 바뀌면 눈이 못 따라가서, 모든 변화를 움직임으로 잇는다.
+ * React key가 유지되는 한 같은 요소가 새 위치로 미끄러져 간다.
+ */
+.viz-box {
+  transition:
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.5s ease;
+}
+
+.viz-box rect,
+.viz-box text {
+  transition:
+    fill 0.45s ease,
+    fill-opacity 0.45s ease;
+}
+
+.viz-fade,
+.viz-free rect,
+.viz-free text,
+.viz-frame,
+.viz-pointer {
+  transition:
+    opacity 0.55s ease,
+    y 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    d 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    stroke 0.45s ease;
+}
+
+.viz-region-title {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--viz-label);
+}
+
+.viz-region-sub,
+.viz-addr {
+  font-size: 11px;
+  fill: var(--viz-label-muted);
+}
+
+.viz-band-text {
+  font-family: 'Consolas', ui-monospace, monospace;
+  font-size: 12px;
+  fill: var(--viz-label-muted);
+}
+
+.viz-box-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.viz-free-text {
+  font-size: 12px;
+  fill: var(--viz-label-muted);
+}
+
+.viz-caption {
+  margin: 16px 0 14px;
+  min-height: 2.8em;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--viz-label);
+  animation: viz-caption-in 0.45s ease;
+}
+
+@keyframes viz-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.viz-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.viz-controls button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--viz-label);
+  background: transparent;
+  border: 1px solid var(--viz-label-muted);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.viz-controls button:hover:not(:disabled) {
+  border-color: var(--viz-label);
+}
+
+.viz-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.viz-primary {
+  min-width: 88px;
+}
+
+.viz-track {
+  display: flex;
+  gap: 3px;
+  margin: 0 6px;
+  flex: 1 1 120px;
+}
+
+.viz-controls .viz-tick {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: var(--viz-label-muted);
+  opacity: 0.3;
+}
+
+.viz-controls .viz-tick.past {
+  opacity: 0.6;
+}
+
+.viz-controls .viz-tick-stage.on {
+  background: var(--viz-current);
+  opacity: 1;
+}
+
+.viz-controls .viz-tick-run.on {
+  background: var(--viz-done);
+  opacity: 1;
+}
+
+.viz-speed {
+  display: flex;
+  gap: 3px;
+}
+
+.viz-controls .viz-speed button {
+  padding: 4px 7px;
+  font-size: 12px;
+  opacity: 0.55;
+}
+
+.viz-controls .viz-speed button.on {
+  opacity: 1;
+  border-color: var(--viz-current);
+  color: var(--viz-current);
+}
+
+@media (max-width: 720px) {
+  .viz-body {
+    flex-direction: column;
+  }
+
+  .viz-code {
+    width: 100%;
+  }
+}
