@@ -280,50 +280,64 @@ button.term:hover {
 }
 
 /*
- * 흐름. 한 줄에 "방향 · 갈 곳 · 이유"를 격자로 놓는다.
- * 전에는 "A —이유→ B"를 글줄로 붙여 써서 링크·화살표·굵은 글씨가 뒤섞여 안 읽혔다.
- * 이유는 갈 곳 아래 작은 글씨로 — 주인공은 갈 곳이고, 이유는 그 까닭이다.
+ * 흐름 = 세로 시간선. 왼쪽 세로선에 점을 찍고, 지금 개념은 채운 점.
+ * 이유는 점과 점 사이 선 옆에 작은 글씨로 — "여기서 저기로 가는 까닭"이니 선 위가 제자리다.
+ * "앞에서/다음으로" 같은 말은 안 쓴다. 선과 점이 이미 방향을 말한다(위 = 먼저, 아래 = 나중).
  */
 .flow {
   list-style: none;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
+  padding: 0 0 0 22px;
+  position: relative;
 }
 
-.flow li {
-  display: grid;
-  grid-template-columns: 4.5em 1fr;
-  grid-template-rows: auto auto;
-  column-gap: var(--sp-3);
-  align-items: baseline;
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--radius);
-  background: var(--surface-sunken);
+.flow::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--border-strong);
 }
 
-.flow-dir {
-  grid-row: 1 / span 2;
-  font-size: 12px;
-  font-weight: 600;
+.flow-step {
+  position: relative;
+  padding: 0 0 6px;
+}
+
+.flow-step:last-child {
+  padding-bottom: 0;
+}
+
+/* 점과 점 사이의 까닭. 점은 없고 선만 지나간다. */
+.flow-gap {
+  font-size: 13px;
   color: var(--text-muted);
-  white-space: nowrap;
+  padding: 0 0 6px;
 }
 
-.flow-dir::before {
-  display: inline-block;
-  width: 1.2em;
-  color: var(--accent);
+.flow-step::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border-strong);
 }
 
-.flow-prev .flow-dir::before {
-  content: '←';
+.flow-step.is-here::before {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
-.flow-next .flow-dir::before {
-  content: '→';
+.flow-step.is-here b {
+  font-size: 15px;
+  color: var(--text);
 }
 
 .flow-go {
@@ -336,7 +350,6 @@ button.term:hover {
   padding: 0;
   cursor: pointer;
   text-align: left;
-  justify-self: start;
   text-decoration: underline;
   text-decoration-color: transparent;
   text-underline-offset: 3px;
@@ -345,12 +358,6 @@ button.term:hover {
 
 .flow-go:hover {
   text-decoration-color: currentColor;
-}
-
-.flow-why {
-  grid-column: 2;
-  font-size: 13px;
-  color: var(--text-muted);
 }
 
 .hint {

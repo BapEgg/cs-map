@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentTree } from '../content/types';
 import type { ConceptNote } from '../store/studyStore';
 import NoteTab from './NoteTab';
@@ -245,30 +245,35 @@ export default function ConceptPanel({
             <section>
               <h3 className="section-title">흐름</h3>
               {/*
-                앞뒤를 **줄로 나눠** 보여준다. 전에는 "A —이유→ B"를 한 줄에 붙여 써서
-                링크·화살표·굵은 글씨가 뒤섞여 무엇이 무엇인지 안 읽혔다.
-                방향 표시, 갈 곳, 그 이유 — 셋을 각자 자리에 둔다.
+                세로 시간선. 위가 먼저, 아래가 나중. 지금 개념은 가운데 채운 점.
+                이유는 두 점 사이 선 위에 놓인다 — "여기서 저기로 가는 까닭"이니까.
+                "앞에서/다음으로" 같은 말은 안 쓴다. 선과 점이 이미 방향을 말한다.
               */}
-              <ul className="flow">
+              <ol className="flow">
                 {node.flowPrev.map((f) => (
-                  <li key={`p-${f.id}`} className="flow-prev">
-                    <span className="flow-dir">앞에서</span>
-                    <button type="button" className="flow-go" onClick={() => go(f.id)}>
-                      {tree.byId[f.id]?.title ?? f.id}
-                    </button>
-                    <span className="flow-why">{f.reason}</span>
-                  </li>
+                  <Fragment key={`p-${f.id}`}>
+                    <li className="flow-step">
+                      <button type="button" className="flow-go" onClick={() => go(f.id)}>
+                        {tree.byId[f.id]?.title ?? f.id}
+                      </button>
+                    </li>
+                    <li className="flow-gap">{f.reason}</li>
+                  </Fragment>
                 ))}
+                <li className="flow-step is-here">
+                  <b>{node.title}</b>
+                </li>
                 {node.flowNext.map((f) => (
-                  <li key={`n-${f.id}`} className="flow-next">
-                    <span className="flow-dir">다음으로</span>
-                    <button type="button" className="flow-go" onClick={() => go(f.id)}>
-                      {tree.byId[f.id]?.title ?? f.id}
-                    </button>
-                    <span className="flow-why">{f.reason}</span>
-                  </li>
+                  <Fragment key={`n-${f.id}`}>
+                    <li className="flow-gap">{f.reason}</li>
+                    <li className="flow-step">
+                      <button type="button" className="flow-go" onClick={() => go(f.id)}>
+                        {tree.byId[f.id]?.title ?? f.id}
+                      </button>
+                    </li>
+                  </Fragment>
                 ))}
-              </ul>
+              </ol>
             </section>
           )}
 
