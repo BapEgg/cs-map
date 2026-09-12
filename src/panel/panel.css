@@ -108,9 +108,9 @@
 /*
  * 외울 한 문장(3줄 카드, HANDOFF 5-4). 설명 뒤에 온다.
  *
- * 상자도 띠도 두르지 않는다. 왼쪽에 색 띠를 세운 안내 상자는 어느 앱에나 있는 모양이라
- * 눈이 그냥 지나친다. 대신 **교재에 형광펜을 긋듯** 문장 아래를 칠한다 —
- * 이 앱에서 형광펜은 이미 "여기 봐라"는 뜻이고, 외울 문장에 줄을 긋는 건 누구나 해 본 일이다.
+ * 상자·띠·형광펜 어느 것도 두르지 않는다. 표시로 구분하는 안은 전부 "어디서 본 모양"이거나
+ * 본문과 안 갈렸다. 대신 **가려 두고 눌러서 본다** — 구분이 모양이 아니라 동작에서 나오고,
+ * 읽을 때마다 한 번 떠올리게 되어 그 자체가 외우는 일이 된다.
  */
 .card3 {
   margin: var(--sp-2) 0 var(--sp-5);
@@ -136,16 +136,59 @@
 }
 
 /*
- * 형광펜. 글줄을 따라가야 하니 블록이 아니라 인라인이다.
- * 아래 45%만 칠해서 글자 위로 올라오지 않게 하고, 줄이 바뀌면 줄마다 따로 칠한다.
+ * 가려 둔 문장. 흐리게만 하고 자리는 그대로 — 눌렀을 때 글이 그 자리에 나타나야
+ * 시선이 안 움직인다. 흐린 글은 aria-hidden이라 버튼 이름이 읽힌다.
  */
+.card3-cover {
+  position: relative;
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.card3-cover:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
+
+.card3-blur {
+  display: block;
+  filter: blur(7px);
+  opacity: 0.55;
+  user-select: none;
+  transition: filter var(--move-fast) ease;
+}
+
+.card3-cover:hover .card3-blur {
+  filter: blur(5px);
+}
+
+.card3-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.card3-cover:hover .card3-hint {
+  color: var(--text);
+}
+
 .card3-line .rich-line {
-  display: inline;
+  display: block;
   margin: 0;
-  padding: 0 0.15em;
-  background-image: linear-gradient(transparent 55%, var(--highlight-bg) 55%);
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
 }
 
 .card3-analogy {

@@ -55,6 +55,8 @@ export default function ConceptPanel({
   const [tab, setTab] = useState<Tab>(restore?.tab ?? 'basic');
   const [cards, setCards] = useState<TermCard[]>([]);
   const [openAnswers, setOpenAnswers] = useState<Set<number>>(new Set());
+  /** 외울 한 문장을 봤는지. 개념이 바뀌면(key=selected) 다시 가려진다. */
+  const [revealed, setRevealed] = useState(false);
   const scroller = useRef<HTMLElement>(null);
 
   const parsed = useMemo(() => parseBody(node.body), [node.body]);
@@ -202,9 +204,31 @@ export default function ConceptPanel({
                   div로 감싼다. RichText가 문단마다 <p>를 내보내는데 <p> 안의 <p>는
                   브라우저가 바깥 <p>를 먼저 닫아 버려서 구조가 통째로 어긋난다.
                 */}
-                <div className="card3-line">
-                  <RichText text={node.card.one_line} {...richProps} />
-                </div>
+                {/*
+                  가려 두고 눌러서 본다. 표시(상자·띠·형광펜)로 구분하는 게 아니라 **동작**으로 구분한다 —
+                  읽을 때마다 한 번 떠올리게 되어, 그 자체가 외우는 일이 된다.
+                  개념을 옮기면(key=selected) 다시 가려진다.
+                */}
+                {revealed ? (
+                  <div className="card3-line">
+                    <RichText text={node.card.one_line} {...richProps} />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="card3-cover"
+                    onClick={() => setRevealed(true)}
+                    aria-label="한 문장 보기 — 먼저 떠올려 보세요"
+                  >
+                    {/* 흐린 글은 장식이다. 읽는 건 버튼 이름으로 충분하다. */}
+                    <span className="card3-line card3-blur" aria-hidden="true">
+                      {node.card.one_line}
+                    </span>
+                    <span className="card3-hint" aria-hidden="true">
+                      떠올려 보고 눌러서 확인
+                    </span>
+                  </button>
+                )}
                 {node.card.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
                 {!!node.card.keywords?.length && (
                   <p className="card3-keys">
