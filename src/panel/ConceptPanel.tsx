@@ -243,7 +243,7 @@ export default function ConceptPanel({
 
           {(node.flowPrev.length > 0 || node.flowNext.length > 0) && (
             <section>
-              <h3 className="section-title">흐름</h3>
+              <h3 className="section-title">앞뒤 개념</h3>
               {/*
                 세로 시간선. 위가 먼저, 아래가 나중. 지금 개념은 가운데 채운 점.
                 이유는 두 점 사이 선 위에 놓인다 — "여기서 저기로 가는 까닭"이니까.
@@ -293,7 +293,7 @@ export default function ConceptPanel({
 
           {!!node.see_also?.length && (
             <section>
-              <h3 className="section-title">이어 보기</h3>
+              <h3 className="section-title">같이 보기</h3>
               <div className="chip-row">
                 {node.see_also.map((sid) => (
                   <button key={sid} type="button" className="chip" onClick={() => go(sid)}>
