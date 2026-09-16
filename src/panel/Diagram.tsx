@@ -48,24 +48,39 @@ function layout(edges: DiagramEdge[], vertical: boolean) {
   });
   const total = cursor - GAP;
 
-  // 같은 방향으로 같은 거리를 도는 호가 여럿이면 층을 올린다.
-  const lanes = new Map<string, number>();
-  const arcs: Arc[] = edges.map((e) => {
-    const i = names.indexOf(e.from);
-    const j = names.indexOf(e.to);
-    const forward = j >= i;
-    const span = Math.max(1, Math.abs(j - i));
-    const key = `${forward}:${span}`;
-    const lane = lanes.get(key) ?? 0;
-    lanes.set(key, lane + 1);
-    return { ...e, i, j, forward, height: ARC_BASE + ARC_STEP * (span - 1) + lane * ARC_STEP };
-  });
+  // 같은 쪽에서 겹치는 호는 바깥 것을 더 높이 띄운다. 안쪽(짧은) 호부터 자리를 잡고,
+  // 구간이 겹치는 호가 이미 있으면 그 위로 한 층 올린다. 겹치지 않으면 같은 높이라도 된다.
+  const arcs: Arc[] = edges
+    .map((e) => {
+      const i = names.indexOf(e.from);
+      const j = names.indexOf(e.to);
+      return { ...e, i, j, forward: j >= i, height: 0 };
+    })
+    .sort((a, b) => Math.abs(a.j - a.i) - Math.abs(b.j - b.i));
+  const placed: Arc[] = [];
+  for (const a of arcs) {
+    const lo = Math.min(a.i, a.j);
+    const hi = Math.max(a.i, a.j);
+    let below = 0;
+    for (const b of placed) {
+      if (b.forward !== a.forward) continue;
+      const blo = Math.min(b.i, b.j);
+      const bhi = Math.max(b.i, b.j);
+      const overlaps = blo < hi && lo < bhi;
+      const touchesSame = blo === lo && bhi === hi;
+      if (overlaps || touchesSame) below = Math.max(below, b.height);
+    }
+    a.height = below ? below + ARC_STEP : ARC_BASE;
+    placed.push(a);
+  }
 
   // 호가 차지하는 두께. 넓은 화면은 글씨가 호 위에 얹히고, 폰은 호 옆에 붙는다(폭이 더 든다).
   const extent = (side: Arc[]) => {
     if (!side.length) return MARGIN;
     const arc = Math.max(...side.map((a) => a.height));
-    const label = vertical ? Math.max(...side.map((a) => textWidth(a.label, LABEL))) + 8 : LABEL;
+    const label = vertical
+      ? Math.max(...side.map((a) => textWidth(a.label, LABEL))) / 2 + 8
+      : LABEL;
     return arc + label + MARGIN;
   };
   const forwardExtent = extent(arcs.filter((a) => a.forward));
@@ -137,9 +152,9 @@ export default function Diagram({ edges }: { edges: DiagramEdge[] }) {
           const c1 = pt(self ? a0 + 30 : a1, face + sign * a.height * 1.3);
           const apex = pt((a0 + a1) / 2, face + sign * a.height);
           const d = `M ${p0.x} ${p0.y} C ${c0.x} ${c0.y}, ${c1.x} ${c1.y}, ${p1.x} ${p1.y}`;
-          const label = vertical
-            ? { x: apex.x + sign * 6, y: apex.y, anchor: sign > 0 ? 'start' : 'end' }
-            : { x: apex.x, y: apex.y + (sign < 0 ? -5 : LABEL + 3), anchor: 'middle' };
+          // 글씨는 호의 꼭대기 위에 얹는다. 배경색 테두리(halo)가 밑의 선을 가려서
+          // 어느 호의 글씨인지 위치로 읽히고, 다른 호가 지나가도 글자는 살아남는다.
+          const label = { x: apex.x, y: apex.y };
           return (
             <g key={k} className="diagram-edge">
               <path d={d} markerEnd="url(#dg-arrow)" />
@@ -147,8 +162,8 @@ export default function Diagram({ edges }: { edges: DiagramEdge[] }) {
                 <text
                   x={label.x}
                   y={label.y}
-                  textAnchor={label.anchor as 'start' | 'end' | 'middle'}
-                  dominantBaseline={vertical ? 'central' : undefined}
+                  textAnchor="middle"
+                  dominantBaseline="central"
                   className="diagram-label"
                 >
                   {a.label}

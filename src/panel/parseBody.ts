@@ -62,13 +62,15 @@ const FOLLOW = /^-\s*꼬리\s*:\s*/;
 const FENCE = /^```(\w*)\s*$/;
 const EDGE = /^(.+?)\s*(?:->|→)\s*(.+?)\s*(?::\s*(.*))?$/;
 
+/** 칸 나누기. 칸 안에 `\|`를 쓰면 글자 그대로의 세로줄이다. */
 const cells = (line: string) =>
   line
     .trim()
     .replace(/^\|/, '')
     .replace(/\|$/, '')
+    .replace(/\\\|/g, '\uE001')
     .split('|')
-    .map((c) => c.trim());
+    .map((c) => c.trim().replace(/\uE001/g, '|'));
 
 const isTableRow = (line: string) => /^\s*\|.*\|\s*$/.test(line);
 const isSeparator = (line: string) =>

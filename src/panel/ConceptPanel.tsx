@@ -203,13 +203,13 @@ export default function ConceptPanel({
               {parsed.concept.length > 0 && (
                 <section>
                   <h3 className="section-title">개념 정리</h3>
-                  <Blocks blocks={parsed.concept} {...richProps} used={new Set()} />
+                  <Blocks blocks={parsed.concept} {...richProps} />
                 </section>
               )}
               {parsed.why.length > 0 && (
                 <section>
                   <h3 className="section-title">왜 나왔나</h3>
-                  <Blocks blocks={parsed.why} {...richProps} used={new Set()} />
+                  <Blocks blocks={parsed.why} {...richProps} />
                 </section>
               )}
             </>
@@ -365,7 +365,7 @@ export default function ConceptPanel({
           {parsed.deep?.sections.map((sec) => (
             <section key={sec.title}>
               <h3 className="section-title">{sec.title}</h3>
-              <Blocks blocks={sec.blocks} {...richProps} used={new Set()} />
+              <Blocks blocks={sec.blocks} {...richProps} />
             </section>
           ))}
 

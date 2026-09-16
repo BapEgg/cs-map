@@ -356,11 +356,11 @@ span.rich {
 }
 
 .diagram-label {
-  fill: var(--text-muted);
+  fill: var(--text);
   font-size: 12px;
   paint-order: stroke;
   stroke: var(--surface);
-  stroke-width: 4px;
+  stroke-width: 6px;
   stroke-linejoin: round;
 }
 

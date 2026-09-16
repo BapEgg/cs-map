@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react';
 import { SLOT, maskCode } from './inlineCode';
-import { resolveTerm, standsAlone, type TermIndex, type TermTarget } from './termIndex';
+import { findTerms } from './linkTerms';
+import type { TermIndex, TermTarget } from './termIndex';
 
 interface Props {
   text: string;
@@ -9,10 +10,11 @@ interface Props {
   index: TermIndex;
   onTerm: (target: TermTarget) => void;
   /**
-   * 이미 링크한 용어. 절(section) 단위로 하나를 넘겨 주면 그 절 안에서는 같은 용어를
-   * 한 번만 링크한다. 문단마다 새로 링크하면 밑줄이 반복돼 글이 한 덩어리로 보였다.
+   * 앞에서 이미 링크한 용어. 여기 있는 이름은 다시 밑줄을 치지 않는다(절 안에서 한 번만).
+   * **읽기만 한다** — 복사해서 쓰므로 부모가 넘긴 Set은 바뀌지 않는다. 렌더 중에 공유 Set을
+   * 고치면 StrictMode의 두 번째 렌더에서 모든 링크가 사라진다(실제로 그랬다).
    */
-  used?: Set<string>;
+  skip?: Set<string>;
   /** 문단 태그. 목록 항목 안에서는 <span>으로 그린다. */
   as?: 'p' | 'span';
 }
@@ -20,7 +22,12 @@ interface Props {
 /** `**강조**`를 형광펜으로, `코드`를 <code>로, 용어를 누를 수 있는 버튼으로 바꾼다. */
 function renderInline(
   text: string,
-  { selfId, index, onTerm, used }: Required<Pick<Props, 'selfId' | 'index' | 'onTerm' | 'used'>>,
+  {
+    selfId,
+    index,
+    onTerm,
+    used,
+  }: Pick<Props, 'selfId' | 'index' | 'onTerm'> & { used: Set<string> },
 ): ReactNode[] {
   const { masked, codes } = maskCode(text);
   const out: ReactNode[] = [];
@@ -44,19 +51,9 @@ function renderInline(
 
   function linkify(chunk: string): ReactNode[] {
     if (!chunk) return [];
-    if (!index.pattern) return [chunk];
     const pieces: ReactNode[] = [];
     let last = 0;
-    index.pattern.lastIndex = 0;
-    for (const m of chunk.matchAll(index.pattern)) {
-      const name = m[0];
-      const at = m.index!;
-      if (used.has(name)) continue;
-      // "프레임워크"의 '프레임'처럼 낱말 안에 파묻힌 건 건너뛴다
-      if (!standsAlone(chunk, at, at + name.length)) continue;
-      const target = resolveTerm(index, name, selfId);
-      if (!target) continue;
-      used.add(name);
+    for (const { name, at, target } of findTerms(chunk, index, selfId, used)) {
       if (at > last) pieces.push(chunk.slice(last, at));
       pieces.push(
         <button
@@ -83,8 +80,8 @@ function renderInline(
  * 문단이 사라지고 문장 간격 = 주제 간격이 되어 글이 한 덩어리로 보였다. 문단이 묶여야
  * 어디서 주제가 바뀌는지 보인다. 연결어 색도 뺐다 — 형광펜·밑줄과 셋이 경쟁했다.
  */
-export default function RichText({ text, selfId, index, onTerm, used, as = 'p' }: Props) {
-  const seen = used ?? new Set<string>();
+export default function RichText({ text, selfId, index, onTerm, skip, as = 'p' }: Props) {
+  const seen = new Set(skip);
   const paragraphs = text.split(/\n{2,}/).filter((p) => p.trim());
   const Tag = as;
   return (

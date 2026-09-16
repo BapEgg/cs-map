@@ -157,3 +157,10 @@ describe('parseBody', () => {
     expect(dropped).toEqual(['이상한 줄']);
   });
 });
+
+describe('표 칸 안의 세로줄', () => {
+  it('역슬래시 세로줄은 글자 그대로', () => {
+    const [t] = parseBlocks(['| a | b |', '|---|---|', '| `ls \\| grep` | x |']);
+    expect(t).toEqual({ kind: 'table', head: ['a', 'b'], rows: [['`ls | grep`', 'x']] });
+  });
+});
