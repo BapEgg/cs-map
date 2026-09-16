@@ -93,8 +93,8 @@ describe('노드 너비', () => {
     // 전에는 잎에도 22px를 빼서 글씨가 11.5px로 쪼그라들었다.
     const t = buildTree({
       '_index.md': md('id: root\ntitle: 루트'),
-      'leaf.md': md('id: leaf\ntitle: 프로세스와 쓰레드'),
-      'branch/_index.md': md('id: branch\ntitle: 프로세스와 쓰레드'),
+      'leaf.md': md('id: leaf\ntitle: 프로세스와 스레드'),
+      'branch/_index.md': md('id: branch\ntitle: 프로세스와 스레드'),
       'branch/kid.md': md('id: kid\ntitle: 자식'),
     });
     // 같은 제목인데 가지 쪽이 토글만큼 넓다

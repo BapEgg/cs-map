@@ -3,6 +3,7 @@ import type { ContentTree } from '../content/types';
 import type { ConceptNote } from '../store/studyStore';
 import NoteTab from './NoteTab';
 import { parseBody } from './parseBody';
+import { InlineText } from './PlainText';
 import RichText from './RichText';
 import type { TermIndex, TermTarget } from './termIndex';
 import './panel.css';
@@ -362,14 +363,14 @@ export default function ConceptPanel({
                       })
                     }
                   >
-                    {openAnswers.has(i) ? '▾' : '▸'} {qa.q}
+                    {openAnswers.has(i) ? '▾' : '▸'} <InlineText text={qa.q} />
                   </button>
                   {openAnswers.has(i) && (
                     <div className="qa-a">
                       <RichText text={qa.a} {...richProps} />
                       {qa.follow.map((f) => (
                         <p key={f} className="qa-follow">
-                          꼬리 질문 · {f}
+                          꼬리 질문 · <InlineText text={f} />
                         </p>
                       ))}
                     </div>

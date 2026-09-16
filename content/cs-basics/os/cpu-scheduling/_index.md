@@ -1,7 +1,7 @@
 ---
 id: cpu-scheduling
 title: CPU 스케줄링
-order: 2
+order: 3
 card:
   one_line: 'CPU 스케줄링은 여러 프로세스 중 어떤 것에 CPU를 줄지 정하는 규칙이다.'
   analogy: ''

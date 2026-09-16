@@ -1,7 +1,7 @@
 ---
 id: disk-scheduling
 title: 디스크 스케줄링
-order: 4
+order: 5
 card:
   one_line: '디스크 스케줄링은 디스크 헤드가 어떤 순서로 요청을 처리할지 정하는 규칙이다.'
   analogy: ''

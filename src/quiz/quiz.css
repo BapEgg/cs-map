@@ -288,3 +288,13 @@ kbd {
   display: flex;
   gap: var(--sp-2);
 }
+
+/* 답과 질문 속 `코드`. 설명 패널과 같은 모양. */
+.quiz code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, 'D2Coding', monospace;
+  font-size: 0.92em;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 4px;
+}

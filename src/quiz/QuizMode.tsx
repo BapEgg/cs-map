@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentTree } from '../content/types';
+import PlainText, { InlineText } from '../panel/PlainText';
 import { SESSION, buildQuestions, pickSession, type QuizKind } from './buildQuestions';
 import './quiz.css';
 
@@ -239,7 +240,9 @@ export default function QuizMode({ tree, marks, onMark, onClose, onGoTo }: Props
 
       <div className="quiz-card">
         {q.path.length > 0 && <p className="quiz-path">{q.path.join(' › ')}</p>}
-        <h3 className="quiz-q">{q.kind === 'basic' ? q.title : q.prompt}</h3>
+        <h3 className="quiz-q">
+          <InlineText text={q.kind === 'basic' ? q.title : q.prompt} />
+        </h3>
         {q.kind === 'interview' && <p className="quiz-from">{q.title}</p>}
 
         {!shown ? (
@@ -259,7 +262,7 @@ export default function QuizMode({ tree, marks, onMark, onClose, onGoTo }: Props
         ) : (
           <>
             <div className="quiz-answer">
-              <p>{q.answer}</p>
+              <PlainText text={q.answer} />
               {q.keywords.length > 0 && (
                 <p className="quiz-keys">
                   {q.keywords.map((k) => (
