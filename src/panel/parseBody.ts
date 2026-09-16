@@ -30,6 +30,8 @@ export interface InterviewQuestion {
   a: string;
   /** 꼬리 질문. */
   follow: string[];
+  /** 흔한 오답. `- 오답: …` 줄. 없으면 생략. */
+  wrong?: string[];
 }
 
 /** 심화의 절 하나. 제목은 파일에 적은 그대로. */
@@ -62,6 +64,8 @@ export interface ParsedBody {
 }
 
 const FOLLOW = /^-\s*꼬리\s*:\s*/;
+/** 흔한 오답. 답 아래 `- 오답: …` 줄. 무엇이 틀린 답인지 없으면 외운 답이 맞는지 스스로 못 가린다. */
+const WRONG = /^-\s*오답\s*:\s*/;
 const FENCE = /^```(\w*)\s*$/;
 const EDGE = /^(.+?)\s*(?:->|→)\s*(.+?)\s*(?::\s*(.*))?$/;
 
@@ -279,11 +283,12 @@ export function parseBody(body: string): ParsedBody {
       if (section !== '면접 질문') continue;
       // 답변은 꼬리 질문 앞까지.
       const follow = chunk.filter((l) => FOLLOW.test(l)).map((l) => l.replace(FOLLOW, '').trim());
+      const wrong = chunk.filter((l) => WRONG.test(l)).map((l) => l.replace(WRONG, '').trim());
       const a = chunk
-        .filter((l) => !FOLLOW.test(l))
+        .filter((l) => !FOLLOW.test(l) && !WRONG.test(l))
         .join('\n')
         .trim();
-      deep.interview.push({ q: title, a, follow });
+      deep.interview.push({ q: title, a, follow, ...(wrong.length ? { wrong } : {}) });
     }
   }
 

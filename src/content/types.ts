@@ -50,6 +50,11 @@ export interface ConceptMeta {
   /** 사실 확인한 연월. 심화 내용에 남긴다. */
   checked?: string;
   sources?: string[];
+  /**
+   * 면접 질문의 근거. 없으면 화면에 "예상 질문(기출 근거 없음)"으로 표시한다 —
+   * 지금 있는 질문은 전부 교재·문서에서 뽑은 예상 질문이다. 기출 근거가 생긴 파일만 여기에 출처를 적는다.
+   */
+  interview_basis?: string;
 }
 
 /** 트리에 올라간 개념 하나. */

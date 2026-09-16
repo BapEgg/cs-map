@@ -93,6 +93,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
       sim: typeof data.sim === 'string' ? data.sim : undefined,
       quiz: data.quiz === false ? false : undefined,
       checked: typeof data.checked === 'string' ? data.checked : undefined,
+      interview_basis: typeof data.interview_basis === 'string' ? data.interview_basis : undefined,
       sources: asStringArray(data.sources),
       path: rel,
       body,
