@@ -173,8 +173,12 @@ describe('parseBody', () => {
   });
 
   it('면접 질문의 `- 오답:` 줄은 흔한 오답으로 따로 읽는다', () => {
-    const p = parseBody(`## 심화\n\n### 면접 질문\n\n#### 질문?\n\n답\n\n- 오답: 틀린 답\n- 꼬리: 다음?`);
-    expect(p.deep?.interview).toEqual([{ q: '질문?', a: '답', follow: ['다음?'], wrong: ['틀린 답'] }]);
+    const p = parseBody(
+      `## 심화\n\n### 면접 질문\n\n#### 질문?\n\n답\n\n- 오답: 틀린 답\n- 꼬리: 다음?`,
+    );
+    expect(p.deep?.interview).toEqual([
+      { q: '질문?', a: '답', follow: ['다음?'], wrong: ['틀린 답'] },
+    ]);
   });
 
   it('심화 밖의 ###과 답 없는 확인 질문도 누락이다', () => {

@@ -480,8 +480,10 @@ export default function ConceptPanel({
                 <h3 className="section-title">면접 질문</h3>
                 {/* 기출 근거가 있는 파일만 frontmatter interview_basis에 출처를 적는다. 없으면 예상 질문이라고 밝힌다. */}
                 <p className="hint">
-                  {node.interview_basis ? `근거 · ${node.interview_basis}` : '예상 질문(기출 근거 없음)'} · 먼저 말로
-                  답해보고 나서 펼쳐 보세요.
+                  {node.interview_basis
+                    ? `근거 · ${node.interview_basis}`
+                    : '예상 질문(기출 근거 없음)'}{' '}
+                  · 먼저 말로 답해보고 나서 펼쳐 보세요.
                 </p>
                 {parsed.deep.interview.map((qa, i) => (
                   <div key={i} className="qa">

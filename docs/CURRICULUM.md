@@ -64,11 +64,16 @@
 | tree / heap / graph | 트리 · 힙 · 그래프 | ✅ | | B-tree(인덱스), 우선순위 큐(스케줄링) |
 | search / sort | 탐색 · 정렬 | ✅ | complexity | 이진 탐색, 퀵·병합·힙 정렬(시각화 대상) |
 | bfs-dfs | BFS/DFS | ✅ | graph, queue, stack | |
+| recursion-backtracking | 재귀·백트래킹 | ✅ | stack, bfs-dfs | 선택→재귀→되돌리기, 가지치기 (2026-09-17) |
+| dp | 동적 계획법 | ✅ | recursion-backtracking | 상태·점화식, 하향/상향, 그리디와 비교 (2026-09-17) |
+| greedy | 그리디 | ✅ | dp, sort | 그리디 선택 속성·교환 논증, 틀리는 예 (2026-09-17) |
+| two-pointer-window-prefix | 투 포인터·슬라이딩 윈도우·누적 합 | ✅ | array, sort | 단조성 조건, 음수일 때 대안 (2026-09-17) |
 
 ## 4. 네트워크·웹 `cs-basics/network`
 
 | id | 제목 | 상태 | 선수 | 비고 |
 |---|---|---|---|---|
+| network-layers | 네트워크 계층과 라우팅 | ✅ | — | 4계층/OSI, 라우팅 표·다음 홉, NAT·사설 IP (2026-09-17) |
 | ip-port-dns | IP·포트·DNS | ✅ | — | 주소 → 문 → 이름 |
 | tcp-udp | TCP/UDP | ✅ | ip-port-dns | 3-way handshake, 순서·재전송, 흐름·혼잡 제어 |
 | http | HTTP | ✅ | tcp-udp | 메서드·상태 코드·헤더, HTTP/1.1 vs 2 vs 3(버전 차이 명시) |
@@ -97,10 +102,16 @@
 
 | id | 제목 | 상태 | 선수 | 비고 |
 |---|---|---|---|---|
-| oop | 객체 지향 | ✅ | class, object(program-dev) | 캡슐화·상속·다형성, 인터페이스 |
+| value-passing | 값 전달과 참조 | ✅ | jvm-memory | call by value, 내용 변경 vs 재할당, 방어적 복사 (2026-09-17) |
+| string-immutability | String 불변성과 문자열 풀 | ✅ | value-passing | ==/equals, intern, StringBuilder (2026-09-17) |
+| static-final | static과 final | ✅ | | 클래스 멤버, 상수, 공유 상태의 위험 (2026-09-17) |
+| oop | 객체 지향 | ✅ | class, object(program-dev) | 캡슐화·상속·다형성 + 오버로딩/오버라이딩 절 (2026-09-17 보강) |
+| interface-abstract | 인터페이스와 추상 클래스 | ✅ | oop | 역할 vs 뼈대, default 메서드, 선택 기준 (2026-09-17) |
 | equals-hashcode | equals/hashCode | ✅ | hash | HashMap이 왜 둘 다 필요로 하는가 |
 | collections | 컬렉션 | ✅ | array, linked-list, hash | ArrayList/LinkedList/HashMap 내부 |
 | generics | 제네릭 | ✅ | collections | 타입 소거 |
+| lambda-functional | 람다와 함수형 인터페이스 | ✅ | interface-abstract | 함수형 인터페이스, effectively final, invokedynamic (2026-09-17) |
+| stream-optional | Stream과 Optional | ✅ | lambda-functional, collections | 지연 평가·부작용·병렬 조건, Optional 자리 (2026-09-17) |
 | exceptions | 예외 | ✅ | | checked/unchecked, try-with-resources |
 | jvm-execution | JVM 실행 | ✅ | 바이트코드 | 클래스 로딩, JIT |
 | jvm-memory | JVM 메모리 | ✅ | 메모리 영역, process | 힙·스택·메타스페이스 ↔ OS 메모리 영역 |
@@ -114,10 +125,12 @@
 |---|---|---|---|---|
 | ioc-di | IoC/DI | ✅ | oop | 왜 new를 안 하나 |
 | bean-lifecycle | 빈 생명주기 | ✅ | ioc-di | 스코프, 초기화/소멸 |
+| boot-config | 부트 자동 설정과 프로파일 | ✅ | bean-lifecycle | 조건부 자동 설정, 설정 우선순위, 프로파일·비밀 (2026-09-17) |
 | mvc-request-flow | MVC 요청 흐름 | ✅ | http, thread-pool | 필터 → 디스패처 서블릿 → 컨트롤러 → … (시각화 대상) |
 | aop-proxy | AOP·프록시 | ✅ | ioc-di | 자기 호출 함정 |
 | spring-transaction | 트랜잭션 | ✅ | transaction-acid, aop-proxy | 전파, 롤백 규칙 |
 | persistence-context | 영속성 컨텍스트 | ✅ | spring-transaction | 1차 캐시, 변경 감지, 플러시 |
+| jpa-relations | 연관관계의 주인과 cascade | ✅ | persistence-context, relational-model | mappedBy, cascade/orphanRemoval, 편의 메서드 (2026-09-17) |
 | n-plus-one | N+1 | ✅ | persistence-context, sql-join | fetch join, batch size |
 | spring-test | 테스트 | ✅ | harness | 단위/슬라이스/통합 |
 
@@ -127,6 +140,9 @@
 |---|---|---|---|---|
 | request-journey | 요청의 전체 여정 | ✅ | dns, tcp, http, mvc-request-flow | 브라우저 → DNS → LB → 서버 → DB → 응답 |
 | auth | 인증·인가 | ✅ | cookie-session-jwt | 401 vs 403 |
+| cors | 동일 출처 정책과 CORS | ✅ | http, auth | 출처, 프리플라이트, 브라우저만 지킴, Security와 순서 (2026-09-17) |
+| xss-csrf | XSS와 CSRF | ✅ | cookie-session-jwt, cors | 출력 이스케이프·CSP·HttpOnly / SameSite·CSRF 토큰 (2026-09-17) |
+| sql-injection | SQL 인젝션과 파라미터 바인딩 | ✅ | sql-join | PreparedStatement 원리, 식별자는 허용 목록 (2026-09-17) |
 | redis-cache | Redis·캐시 | ✅ | cache, lru, hash | 캐시 전략, 키 설계, 만료 |
 | message-queue | MQ | ✅ | queue, thread-pool | 비동기, 순서, 재처리 |
 | idempotency-retry-timeout | 멱등성·재시도·타임아웃 | ✅ | http, transaction-acid | 두 번 결제 방지 |
@@ -134,9 +150,29 @@
 | monolith-msa | 모놀리스/MSA | ✅ | 전부 | 모듈러 모놀리스 |
 | order-journey | 주문 요청 하나가 끝까지 | ✅ | 위 전부 | 예매·주문 시나리오로 전 단원을 잇는 마지막 개념 |
 
+## 9. 프로그램 개발 보강 `service-dev/program-dev`
+
+| id | 제목 | 상태 | 선수 | 비고 |
+|---|---|---|---|---|
+| object-design | 객체 설계 원칙 | ✅ | object, oop | 응집·결합, SOLID, 전략·팩토리 선택 이유 (2026-09-17) |
+
+## 10. 기존 챕터 보강 (2026-09-17)
+
+- context-switch: "시스템 호출·모드 전환은 문맥 교환이 아니다" 절 + 면접 질문.
+- oop: 오버로딩/오버라이딩 절 + 면접 질문.
+- 정확성 교정: java-threads·collections(ConcurrentHashMap 갱신 경로), db-index(복합 인덱스 앞 열 없을 때), tcp-udp(handshake 뒤 전송 시점), n-plus-one(EAGER+JPQL), volatile "즉시", 인덱스 "공짜" 등 — 근거는 각 파일 sources.
+
+## 11. 아직 없는 것 (신입 백엔드 기준, 우선순위 순)
+
+- 티어/레이어 구분, 보안 3요소(기밀성·무결성·가용성) — 절 하나씩이면 충분. `docs/VIDEO-MAP.md` 누락 후보.
+- SQL vs NoSQL 선택 기준, CQRS, 서비스 디스커버리, Docker/VM — 백엔드 심화.
+- Redis Pub/Sub·Streams·트랜잭션 — 선택 확장.
+- 컴퓨터 구조·OS 🔶 항목 보강(1·2장), 지연 시간 숫자표.
+- **과목 전체 충분성 검토는 아직이다.** 위 표의 ✅는 "파일 작성 완료(형식·출처·면접 질문 포함)"이지 "그 과목을 신입 면접 기준으로 빠짐없이 다뤘다"가 아니다. 충분성은 사용자 검토와 실제 면접 질문 대조 뒤에 표시한다.
+
 ## 참고 자료
 
-- 재생목록 "개발자 개념 장착"(코딩하는기술사, 50편) — **제목·URL만 확인(2026-09-16), 내용은 미확인.**
+- 재생목록 "개발자 개념 장착"(코딩하는기술사, 49편) — **제목·URL만 확인(2026-09-17 oEmbed), 내용은 미확인.** 편별 대응은 `docs/VIDEO-MAP.md`.
   목차를 짜는 데 참고했고, 본문 사실 확인은 교재·공식 문서로 한다. 개별 개념의 `sources`에는 확인한 것만 적는다.
 - 운영체제: OSTEP(무료, https://pages.cs.wisc.edu/~remzi/OSTEP/), Silberschatz 외 Operating System Concepts 10판
 - Java: JDK 21 API 문서, Java Concurrency in Practice
