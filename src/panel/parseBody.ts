@@ -255,8 +255,9 @@ export function parseBody(body: string): ParsedBody {
     if (level === 2) {
       top = title;
       section = null;
-      if (title === '개념') concept = parseBlocks(chunk, dropped);
-      else if (title === '왜 나왔나') why = parseBlocks(chunk, dropped);
+      // 기초 절도 #### 소제목(예시·작동 과정·비교)을 품는다 — 다음 ##/### 앞까지.
+      if (title === '개념') concept = parseBlocks(sliceAfter(i, 3), dropped);
+      else if (title === '왜 나왔나') why = parseBlocks(sliceAfter(i, 3), dropped);
       else if (title === '확인 질문') checks = parseChecks(chunk, dropped);
       else if (title === '심화') {
         sawDeep = true;

@@ -16,21 +16,37 @@ checked: '2026-09-16'
 sources:
   - 'MySQL 8.0 Reference — Clustered and Secondary Indexes — https://dev.mysql.com/doc/refman/8.0/en/innodb-index-types.html'
   - 'MySQL 8.0 Reference — Multiple-Column Indexes(맨 왼쪽 접두) — https://dev.mysql.com/doc/refman/8.0/en/multiple-column-indexes.html'
+  - 'MySQL 8.0 Reference — Index Skip Scan Access Method(8.0.13+) — https://dev.mysql.com/doc/refman/8.0/en/range-optimization.html#range-access-skip-scan'
   - 'MySQL 8.0 Reference — How MySQL Uses Indexes — https://dev.mysql.com/doc/refman/8.0/en/mysql-indexes.html'
   - 'PostgreSQL 16 문서 — Index Types, Index-Only Scans — https://www.postgresql.org/docs/16/indexes-types.html'
 ---
 
 ## 개념
 
-`WHERE email = 'a@b.c'`를 인덱스 없이 실행하면 DB는 표의 모든 행을 읽어 비교한다(풀 스캔, O(n)). 인덱스는 **그 열의 값을 정렬해 B-tree로 따로 저장**해 둔 것이다. 정렬돼 있으니 이진 탐색처럼 O(log n)에 찾고, 찾은 자리에서 행의 위치를 알아 표로 간다. 100만 행이면 디스크 읽기 3~4번이다.
+인덱스는 **열의 값을 정렬해 B-tree로 따로 저장해 둔 것**이다. 정렬돼 있으니 이진 탐색처럼 O(log n)에 찾고, 찾은 자리에서 행의 위치를 알아 표로 간다. 인덱스가 없으면 DB는 표의 모든 행을 읽어 조건과 비교한다(풀 스캔, O(n)).
 
-공짜는 아니다. 행을 넣고 고치고 지울 때마다 인덱스도 함께 고쳐야 하고, 인덱스만큼 디스크를 더 쓴다. 그래서 "자주 찾는 조건"에만 건다.
+대가가 있다. 행을 넣고 고치고 지울 때마다 인덱스도 함께 고쳐야 하고, 인덱스만큼 디스크를 더 쓴다. 그래서 "자주 찾는 조건"에만 건다.
 
-`users(id, email, name, created_at)` 100만 행에서 이메일로 찾아 보자.
+#### 비교 — 같은 조회, 인덱스 없음과 있음
 
-- 인덱스 없음: 100만 행을 처음부터 끝까지 읽어 비교. 디스크 페이지 수천 개.
-- `CREATE INDEX idx_email ON users(email)` 뒤: B-tree 뿌리 → 중간 → 잎에서 `a@b.c`를 찾고 그 행의 PK를 얻어 표에서 행을 읽는다. 페이지 4~5개.
-- 결과: 수백 ms가 1ms 아래로. 대신 회원 가입(INSERT)마다 이 B-tree에도 한 칸 끼워 넣는다.
+`users(id, email, name, created_at)` 100만 행에서 이메일로 한 사람을 찾는다.
+
+```sql
+SELECT * FROM users WHERE email = 'a@b.c';
+```
+
+아래 한 줄을 실행하기 전과 후를 비교한다.
+
+```sql
+CREATE INDEX idx_users_email ON users (email);
+```
+
+| | 인덱스 없음 | 인덱스 있음 |
+|---|---|---|
+| 읽는 방법 | 첫 행부터 끝까지 비교(풀 스캔) | B-tree 뿌리 → 중간 → 잎에서 값을 찾고, 그 행의 PK로 표에서 행을 읽음 |
+| 읽는 페이지 | 수천 개 | 4~5개 |
+| 걸리는 시간 | 수백 ms | 1ms 아래 |
+| 쓰기 비용 | 없음 | 회원 가입(INSERT)마다 B-tree에 한 칸 끼움, 디스크 추가 |
 
 ## 왜 나왔나
 
@@ -43,7 +59,7 @@ sources:
 - 다음 상태 예측: 인덱스를 열 10개에 걸면 INSERT는?
   답: 행 하나 넣을 때 B-tree 10개를 갱신한다. 쓰기가 눈에 띄게 느려지고 디스크도 더 쓴다.
 - 다음 상태 예측: 복합 인덱스 `(last_name, first_name)`가 있을 때 `WHERE first_name = '철수'`는?
-  답: 인덱스를 못 탄다. 성으로 먼저 정렬돼 있어 이름만으로는 어디 있는지 모른다(맨 왼쪽 접두 규칙).
+  답: 그 인덱스로 바로 찾아가지는 못한다. 성으로 먼저 정렬돼 있어 이름만으로는 어디 있는지 모른다(맨 왼쪽 접두 규칙). 옵티마이저는 보통 풀 스캔을 고르고, 필요한 열이 인덱스 안에 다 있으면 인덱스 전체를 훑기도 한다(인덱스 풀 스캔). MySQL 8.0.13+는 성의 종류가 적을 때 성마다 이름을 찾는 Skip Scan을 쓸 수 있다.
 
 ## 심화
 
@@ -53,7 +69,7 @@ InnoDB는 표 자체를 PK 순서의 B+tree로 저장한다(클러스터드 인�
 
 ### 복합 인덱스와 맨 왼쪽 접두
 
-`(a, b, c)` 인덱스는 a로 정렬하고 같은 a 안에서 b, 다시 c로 정렬한 것이다. `WHERE a = ?`, `a = ? AND b = ?`, `a = ? AND b = ? AND c = ?`는 타지만 `b = ?`만으로는 못 탄다. 범위 조건(`a > ?`) 뒤의 열은 인덱스 정렬을 못 쓴다 — 등호 조건 열을 앞에, 범위 열을 뒤에 둔다. `ORDER BY a, b`도 같은 인덱스로 정렬 없이 읽는다.
+`(a, b, c)` 인덱스는 a로 정렬하고 같은 a 안에서 b, 다시 c로 정렬한 것이다. `WHERE a = ?`, `a = ? AND b = ?`, `a = ? AND b = ? AND c = ?`는 정렬을 그대로 써서 찾아간다(효율적 탐색). `b = ?`만으로는 정렬을 이용해 찾아갈 수 없다 — 그렇다고 "인덱스를 못 탄다"고 단정하면 틀린다. 옵티마이저는 풀 스캔, 필요한 열이 인덱스에 다 있으면 인덱스 전체를 순서대로 읽는 인덱스 풀 스캔, MySQL 8.0.13+에서는 a의 값 종류가 적을 때 a마다 b를 찾는 Skip Scan(실행 계획 `Using index for skip scan`) 중에서 비용이 싼 것을 고른다. 셋 다 `a = ?`가 있을 때보다 느리므로 설계는 여전히 맨 왼쪽 접두를 기준으로 한다. 범위 조건(`a > ?`) 뒤의 열은 인덱스 정렬을 못 쓴다 — 등호 조건 열을 앞에, 범위 열을 뒤에 둔다. `ORDER BY a, b`도 같은 인덱스로 정렬 없이 읽는다.
 
 ### 커버링 인덱스
 
@@ -77,7 +93,7 @@ InnoDB는 표 자체를 PK 순서의 B+tree로 저장한다(클러스터드 인�
 
 인덱스는 열 값을 정렬한 B-tree를 따로 두어 O(log n)에 행 위치를 찾게 하는 구조이고, 행을 쓸 때마다 모든 인덱스를 함께 갱신해야 하므로 많이 걸면 쓰기가 느려지고 디스크를 더 씁니다.
 100만 행 표에서 이메일 조회는 풀 스캔 대신 페이지 4~5개 읽기로 끝나지만, 인덱스 10개면 INSERT마다 B-tree 10개에 삽입이 일어납니다.
-그래서 WHERE·JOIN·ORDER BY에 자주 쓰이는 열에만 걸고, 선택도가 낮은 열(성별)은 인덱스가 있어도 풀 스캔이 싸서 안 씁니다. 한계는 인덱스가 있어도 열에 함수를 씌우거나 앞 와일드카드 LIKE를 쓰면 못 탄다는 점입니다.
+그래서 WHERE·JOIN·ORDER BY에 자주 쓰이는 열에만 걸고, 선택도가 낮은 열(성별)은 인덱스가 있어도 풀 스캔이 싸서 안 씁니다. 한계는 인덱스가 있어도 열에 함수를 씌우거나 앞 와일드카드 LIKE를 쓰면 정렬을 이용한 탐색이 안 되고, 복합 인덱스는 맨 왼쪽 열 조건이 없으면 효율적 탐색이 아니라 풀 스캔·인덱스 풀 스캔·조건부 Skip Scan 중 하나가 된다는 점입니다.
 
 - 꼬리: 클러스터드 인덱스와 보조 인덱스의 차이는?
 - 꼬리: 커버링 인덱스란?

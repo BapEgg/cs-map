@@ -107,6 +107,13 @@ export default function App() {
    */
   const narrow = useMedia(ONE_PANE);
   const [phoneView, setPhoneView] = useState<'map' | 'read'>('map');
+  /**
+   * "본문만 보기" — 정독할 때 지도가 옆에서 시선을 끈다. 지도는 숨기기만 하고(언마운트 안 함)
+   * 본문을 읽기 폭(640×글자 배율)으로 가운데에 둔다. 돌아오면 지도의 카메라·선택, 패널 폭이 그대로다.
+   * 자동으로 켜지지 않는다. 좁은 화면(한 화면)에서는 뜻이 없어 무시한다.
+   */
+  const [focus, setFocus] = useState(false);
+  const focusOn = focus && !narrow;
 
   /** 지난번에 보던 개념. 다시 열었을 때 그 자리로 돌아간다. */
   const lastSeen = study.data.recent.find((id) => tree.byId[id]) ?? null;
@@ -442,7 +449,7 @@ export default function App() {
 
       <main
         ref={mapRef}
-        className={`map${narrow ? ` phone-${phoneView}` : ''}`}
+        className={`map${narrow ? ` phone-${phoneView}` : ''}${focusOn ? ' focus' : ''}`}
         style={
           {
             ['--read-scale' as string]: read.size,
@@ -460,10 +467,10 @@ export default function App() {
           noted={notedIds}
           onNodeClick={clickNode}
           onToggle={toggle}
-          visible={!narrow || phoneView === 'map'}
+          visible={(!narrow || phoneView === 'map') && !focusOn}
           handleRef={treeRef}
         />
-        {!narrow && <Splitter width={panelWidth} onChange={dragPanel} />}
+        {!narrow && !focusOn && <Splitter width={panelWidth} onChange={dragPanel} />}
 
         {selected ? (
           <ConceptPanel
@@ -480,7 +487,9 @@ export default function App() {
             onOpenViz={() => setOverlay('viz')}
             wide={narrow ? undefined : !!wide}
             onToggleWide={narrow ? undefined : toggleWide}
-            layoutKey={`${narrow ? 'one' : panelWidth}:${read.size}`}
+            focus={narrow ? undefined : focusOn}
+            onToggleFocus={narrow ? undefined : () => setFocus((f) => !f)}
+            layoutKey={`${narrow ? 'one' : focusOn ? 'focus' : panelWidth}:${read.size}`}
           />
         ) : (
           <StartPanel

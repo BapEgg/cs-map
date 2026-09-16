@@ -143,6 +143,35 @@ describe('parseBody', () => {
     expect(p.dropped).toEqual([]);
   });
 
+  it('개념·왜 나왔나 안의 ####는 소제목으로 남는다(예시·작동 과정·비교)', () => {
+    const p = parseBody(`## 개념
+
+정의
+
+#### 예시
+
+글
+
+## 왜 나왔나
+
+문제
+
+#### 그래서
+
+해결`);
+    expect(p.concept).toEqual([
+      { kind: 'p', text: '정의' },
+      { kind: 'h4', text: '예시' },
+      { kind: 'p', text: '글' },
+    ]);
+    expect(p.why).toEqual([
+      { kind: 'p', text: '문제' },
+      { kind: 'h4', text: '그래서' },
+      { kind: 'p', text: '해결' },
+    ]);
+    expect(p.dropped).toEqual([]);
+  });
+
   it('심화 밖의 ###과 답 없는 확인 질문도 누락이다', () => {
     const p = parseBody(`## 개념\n\n### 소제목\n\n글\n\n## 확인 질문\n\n- 답이 없는 질문`);
     expect(p.dropped).toEqual(['### 소제목', '글', '- 답이 없는 질문']);

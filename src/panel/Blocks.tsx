@@ -76,9 +76,11 @@ export default function Blocks({ blocks, selfId, index, onTerm }: Props) {
               offsets.push(at);
               at += row.length;
             }
+            // 폰에서 3열 이상은 행마다 "항목: 값" 세로 배치로 바꾼다(panel.css .cmp-stack). 칸 머리글을 data-h로 넘긴다.
+            const heads = b.head.map((h) => h.replace(/\*\*|`/g, ''));
             return (
               <div key={i} className="cmp-wrap">
-                <table className="cmp">
+                <table className={heads.length >= 3 ? 'cmp cmp-stack' : 'cmp'}>
                   <thead>
                     <tr>
                       {b.head.map((h, k) => (
@@ -90,7 +92,9 @@ export default function Blocks({ blocks, selfId, index, onTerm }: Props) {
                     {b.rows.map((row, r) => (
                       <tr key={r}>
                         {row.map((cell, c) => (
-                          <td key={c}>{piece(cell, sk[offsets[r] + c], 'span')}</td>
+                          <td key={c} data-h={heads[c]}>
+                            {piece(cell, sk[offsets[r] + c], 'span')}
+                          </td>
                         ))}
                       </tr>
                     ))}

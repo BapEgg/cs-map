@@ -54,6 +54,9 @@ interface Props {
   /** "넓게 읽기" 상태. 지도와 나란히 있는 화면에서만 넘어온다(폰은 이미 한 화면이라 없음). */
   wide?: boolean;
   onToggleWide?: () => void;
+  /** "본문만 보기" — 지도를 접고 본문만 가운데에. 지도와 나란한 화면에서만 넘어온다. */
+  focus?: boolean;
+  onToggleFocus?: () => void;
   /**
    * 글이 다시 흐르는 조건(패널 폭, 글자 크기)을 한 값으로. 이게 바뀌면 읽던 문단을 같은 자리에 되돌린다 —
    * scrollTop 숫자만 지키면 폭이 바뀐 뒤 다른 문단이 보인다.
@@ -82,6 +85,8 @@ export default function ConceptPanel({
   onOpenViz,
   wide,
   onToggleWide,
+  focus,
+  onToggleFocus,
   layoutKey,
 }: Props) {
   const node = tree.byId[id];
@@ -182,60 +187,85 @@ export default function ConceptPanel({
         안에서 가운데에 놓인다 — 줄이 길어지면 다음 줄 첫 글자를 찾기 어렵다(HANDOFF 6-2-16).
       */}
       <div className="panel-inner">
-        {(backTo || onToggleWide) && (
-          <div className="panel-top">
-            {backTo && (
-              <button className="btn btn-quiet panel-back" onClick={onBack}>
-                ← {backTo}
-              </button>
-            )}
-            {onToggleWide && (
-              <button
-                type="button"
-                className="btn btn-quiet panel-wide"
-                onClick={onToggleWide}
-                aria-pressed={wide}
-                title={
-                  wide
-                    ? '넓히기 전 폭으로 돌아갑니다'
-                    : '본문이 640px 폭으로 들어가게 설명을 넓힙니다'
-                }
-              >
-                {wide ? '원래 폭으로' : '넓게 읽기'}
-              </button>
-            )}
-          </div>
-        )}
+        {/*
+          상단은 세 행: 경로(보조, 돌아가기 포함) / 제목 + 동작 / 탭.
+          "넓게 읽기"만을 위한 행을 따로 두지 않는다 — 1280×720에서 상단이 본문 자리의 40%를 먹었다(2026-09-16).
+        */}
+        <div className="panel-aux">
+          <nav className="panel-path" aria-label="경로">
+            {shownPath.map((pid, i) => (
+              <span key={`${pid}-${i}`}>
+                {i > 0 && <span className="sep">›</span>}
+                {pid === '…' ? (
+                  <button type="button" onClick={() => setPathOpen(true)} title="경로 전부 보기">
+                    …
+                  </button>
+                ) : pid === id ? (
+                  <b aria-current="page">{tree.byId[pid].title}</b>
+                ) : (
+                  <button type="button" onClick={() => go(pid)}>
+                    {tree.byId[pid].title}
+                  </button>
+                )}
+              </span>
+            ))}
+          </nav>
+          {backTo && (
+            <button
+              type="button"
+              className="panel-back"
+              onClick={onBack}
+              title={`${backTo}(으)로 돌아가기`}
+              aria-label={`${backTo}(으)로 돌아가기`}
+            >
+              ← 뒤로
+            </button>
+          )}
+        </div>
 
-        <nav className="panel-path" aria-label="경로">
-          {shownPath.map((pid, i) => (
-            <span key={`${pid}-${i}`}>
-              {i > 0 && <span className="sep">›</span>}
-              {pid === '…' ? (
-                <button type="button" onClick={() => setPathOpen(true)} title="경로 전부 보기">
-                  …
-                </button>
-              ) : pid === id ? (
-                <b aria-current="page">{tree.byId[pid].title}</b>
-              ) : (
-                <button type="button" onClick={() => go(pid)}>
-                  {tree.byId[pid].title}
+        <div className="panel-head">
+          <h2 className="panel-title">
+            {node.title}
+            {node.isStub && <span className="stub-badge">준비 중</span>}
+          </h2>
+          {(node.sim || onToggleWide || onToggleFocus) && (
+            <div className="panel-actions">
+              {node.sim && (
+                <button className="btn btn-quiet panel-sim-open" type="button" onClick={onOpenViz}>
+                  ▶ 동작 보기
                 </button>
               )}
-            </span>
-          ))}
-        </nav>
-
-        <h2 className="panel-title">
-          {node.title}
-          {node.isStub && <span className="stub-badge">준비 중</span>}
-        </h2>
-
-        {node.sim && (
-          <button className="panel-sim-open" type="button" onClick={onOpenViz}>
-            ▶ 동작 과정 눈으로 보기
-          </button>
-        )}
+              {onToggleWide && !focus && (
+                <button
+                  type="button"
+                  className="btn btn-quiet panel-wide"
+                  onClick={onToggleWide}
+                  aria-pressed={wide}
+                  title={
+                    wide
+                      ? '넓히기 전 폭으로 돌아갑니다'
+                      : '본문이 640px 폭으로 들어가게 설명을 넓힙니다'
+                  }
+                >
+                  {wide ? '원래 폭으로' : '넓게 읽기'}
+                </button>
+              )}
+              {onToggleFocus && (
+                <button
+                  type="button"
+                  className="btn btn-quiet panel-focus"
+                  onClick={onToggleFocus}
+                  aria-pressed={focus}
+                  title={
+                    focus ? '지도를 다시 옆에 펼칩니다' : '지도를 접고 본문만 가운데에 놓습니다'
+                  }
+                >
+                  {focus ? '지도 보기' : '본문만 보기'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="panel-tabs" role="tablist">
           {(

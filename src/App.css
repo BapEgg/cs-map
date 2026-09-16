@@ -195,6 +195,21 @@
   min-height: 0;
 }
 
+/*
+ * 본문만 보기: 지도와 손잡이를 숨기고 설명을 읽기 폭(본문 640×배율 + 패널 여백 48)으로 가운데에.
+ * 화면 전체로 늘리지 않는다 — 한 줄이 길어지면 다음 줄 첫 글자를 잃는다(6-2-16).
+ */
+.map.focus .tree-wrap {
+  display: none;
+}
+
+.map.focus .panel {
+  flex: 0 0 auto;
+  width: calc(640px * var(--read-scale, 1) + 48px);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 .save-failed {
   margin: 0;
   padding: var(--sp-3) var(--sp-4);

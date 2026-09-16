@@ -69,26 +69,45 @@
 }
 
 .panel-title {
-  margin: var(--sp-2) 0 var(--sp-4);
+  margin: 0;
   font-size: calc(26px * var(--read-scale, 1));
   font-weight: 700;
   line-height: 1.3;
   /* 제목 마지막 줄에 한 낱말만 남는 걸 막는다. */
   text-wrap: balance;
   overflow-wrap: anywhere;
+  min-width: 0;
+  flex: 1 1 200px;
+}
+
+/*
+ * 제목 + 동작(▶ 동작 보기 · 넓게 읽기 · 본문만 보기)이 한 행. 좁으면 동작이 다음 줄로 내려간다 —
+ * 클릭 영역(32px)을 줄여서 높이를 맞추지 않는다. 상단 목표: 1280×720 기본 글씨에서 첫 본문까지 180px 안.
+ */
+.panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-3);
+  margin: var(--sp-1) 0 var(--sp-1);
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-left: auto;
+}
+
+.panel-actions .btn {
+  font-size: 13px;
+  padding-left: var(--sp-3);
+  padding-right: var(--sp-3);
+  white-space: nowrap;
 }
 
 .panel-sim-open {
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
   color: var(--badge-sim);
-  background: none;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  padding: var(--sp-2) var(--sp-4);
-  margin-bottom: var(--sp-4);
-  cursor: pointer;
 }
 
 .panel-sim {
@@ -99,7 +118,7 @@
   display: flex;
   gap: var(--sp-1);
   border-bottom: 1px solid var(--border);
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-4);
   /* 스크롤을 내려도 탭은 남는다. 제목·경로는 같이 붙이지 않는다 — 본문 자리를 먹는다. */
   position: sticky;
   top: calc(-1 * var(--sp-4));
@@ -358,6 +377,49 @@ span.rich {
   white-space: nowrap;
 }
 
+/*
+ * 폰(PHONE)에서 3열 이상 표는 옆으로 밀어 보게 하지 않는다 — 열을 좁히면 한 칸이 세로로 길게 깨지고,
+ * 가로 스크롤은 비교 대상이 화면 밖으로 나간다. 행 하나를 한 덩어리로, 칸마다 "머리글: 값"으로 세운다.
+ * 첫 칸(행 이름)은 덩어리의 제목이 된다.
+ */
+@media (max-width: 620px) {
+  .cmp-stack thead {
+    display: none;
+  }
+
+  .cmp-stack tr {
+    display: block;
+    padding: var(--sp-2) 0 var(--sp-3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cmp-stack td {
+    display: grid;
+    grid-template-columns: minmax(0, 34%) 1fr;
+    gap: var(--sp-2);
+    padding: 2px 0;
+    border: none;
+  }
+
+  .cmp-stack td::before {
+    content: attr(data-h);
+    font-size: 0.92em;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .cmp-stack td:first-child {
+    display: block;
+    padding-bottom: var(--sp-1);
+    font-weight: 700;
+    white-space: normal;
+  }
+
+  .cmp-stack td:first-child::before {
+    content: none;
+  }
+}
+
 /* 코드 블록. 실행 예시는 코드로. */
 .code-block {
   margin: 0 0 var(--sp-4);
@@ -377,6 +439,14 @@ span.rich {
   border: none;
   padding: 0;
   font: inherit;
+}
+
+/* 폰에서는 긴 줄을 옆으로 밀어 숨기지 않고 접는다 — SQL 한 줄의 끝이 화면 밖에 있으면 조건을 못 본다. */
+@media (max-width: 620px) {
+  .code-block {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* 관계도. 그림은 본문 폭 안에서, 폰에서는 세로 배치(Diagram.tsx). */
@@ -725,29 +795,44 @@ button.term:focus-visible {
   }
 }
 
-.panel-top {
+/*
+ * 보조 행: 경로 왼쪽, 돌아가기 오른쪽. "← 뒤로"만 쓴다 — 목적지 제목까지 쓰면 432px 폭에서 경로가
+ * 두 줄로 꺾여 상단이 22px 늘었다. 목적지는 title/aria-label에 있다.
+ */
+.panel-aux {
   display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+
+.panel-aux .panel-path {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .panel-back {
-  margin-right: auto;
-  max-width: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-/* "넓게 읽기". 오른쪽 끝, 글씨로만. 눌린 상태는 색으로. */
-.panel-wide {
-  margin-left: auto;
-  font-size: 13px;
+  flex: 0 0 auto;
   white-space: nowrap;
+  font: inherit;
+  font-size: calc(13px * var(--read-scale, 1));
+  line-height: 1.5;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 1px 2px;
+  cursor: pointer;
+  border-radius: 3px;
 }
 
-.panel-wide[aria-pressed='true'] {
+.panel-back:hover,
+.panel-back:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 눌린 상태(넓게 읽는 중 / 본문만 보는 중)는 색으로. */
+.panel-wide[aria-pressed='true'],
+.panel-focus[aria-pressed='true'] {
   color: var(--accent);
 }
 
