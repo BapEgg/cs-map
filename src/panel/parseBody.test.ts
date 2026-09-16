@@ -1,30 +1,53 @@
 import { describe, expect, it } from 'vitest';
-import { items, parseBody } from './parseBody';
+import { parseBlocks, parseBody, parseDiagram } from './parseBody';
 
 const SAMPLE = `
 ## 개념
 
 무엇인지 설명.
+이어지는 문장.
+
+둘째 문단.
 
 ## 왜 나왔나
 
 문제가 있었다.
 그래서 해결했다.
 
+## 확인 질문
+
+- 설명해 보기: 프로그램과 프로세스의 차이는?
+  답: 프로그램은 파일, 프로세스는 실행 중.
+- 다음 상태 예측: 실행 중 파일 읽기를 요청하면?
+  답: 대기.
+
 ## 심화
 
-### 내부 구조
+### 언제 실행하고 기다리는가
+
+\`\`\`diagram
+준비 -> 실행: 스케줄러가 뽑음
+실행 -> 준비: 퀀텀 끝
+실행 -> 대기: I/O 요청
+대기 -> 준비: I/O 완료
+\`\`\`
+
+설명 문단.
+
+### 실무 선택
+
+| 제품 | 모델 |
+|---|---|
+| Nginx | 워커 몇 개 |
+| PostgreSQL | 연결당 프로세스 |
 
 - 목록 하나
 - 두 줄로 이어지는
   목록 둘
 
-문단으로 쓴 설명도 항목이다.
-두 줄이어도 한 항목.
-
-### 실제 활용
-
-- 실무 예
+\`\`\`c
+int x = 1; // # 주석
+\`\`\`
 
 ### 면접 질문
 
@@ -39,46 +62,98 @@ const SAMPLE = `
 describe('parseBody', () => {
   const parsed = parseBody(SAMPLE);
 
-  it('개념·왜 나왔나를 가른다', () => {
-    expect(parsed.concept).toBe('무엇인지 설명.');
-    expect(parsed.why).toBe('문제가 있었다.\n그래서 해결했다.');
-  });
-
-  it('내부 구조는 목록이든 문단이든 항목으로 읽는다', () => {
-    expect(parsed.deep?.internals).toEqual([
-      '목록 하나',
-      '두 줄로 이어지는\n목록 둘',
-      '문단으로 쓴 설명도 항목이다.\n두 줄이어도 한 항목.',
+  it('개념·왜 나왔나는 문단 블록', () => {
+    expect(parsed.concept).toEqual([
+      { kind: 'p', text: '무엇인지 설명.\n이어지는 문장.' },
+      { kind: 'p', text: '둘째 문단.' },
     ]);
-    expect(parsed.deep?.usage).toEqual(['실무 예']);
+    expect(parsed.why).toEqual([{ kind: 'p', text: '문제가 있었다.\n그래서 해결했다.' }]);
   });
 
-  it('면접 질문은 #### 제목 + 답 + 꼬리', () => {
+  it('확인 질문은 질문과 답으로 갈린다', () => {
+    expect(parsed.checks).toEqual([
+      {
+        q: '설명해 보기: 프로그램과 프로세스의 차이는?',
+        a: '프로그램은 파일, 프로세스는 실행 중.',
+      },
+      { q: '다음 상태 예측: 실행 중 파일 읽기를 요청하면?', a: '대기.' },
+    ]);
+  });
+
+  it('심화는 ### 절이 순서대로, 면접 질문은 따로', () => {
+    expect(parsed.deep?.sections.map((s) => s.title)).toEqual([
+      '언제 실행하고 기다리는가',
+      '실무 선택',
+    ]);
     expect(parsed.deep?.interview).toEqual([
       { q: '첫 질문은?', a: '결론부터 말하면 이렇다.', follow: ['꼬리 하나', '꼬리 둘'] },
     ]);
     expect(parsed.dropped).toEqual([]);
   });
 
+  it('관계도·표·목록·코드 블록을 읽는다', () => {
+    const [first, second] = parsed.deep!.sections;
+    expect(first.blocks[0]).toEqual({
+      kind: 'diagram',
+      edges: [
+        { from: '준비', to: '실행', label: '스케줄러가 뽑음' },
+        { from: '실행', to: '준비', label: '퀀텀 끝' },
+        { from: '실행', to: '대기', label: 'I/O 요청' },
+        { from: '대기', to: '준비', label: 'I/O 완료' },
+      ],
+    });
+    expect(first.blocks[1]).toEqual({ kind: 'p', text: '설명 문단.' });
+    expect(second.blocks).toEqual([
+      {
+        kind: 'table',
+        head: ['제품', '모델'],
+        rows: [
+          ['Nginx', '워커 몇 개'],
+          ['PostgreSQL', '연결당 프로세스'],
+        ],
+      },
+      { kind: 'list', items: ['목록 하나', '두 줄로 이어지는\n목록 둘'] },
+      { kind: 'code', lang: 'c', code: 'int x = 1; // # 주석' },
+    ]);
+  });
+
   it('안 읽히는 형식은 누락으로 잡는다', () => {
     const p = parseBody(
-      `## 심화\n\n### 면접 질문\n\n- Q. 옛 형식?\n  A. 답.\n\n### 참고\n\n출처 목록`,
+      `## 심화\n\n### 면접 질문\n\n- Q. 옛 형식?\n  A. 답.\n\n## 참고\n\n출처 목록`,
     );
-    expect(p.dropped).toEqual(['- Q. 옛 형식?', '  A. 답.', '### 참고', '출처 목록']);
+    expect(p.dropped).toEqual(['- Q. 옛 형식?', '  A. 답.', '## 참고', '출처 목록']);
     expect(p.deep).toBeNull();
   });
 
-  it('면접 질문 절 밖의 ####는 질문이 아니다', () => {
+  it('면접 질문 절 밖의 ####는 질문이 아니라 누락이다', () => {
     const p = parseBody(`## 심화\n\n### 내부 구조\n\n#### 소제목\n\n- 항목`);
-    expect(p.deep).toBeNull();
+    expect(p.deep?.interview).toEqual([]);
     expect(p.dropped).toEqual(['#### 소제목', '- 항목']);
+  });
+
+  it('심화 밖의 ###과 답 없는 확인 질문도 누락이다', () => {
+    const p = parseBody(`## 개념\n\n### 소제목\n\n글\n\n## 확인 질문\n\n- 답이 없는 질문`);
+    expect(p.dropped).toEqual(['### 소제목', '글', '- 답이 없는 질문']);
   });
 
   it('심화가 없으면 deep은 null', () => {
     expect(parseBody('## 개념\n\n설명').deep).toBeNull();
   });
 
-  it('items: 빈 줄이 문단을 가르고 들여쓴 줄은 앞 항목에 붙는다', () => {
-    expect(items(['a', 'b', '', '- c', '  d', '- e'])).toEqual(['a\nb', 'c\nd', 'e']);
+  it('parseBlocks: 빈 줄이 문단을 가르고 들여쓴 줄은 목록 항목에 붙는다', () => {
+    expect(parseBlocks(['a', 'b', '', '- c', '  d', '- e', 'f'])).toEqual([
+      { kind: 'p', text: 'a\nb' },
+      { kind: 'list', items: ['c\nd', 'e'] },
+      { kind: 'p', text: 'f' },
+    ]);
+  });
+
+  it('parseDiagram: 화살표 없는 줄은 누락', () => {
+    const dropped: string[] = [];
+    expect(parseDiagram(['A → B', 'C -> D: 이유', '이상한 줄'], dropped)).toEqual([
+      { from: 'A', to: 'B', label: '' },
+      { from: 'C', to: 'D', label: '이유' },
+    ]);
+    expect(dropped).toEqual(['이상한 줄']);
   });
 });

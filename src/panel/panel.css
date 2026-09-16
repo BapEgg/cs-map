@@ -102,7 +102,17 @@
 }
 
 .panel-body section {
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-6);
+}
+
+/*
+ * 절 제목은 본문보다 **커야** 한다. 전에는 12px(본문 16px)에 절 간격 24 = 문장 간격 12 × 2라
+ * 제목이 캡션처럼 읽히고 글이 한 덩어리로 보였다. 글씨 크기 설정에도 같은 비율로 커진다.
+ */
+.panel-body .section-title {
+  font-size: calc(15px * var(--read-scale, 1));
+  letter-spacing: 0;
+  margin: 0 0 var(--sp-3);
 }
 
 /*
@@ -186,11 +196,6 @@
   color: var(--text);
 }
 
-.card3-line .rich-line {
-  display: block;
-  margin: 0;
-}
-
 .card3-analogy {
   margin: var(--sp-2) 0 0;
   font-size: calc(14px * var(--read-scale, 1));
@@ -234,9 +239,172 @@
   line-height: 1.75;
 }
 
-.rich-line {
+/* 목록은 목록처럼. 항목 사이는 문장 간격보다 좁게, 문단 사이보다는 넓게 보이게. */
+.rich-list {
+  margin: 0 0 var(--sp-3);
+  padding-left: 1.25em;
+  max-width: 40em;
+  font-size: calc(16px * var(--read-scale, 1));
+  line-height: 1.7;
+}
+
+.rich-list li {
+  margin: 0 0 var(--sp-2);
+}
+
+.rich-list li::marker {
+  color: var(--text-muted);
+}
+
+span.rich {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 비교표. 차이는 표로 — 문장으로 늘어놓으면 비교가 안 된다. */
+.cmp-wrap {
+  overflow-x: auto;
+  margin: 0 0 var(--sp-4);
+  max-width: 40em;
+}
+
+.cmp {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: calc(14px * var(--read-scale, 1));
+  line-height: 1.55;
+}
+
+.cmp th,
+.cmp td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.cmp th {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.92em;
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.cmp td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 코드 블록. 실행 예시는 코드로. */
+.code-block {
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  max-width: 40em;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, 'D2Coding', monospace;
+  font-size: calc(13px * var(--read-scale, 1));
+  line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 4;
+}
+
+.code-block code {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+
+/* 관계도. 그림은 본문 폭 안에서, 폰에서는 세로 배치(Diagram.tsx). */
+.diagram {
+  margin: var(--sp-2) 0 var(--sp-4);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.diagram svg {
   display: block;
-  margin-bottom: var(--sp-3);
+  max-width: 100%;
+  height: auto;
+  font-family: inherit;
+}
+
+.diagram-node rect {
+  fill: var(--surface-sunken);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.diagram-node text {
+  fill: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.diagram-edge path {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.diagram-head {
+  fill: var(--text-muted);
+}
+
+.diagram-label {
+  fill: var(--text-muted);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+/* 확인 질문. 질문은 보이고 답은 눌러서 — 외울 문장과 같은 리듬. */
+.checks {
+  margin: 0;
+  padding-left: 1.4em;
+  max-width: 40em;
+}
+
+.check {
+  margin: 0 0 var(--sp-4);
+}
+
+.check-q {
+  margin: 0 0 var(--sp-1);
+  font-size: calc(15px * var(--read-scale, 1));
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.check-reveal {
+  font: inherit;
+  font-size: calc(13px * var(--read-scale, 1));
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px var(--sp-3);
+  cursor: pointer;
+}
+
+.check-reveal:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.check-a .rich {
+  font-size: calc(15px * var(--read-scale, 1));
+  margin: 0;
+}
+
+.card3-limit {
+  margin-top: var(--sp-1);
 }
 
 .rich mark,
@@ -254,11 +422,6 @@
   box-decoration-break: clone;
 }
 
-.rich .conn {
-  color: var(--connective);
-  font-weight: 600;
-}
-
 button.term {
   font: inherit;
   color: inherit;
@@ -266,10 +429,10 @@ button.term {
   border: none;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: underline dotted;
   text-decoration-color: var(--border-strong);
   text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
 }
 
 button.term:hover {

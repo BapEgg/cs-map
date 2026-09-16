@@ -4,6 +4,7 @@ import type { ConceptNote } from '../store/studyStore';
 import NoteTab from './NoteTab';
 import { parseBody } from './parseBody';
 import { InlineText } from './PlainText';
+import Blocks from './Blocks';
 import RichText from './RichText';
 import type { TermIndex, TermTarget } from './termIndex';
 import './panel.css';
@@ -76,6 +77,8 @@ export default function ConceptPanel({
   const [tab, setTab] = useState<Tab>(restore?.tab ?? 'basic');
   const [cards, setCards] = useState<TermCard[]>([]);
   const [openAnswers, setOpenAnswers] = useState<Set<number>>(new Set());
+  /** 확인 질문 중 답을 펼친 것. 개념이 바뀌면(key=selected) 다시 닫힌다. */
+  const [openChecks, setOpenChecks] = useState<Set<number>>(new Set());
   /** 외울 한 문장을 봤는지. 개념이 바뀌면(key=selected) 다시 가려진다. */
   const [revealed, setRevealed] = useState(false);
   const scroller = useRef<HTMLElement>(null);
@@ -197,16 +200,16 @@ export default function ConceptPanel({
             </p>
           ) : (
             <>
-              {parsed.concept && (
+              {parsed.concept.length > 0 && (
                 <section>
                   <h3 className="section-title">개념 정리</h3>
-                  <RichText text={parsed.concept} {...richProps} />
+                  <Blocks blocks={parsed.concept} {...richProps} used={new Set()} />
                 </section>
               )}
-              {parsed.why && (
+              {parsed.why.length > 0 && (
                 <section>
                   <h3 className="section-title">왜 나왔나</h3>
-                  <RichText text={parsed.why} {...richProps} />
+                  <Blocks blocks={parsed.why} {...richProps} used={new Set()} />
                 </section>
               )}
             </>
@@ -251,6 +254,9 @@ export default function ConceptPanel({
                   </button>
                 )}
                 {node.card.analogy && <p className="card3-analogy">비유 · {node.card.analogy}</p>}
+                {node.card.analogy_limit && (
+                  <p className="card3-analogy card3-limit">다만 · {node.card.analogy_limit}</p>
+                )}
                 {!!node.card.keywords?.length && (
                   <p className="card3-keys">
                     {node.card.keywords.map((k) => (
@@ -259,6 +265,35 @@ export default function ConceptPanel({
                   </p>
                 )}
               </div>
+            </section>
+          )}
+
+          {parsed.checks.length > 0 && (
+            <section>
+              <h3 className="section-title">확인 질문</h3>
+              <p className="hint">기초만 읽고 답해 봅니다. 답은 눌러서 확인.</p>
+              <ol className="checks">
+                {parsed.checks.map((c, i) => (
+                  <li key={i} className="check">
+                    <p className="check-q">
+                      <InlineText text={c.q} />
+                    </p>
+                    {openChecks.has(i) ? (
+                      <div className="check-a">
+                        <RichText text={c.a} {...richProps} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="check-reveal"
+                        onClick={() => setOpenChecks((s) => new Set(s).add(i))}
+                      >
+                        답 보기
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </section>
           )}
 
@@ -327,23 +362,12 @@ export default function ConceptPanel({
         </div>
       ) : (
         <div className="panel-body">
-          {parsed.deep?.internals.length ? (
-            <section>
-              <h3 className="section-title">내부 구조</h3>
-              {parsed.deep.internals.map((line, i) => (
-                <RichText key={i} text={line} {...richProps} />
-              ))}
+          {parsed.deep?.sections.map((sec) => (
+            <section key={sec.title}>
+              <h3 className="section-title">{sec.title}</h3>
+              <Blocks blocks={sec.blocks} {...richProps} used={new Set()} />
             </section>
-          ) : null}
-
-          {parsed.deep?.usage.length ? (
-            <section>
-              <h3 className="section-title">실제 활용</h3>
-              {parsed.deep.usage.map((line, i) => (
-                <RichText key={i} text={line} {...richProps} />
-              ))}
-            </section>
-          ) : null}
+          ))}
 
           {parsed.deep?.interview.length ? (
             <section>

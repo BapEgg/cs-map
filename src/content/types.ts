@@ -7,6 +7,8 @@ export interface ConceptCard {
   one_line: string;
   /** 일상 사물 한 문장. */
   analogy?: string;
+  /** 비유가 안 통하는 데. 비유 바로 옆에 한 줄로 보여 비유가 만든 오해를 그 자리에서 걷는다. */
+  analogy_limit?: string;
   /** 3개 안팎. 퀴즈에서 가리고 떠올리기용. */
   keywords?: string[];
 }
