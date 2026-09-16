@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
+import { SLOT, maskCode } from './inlineCode';
 import { resolveTerm, standsAlone, type TermIndex, type TermTarget } from './termIndex';
 
 /** 문장을 이어주는 말. 눈에 띄게 해두면 "문제 → 그래서 해결" 구조가 보인다. */
@@ -18,6 +19,7 @@ interface Props {
 function renderInline(
   text: string,
   { selfId, index, onTerm, used }: Required<Omit<Props, 'text'>>,
+  codes: string[] = [],
 ): ReactNode[] {
   const out: ReactNode[] = [];
   let key = 0;
@@ -25,13 +27,21 @@ function renderInline(
   // 먼저 **강조**로 자른다. 홀수 조각이 강조된 부분이다.
   text.split(/\*\*(.+?)\*\*/g).forEach((part, i) => {
     if (!part) return;
-    const inner = i % 2 === 1 ? <mark>{linkify(part)}</mark> : linkify(part);
+    const inner = i % 2 === 1 ? <mark>{unmask(part)}</mark> : unmask(part);
     out.push(<Fragment key={key++}>{inner}</Fragment>);
   });
 
   return out;
 
+  function unmask(chunk: string): ReactNode[] {
+    return chunk.split(SLOT).flatMap((piece, i): ReactNode[] => {
+      if (i % 2 === 0) return linkify(piece);
+      return [<code key={`c${key++}`}>{codes[Number(piece)]}</code>];
+    });
+  }
+
   function linkify(chunk: string): ReactNode[] {
+    if (!chunk) return [];
     if (!index.pattern) return [chunk];
     const pieces: ReactNode[] = [];
     let last = 0;
@@ -77,7 +87,8 @@ export default function RichText({ text, selfId, index, onTerm, used }: Props) {
       {paragraphs.map((para, pi) => {
         // 문단마다 새로 센다. 문단이 길어도 같은 용어가 계속 파랗게 되진 않는다.
         const seen = used ?? new Set<string>();
-        const sentences = para
+        const { masked, codes } = maskCode(para);
+        const sentences = masked
           .split(/\n/)
           .flatMap((line) => line.split(/(?<=[.!?])\s+/))
           .map((s) => s.trim())
@@ -91,7 +102,7 @@ export default function RichText({ text, selfId, index, onTerm, used }: Props) {
               return (
                 <span key={si} className="rich-line">
                   {conn && <span className="conn">{conn[1]} </span>}
-                  {renderInline(rest, { selfId, index, onTerm, used: seen })}
+                  {renderInline(rest, { selfId, index, onTerm, used: seen }, codes)}
                 </span>
               );
             })}

@@ -10,6 +10,10 @@ card:
 flow:
   prev: { id: dev-stages, reason: 이 흐름을 AI에게 시키려면 }
 see_also: [dev-stages]
+checked: '2026-09-16'
+sources:
+  - '손필기 note-4 (docs/reference/note-4-vibe-coding-it.png)'
+  - 'Anthropic, Claude Code 문서 — 프롬프트·컨텍스트·검증 — https://docs.claude.com/en/docs/claude-code/overview'
 ---
 
 ## 개념
@@ -41,7 +45,9 @@ AI가 코드를 대신 써 줘도 **무엇을 시킬지**와 **결과가 맞는�
 
 ### 면접 질문
 
-- Q. AI가 써 준 코드를 그대로 쓰면 안 되는 이유는?
-  A. 맞는지 판단할 책임이 사람에게 남기 때문이다. 동작해 보여도 요구와 다르거나,
-  지금 코드의 규칙과 어긋나거나, 드문 경우를 빠뜨릴 수 있다.
-  - 그럼 무엇으로 확인하나?
+#### AI가 써 준 코드를 그대로 쓰면 안 되는 이유는?
+
+맞는지 판단할 책임이 사람에게 남기 때문이다. 동작해 보여도 요구와 다르거나,
+지금 코드의 규칙과 어긋나거나, 드문 경우를 빠뜨릴 수 있다.
+
+- 꼬리: 그럼 무엇으로 확인하나?

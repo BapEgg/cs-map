@@ -11,7 +11,10 @@ flow:
     - { id: fifo, reason: 오래됐어도 자주 쓸 수 있어서 }
     - { id: opt, reason: 미래 대신 과거로 추측 }
   next: { id: nru, reason: 정확한 기록이 비싸서 }
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'OSTEP 22장 Swapping: Policies — https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf'
+  - 'Redis 문서 Key eviction (allkeys-lru) — https://redis.io/docs/latest/develop/reference/eviction/'
 ---
 
 ## 개념

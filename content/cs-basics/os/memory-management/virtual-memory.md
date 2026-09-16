@@ -9,7 +9,10 @@ card:
 flow:
   prev: { id: paging, reason: 더 큰 프로그램도 돌리려고 }
   next: { id: page-replacement, reason: 꽉 차면 뭘 내보낼지 }
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'OSTEP 21~22장 Beyond Physical Memory — https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf'
+  - 'Silberschatz 외, Operating System Concepts (10판) 10장 Virtual Memory (요구 페이징, Copy-on-Write, 스래싱)'
 ---
 
 ## 개념

@@ -9,7 +9,11 @@ card:
 flow:
   prev: { id: component, reason: 속을 몰라도 쓰게 }
 see_also: [backend]
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'RFC 9110 HTTP Semantics (메서드·상태 코드·멱등성) — https://www.rfc-editor.org/rfc/rfc9110'
+  - 'Fielding, Architectural Styles and the Design of Network-based Software Architectures, 5장 REST — https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm'
+  - 'RFC 6749 The OAuth 2.0 Authorization Framework — https://www.rfc-editor.org/rfc/rfc6749'
 ---
 
 ## 개념

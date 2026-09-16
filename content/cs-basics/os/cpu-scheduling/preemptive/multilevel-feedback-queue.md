@@ -8,7 +8,10 @@ card:
   keywords: []
 flow:
   prev: { id: multilevel-queue, reason: 큐를 못 옮겨 굶는 작업 때문에 }
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'OSTEP 8장 Scheduling: The Multi-Level Feedback Queue — https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched-mlfq.pdf'
+  - 'Silberschatz 외, Operating System Concepts (10판) 5.3.6 Multilevel Feedback Queue, 5.7.2 Windows Scheduling'
 ---
 
 ## 개념

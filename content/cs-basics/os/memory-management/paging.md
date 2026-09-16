@@ -9,7 +9,10 @@ card:
 flow:
   prev: { id: segmentation, reason: 빈 공간이 조각나서 }
   next: { id: virtual-memory, reason: 더 큰 프로그램도 돌리려고 }
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'OSTEP 18~20장 Paging / TLB / Smaller Tables — https://pages.cs.wisc.edu/~remzi/OSTEP/vm-paging.pdf'
+  - 'Linux 커널 문서 HugeTLB Pages — https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html'
 ---
 
 ## 개념

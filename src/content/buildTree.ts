@@ -91,6 +91,7 @@ export function buildTree(files: Record<string, string>): ContentTree {
       compare: asStringArray(data.compare),
       see_also: asStringArray(data.see_also),
       sim: typeof data.sim === 'string' ? data.sim : undefined,
+      quiz: data.quiz === false ? false : undefined,
       checked: typeof data.checked === 'string' ? data.checked : undefined,
       sources: asStringArray(data.sources),
       path: rel,

@@ -6,7 +6,10 @@ card:
   one_line: '라운드 로빈은 정해진 시간(타임 퀀텀)씩 모든 프로세스를 돌아가며 실행하는 방식이다.'
   analogy: ''
   keywords: []
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'OSTEP 7장 Scheduling: Introduction — https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf'
+  - 'Linux man sched(7) — SCHED_RR — https://man7.org/linux/man-pages/man7/sched.7.html'
 ---
 
 ## 개념

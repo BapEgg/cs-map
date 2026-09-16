@@ -43,6 +43,8 @@ export interface ConceptMeta {
   see_also?: string[];
   /** 시각화 id. */
   sim?: string;
+  /** `false`면 퀴즈에 안 낸다. 묶음 이름만 있는 분류용 노드에 쓴다. */
+  quiz?: boolean;
   /** 사실 확인한 연월. 심화 내용에 남긴다. */
   checked?: string;
   sources?: string[];

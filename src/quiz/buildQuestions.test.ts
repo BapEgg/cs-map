@@ -53,6 +53,24 @@ describe('퀴즈 문제 만들기', () => {
     expect(buildQuestions(tree, 'cs', 'basic').length).toBeGreaterThan(50);
   });
 
+  it('작성 예정·뿌리·다섯 갈래·quiz: false는 안 낸다', () => {
+    const ids = new Set(buildQuestions(tree, 'cs', 'basic').map((q) => q.id));
+    expect(ids.has('cs')).toBe(false);
+    expect(ids.has('cs-basics')).toBe(false);
+    expect(ids.has('java')).toBe(false); // 작성 예정이기도 하다
+    expect(ids.has('paging')).toBe(true);
+    for (const id of ids) expect(tree.byId[id].isStub).toBe(false);
+  });
+
+  it('면접 문제는 질문마다 기록 키가 다르고, 기초 기록과도 겹치지 않는다', () => {
+    const iv = buildQuestions(tree, 'cs', 'interview');
+    const keys = iv.map((q) => q.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keys.every((k, i) => k.startsWith(`${iv[i].id}#iv:`))).toBe(true);
+    const basic = new Set(buildQuestions(tree, 'cs', 'basic').map((q) => q.key));
+    expect(keys.some((k) => basic.has(k))).toBe(false);
+  });
+
   it('섞어도 문제가 늘거나 줄지 않는다', () => {
     const qs = buildQuestions(tree, 'memory-management', 'basic');
     let seed = 1;
@@ -66,6 +84,7 @@ describe('퀴즈 문제 만들기', () => {
 describe('pickSession', () => {
   const q = (id: string): Question => ({
     id,
+    key: id,
     kind: 'basic',
     title: id,
     path: [],

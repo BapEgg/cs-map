@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { parseBody } from '../panel/parseBody';
 import { buildTree } from './buildTree';
 
 /**
@@ -42,6 +43,33 @@ describe('content/ 전체', () => {
       .filter((n) => !n.card?.one_line?.trim())
       .map((n) => n.path);
     expect(missing).toEqual([]);
+  });
+
+  it('심화에 적은 글이 화면에 다 나간다 (파싱 누락 없음)', () => {
+    // `- Q.` 같은 옛 형식이나 모르는 제목 아래 글은 파서가 버린다. 파일에는 있는데 안 보이면 모른다.
+    const dropped = Object.values(tree.byId)
+      .map((n) => ({ path: n.path, lines: parseBody(n.body).dropped }))
+      .filter((x) => x.lines.length)
+      .map((x) => `${x.path}: ${x.lines[0]}`);
+    expect(dropped).toEqual([]);
+  });
+
+  it('심화가 있으면 출처와 확인 날짜가 있다', () => {
+    const missing = Object.values(tree.byId)
+      .filter((n) => n.hasDeep && (!n.checked || !n.sources?.length))
+      .map((n) => n.path);
+    expect(missing).toEqual([]);
+  });
+
+  it('flow·see_also·compare가 실제 노드를 가리킨다', () => {
+    const bad: string[] = [];
+    for (const n of Object.values(tree.byId)) {
+      for (const f of [...n.flowPrev, ...n.flowNext]) if (!tree.byId[f.id]) bad.push(`${n.id} flow → ${f.id}`);
+      for (const id of [...(n.see_also ?? []), ...(n.compare ?? [])])
+        if (!tree.byId[id]) bad.push(`${n.id} → ${id}`);
+    }
+    for (const g of tree.glossary) if (g.link && !tree.byId[g.link]) bad.push(`용어 ${g.term} link → ${g.link}`);
+    expect(bad).toEqual([]);
   });
 
   it('용어 별칭이 서로 겹치지 않는다', () => {

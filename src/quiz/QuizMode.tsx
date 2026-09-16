@@ -59,7 +59,7 @@ export default function QuizMode({ tree, marks, onMark, onClose, onGoTo }: Props
 
   const answer = (known: boolean) => {
     const q = deck![at];
-    onMark(q.id, known); // 누적 기록
+    onMark(q.key, known); // 누적 기록 — 면접 문제는 질문마다 따로
     setAnswers((prev) => ({ ...prev, [at]: known })); // 이번 회차
     setAt((i) => i + 1);
     setShown(false);

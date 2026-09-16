@@ -104,3 +104,38 @@ export const localStore: StudyStore = {
 
 /** 내보내기용 파일 이름. */
 export const exportName = () => `cs-map-메모-${new Date().toISOString().slice(0, 10)}.json`;
+
+/**
+ * 퀴즈 기록의 키. 기초 문제는 개념 id 그대로(예전 기록이 그대로 살아 있게),
+ * 면접 문제는 `id#iv:<질문 해시>`로 따로 둔다. 한 개념에 면접 질문이 여럿이면
+ * 같은 id로 저장할 때 서로 덮어썼고, 기초 기록까지 지웠다.
+ */
+export const conceptOf = (key: string): string => key.split('#')[0];
+
+/** 짧은 해시. 질문 글이 같으면 순서를 바꿔도 같은 키가 나온다. */
+export function shortHash(text: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
+}
+
+export const interviewKey = (id: string, question: string) =>
+  `${id}#iv:${shortHash(question.trim())}`;
+
+/**
+ * 개념 하나로 묶은 기록. 지도의 점과 시작 화면의 "다시 볼 것"은 개념 단위로 본다.
+ * 기초든 면접이든 **하나라도 헷갈렸으면 헷갈림**, 시각은 가장 최근 것.
+ */
+export function marksByConcept(marks: Record<string, QuizMark>): Record<string, QuizMark> {
+  const out: Record<string, QuizMark> = {};
+  for (const [key, m] of Object.entries(marks)) {
+    const id = conceptOf(key);
+    const prev = out[id];
+    if (!prev) out[id] = { ...m };
+    else out[id] = { known: prev.known && m.known, at: prev.at > m.at ? prev.at : m.at };
+  }
+  return out;
+}

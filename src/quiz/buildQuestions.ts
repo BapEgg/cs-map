@@ -1,11 +1,14 @@
 import { parseBody } from '../panel/parseBody';
+import { interviewKey } from '../store/studyStore';
 import type { ContentTree } from '../content/types';
 
 export type QuizKind = 'basic' | 'interview';
 
 export interface Question {
-  /** 개념 id. 퀴즈 기록도 이 id로 남는다. */
+  /** 개념 id. */
   id: string;
+  /** 퀴즈 기록의 키. 기초는 id, 면접은 질문마다 다르다(studyStore.interviewKey). */
+  key: string;
   kind: QuizKind;
   title: string;
   /** 어디에 있는 개념인지. 화면에 경로로 보여준다. */
@@ -32,6 +35,16 @@ export function descendants(tree: ContentTree, rootId: string): string[] {
   return out;
 }
 
+/**
+ * 출제할 수 있는 개념인지. 아직 안 쓴 개념("작성 예정")과 뿌리·다섯 갈래처럼
+ * 묶음 이름만 있는 노드는 뺀다. 그 밖의 분류용 노드는 frontmatter `quiz: false`로 뺀다.
+ */
+export function quizzable(tree: ContentTree, id: string): boolean {
+  const node = tree.byId[id];
+  if (!node || node.isStub || node.quiz === false) return false;
+  return node.depth >= 2;
+}
+
 const titlePath = (tree: ContentTree, id: string): string[] => {
   const trail: string[] = [];
   let cursor: string | null = id;
@@ -54,12 +67,14 @@ export function buildQuestions(tree: ContentTree, scopeId: string, kind: QuizKin
   const out: Question[] = [];
 
   for (const id of descendants(tree, scopeId)) {
+    if (!quizzable(tree, id)) continue;
     const node = tree.byId[id];
     if (kind === 'basic') {
       const answer = node.card?.one_line?.trim();
       if (!answer) continue;
       out.push({
         id,
+        key: id,
         kind,
         title: node.title,
         path: titlePath(tree, id),
@@ -72,6 +87,7 @@ export function buildQuestions(tree: ContentTree, scopeId: string, kind: QuizKin
       for (const qa of parseBody(node.body).deep?.interview ?? []) {
         out.push({
           id,
+          key: interviewKey(id, qa.q),
           kind,
           title: node.title,
           path: titlePath(tree, id),
@@ -124,14 +140,14 @@ export function pickSession(
   const fresh: Question[] = [];
   const known: Question[] = [];
   for (const q of all) {
-    const m = marks[q.id];
+    const m = marks[q.key];
     if (!m) fresh.push(q);
     else if (!m.known) unsure.push(q);
     else known.push(q);
   }
   // 기억났던 건 오래된 것부터. 같은 시각이면 섞인 순서를 따른다.
   const byAge = shuffle(known, random).sort((a, b) =>
-    (marks[a.id]?.at ?? '').localeCompare(marks[b.id]?.at ?? ''),
+    (marks[a.key]?.at ?? '').localeCompare(marks[b.key]?.at ?? ''),
   );
   return [...shuffle(unsure, random), ...shuffle(fresh, random), ...byAge].slice(0, size);
 }

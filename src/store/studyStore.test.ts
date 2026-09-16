@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { RECENT_MAX, emptyNote, isBlank, normalize, type StudyData } from './studyStore';
+import {
+  RECENT_MAX,
+  conceptOf,
+  emptyNote,
+  interviewKey,
+  isBlank,
+  marksByConcept,
+  normalize,
+  type StudyData,
+} from './studyStore';
 
 describe('메모 저장소', () => {
   it('빈 메모를 알아본다', () => {
@@ -42,5 +51,29 @@ describe('메모 저장소', () => {
   it('버전을 붙여 내보낸다', () => {
     const data: StudyData = normalize({ notes: {}, marks: {} });
     expect(data.version).toBe(1);
+  });
+});
+
+describe('퀴즈 기록 키', () => {
+  it('면접 키는 개념 id로 시작하고, 질문이 같으면 같다', () => {
+    const k = interviewKey('paging', '페이징과 세그멘테이션의 차이는?');
+    expect(k.startsWith('paging#iv:')).toBe(true);
+    expect(interviewKey('paging', ' 페이징과 세그멘테이션의 차이는? ')).toBe(k);
+    expect(interviewKey('paging', '다른 질문')).not.toBe(k);
+    expect(conceptOf(k)).toBe('paging');
+    expect(conceptOf('paging')).toBe('paging');
+  });
+
+  it('개념으로 묶으면 하나라도 헷갈렸으면 헷갈림, 시각은 최근 것', () => {
+    const marks = {
+      paging: { known: true, at: '2026-09-01' },
+      'paging#iv:a': { known: false, at: '2026-09-03' },
+      'paging#iv:b': { known: true, at: '2026-09-02' },
+      lru: { known: true, at: '2026-08-01' },
+    };
+    expect(marksByConcept(marks)).toEqual({
+      paging: { known: false, at: '2026-09-03' },
+      lru: { known: true, at: '2026-08-01' },
+    });
   });
 });

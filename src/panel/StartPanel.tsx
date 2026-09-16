@@ -1,5 +1,5 @@
 import type { ContentTree } from '../content/types';
-import { isBlank, type StudyData } from '../store/studyStore';
+import { conceptOf, isBlank, marksByConcept, type StudyData } from '../store/studyStore';
 import './start.css';
 
 interface Props {
@@ -21,15 +21,20 @@ export default function StartPanel({ tree, data, onGoTo, onQuiz }: Props) {
 
   const recent = data.recent.filter(alive).slice(0, 6);
 
-  // 다시 봐야 할 것: 헷갈림 표시 + 퀴즈에서 틀린 것
+  // 다시 봐야 할 것: 헷갈림 표시 + 퀴즈에서 틀린 것(면접 문제 하나라도 틀렸으면 그 개념)
+  const marks = marksByConcept(data.marks);
   const review = [
     ...Object.keys(data.notes).filter((id) => alive(id) && data.notes[id].unsure),
-    ...Object.keys(data.marks).filter((id) => alive(id) && !data.marks[id].known),
+    ...Object.keys(marks).filter((id) => alive(id) && !marks[id].known),
   ];
   const toReview = [...new Set(review)].slice(0, 8);
 
   // 아직 한 번도 안 들어가 본 과목
-  const seen = new Set([...data.recent, ...Object.keys(data.notes), ...Object.keys(data.marks)]);
+  const seen = new Set([
+    ...data.recent,
+    ...Object.keys(data.notes),
+    ...Object.keys(data.marks).map(conceptOf),
+  ]);
   const touched = (id: string): boolean =>
     seen.has(id) || (tree.byId[id]?.childIds ?? []).some(touched);
   const subjects = tree.byId[tree.rootId]?.childIds ?? [];

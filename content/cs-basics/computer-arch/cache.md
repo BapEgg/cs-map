@@ -9,7 +9,10 @@ card:
 flow:
   prev: { id: cpu, reason: 메모리가 너무 느려서 }
   next: { id: main-memory, reason: 캐시에 못 담는 나머지 }
-checked: 2026.09
+checked: '2026-09-16'
+sources:
+  - 'Patterson & Hennessy, Computer Organization and Design (5판) 5장 Large and Fast: Exploiting Memory Hierarchy'
+  - 'Intel 64 and IA-32 Optimization Reference Manual — False Sharing — https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html'
 ---
 
 ## 개념

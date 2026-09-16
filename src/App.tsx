@@ -6,7 +6,7 @@ import SearchBox from './panel/SearchBox';
 import StartPanel from './panel/StartPanel';
 import { buildTermIndex } from './panel/termIndex';
 import QuizMode from './quiz/QuizMode';
-import { isBlank } from './store/studyStore';
+import { isBlank, marksByConcept } from './store/studyStore';
 import { useStudy } from './store/useStudy';
 import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
@@ -99,6 +99,8 @@ export default function App() {
     return set;
   });
 
+  // 지도의 점은 개념 단위. 면접 문제별 기록을 개념 하나로 묶는다.
+  const conceptMarks = useMemo(() => marksByConcept(study.data.marks), [study.data.marks]);
   const notedIds = useMemo(() => {
     const ids = new Set<string>();
     for (const [id, note] of Object.entries(study.data.notes)) {
@@ -424,7 +426,7 @@ export default function App() {
           open={open}
           selected={selected}
           orientation={orientation}
-          marks={study.data.marks}
+          marks={conceptMarks}
           noted={notedIds}
           onNodeClick={clickNode}
           onToggle={toggle}

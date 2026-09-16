@@ -9,6 +9,26 @@ import './panel.css';
 
 export type Tab = 'basic' | 'deep' | 'note';
 
+const URL_IN = /https?:\/\/\S+/;
+
+/** 출처 한 줄. "OSTEP 26장 — https://…"처럼 URL이 있으면 그 부분만 링크로. */
+function SourceLine({ text }: { text: string }) {
+  const m = URL_IN.exec(text);
+  if (!m) return <>{text}</>;
+  const before = text.slice(0, m.index).replace(/[\s—-]+$/, '');
+  const after = text.slice(m.index + m[0].length);
+  return (
+    <>
+      {before}
+      {before && ' — '}
+      <a href={m[0]} target="_blank" rel="noopener noreferrer">
+        {before ? '링크' : m[0]}
+      </a>
+      {after}
+    </>
+  );
+}
+
 /** 다른 개념으로 건너뛸 때 남겨두는 자리. 돌아오면 이대로 복원한다. */
 export interface PanelPlace {
   tab: Tab;
@@ -359,11 +379,19 @@ export default function ConceptPanel({
             </section>
           ) : null}
 
-          {node.checked && (
-            <p className="checked">
-              사실 확인 {node.checked}
-              {node.sources?.length ? ` · ${node.sources.join(', ')}` : ''}
-            </p>
+          {(node.checked || node.sources?.length) && (
+            <div className="checked">
+              {node.checked && <p style={{ margin: 0 }}>사실 확인 {node.checked}</p>}
+              {node.sources?.length ? (
+                <ul className="sources">
+                  {node.sources.map((s) => (
+                    <li key={s}>
+                      <SourceLine text={s} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
           )}
         </div>
       )}
