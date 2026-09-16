@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ContentTree } from '../content/types';
 import type { ConceptNote } from '../store/studyStore';
 import NoteTab from './NoteTab';
@@ -54,6 +54,11 @@ interface Props {
   /** "넓게 읽기" 상태. 지도와 나란히 있는 화면에서만 넘어온다(폰은 이미 한 화면이라 없음). */
   wide?: boolean;
   onToggleWide?: () => void;
+  /**
+   * 글이 다시 흐르는 조건(패널 폭, 글자 크기)을 한 값으로. 이게 바뀌면 읽던 문단을 같은 자리에 되돌린다 —
+   * scrollTop 숫자만 지키면 폭이 바뀐 뒤 다른 문단이 보인다.
+   */
+  layoutKey?: string;
 }
 
 /** 용어를 눌러 펼친 짧은 설명. 개념이든 용어든 **항상 이걸 먼저 보여준다.** */
@@ -77,6 +82,7 @@ export default function ConceptPanel({
   onOpenViz,
   wide,
   onToggleWide,
+  layoutKey,
 }: Props) {
   const node = tree.byId[id];
   const [tab, setTab] = useState<Tab>(restore?.tab ?? 'basic');
@@ -96,6 +102,39 @@ export default function ConceptPanel({
   useEffect(() => {
     if (restore?.scroll && scroller.current) scroller.current.scrollTop = restore.scroll;
   }, [restore]);
+
+  /**
+   * 읽던 자리 = 화면 위쪽에 걸린 첫 블록과 그 블록의 화면 안 위치. 스크롤할 때마다 적어 두고,
+   * 폭·글자 크기가 바뀌어 글이 다시 흐르면(layoutKey) 그 블록을 같은 위치로 되돌린다.
+   * 브라우저의 자동 앵커링은 폭 변화에는 안 걸려서 직접 한다(.panel은 overflow-anchor: none).
+   */
+  const anchor = useRef<{ el: Element; edge: 'top' | 'bottom'; delta: number } | null>(null);
+  const remember = () => {
+    const panel = scroller.current;
+    if (!panel) return;
+    const top = panel.getBoundingClientRect().top;
+    const tabs = panel.querySelector('.panel-tabs')?.getBoundingClientRect().height ?? 0;
+    const line = top + tabs + 4;
+    for (const el of panel.querySelectorAll('.panel-title, .panel-body section > *')) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom <= line) continue;
+      // 위가 잘려 보이는 블록은 아래 모서리를 잡는다. 글이 다시 흐르면 높이가 바뀌는데,
+      // 위 모서리를 붙들면 그 높이 변화만큼 다음 문단이 밀린다.
+      const edge = r.top < line ? 'bottom' : 'top';
+      anchor.current = { el, edge, delta: (edge === 'top' ? r.top : r.bottom) - top };
+      return;
+    }
+    anchor.current = null;
+  };
+  useLayoutEffect(() => {
+    const panel = scroller.current;
+    const a = anchor.current;
+    if (!panel || !a || !panel.contains(a.el)) return;
+    const top = panel.getBoundingClientRect().top;
+    const r = a.el.getBoundingClientRect();
+    const now = (a.edge === 'top' ? r.top : r.bottom) - top;
+    if (Math.abs(now - a.delta) > 1) panel.scrollTop += now - a.delta;
+  }, [layoutKey]);
 
   const place = (): PanelPlace => ({ tab, scroll: scroller.current?.scrollTop ?? 0 });
   const go = (targetId: string) => onNavigate(targetId, place());
@@ -137,7 +176,7 @@ export default function ConceptPanel({
   const shownPath = path.length > 4 && !pathOpen ? [path[0], '…', path[path.length - 2], id] : path;
 
   return (
-    <aside className="panel" ref={scroller}>
+    <aside className="panel" ref={scroller} onScroll={remember}>
       {/*
         본문 폭은 패널 폭과 따로 간다. 패널을 넓혀도 글은 640px(기본 글자 크기 기준, 글자를 키우면 비례)
         안에서 가운데에 놓인다 — 줄이 길어지면 다음 줄 첫 글자를 찾기 어렵다(HANDOFF 6-2-16).

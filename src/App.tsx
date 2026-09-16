@@ -480,6 +480,7 @@ export default function App() {
             onOpenViz={() => setOverlay('viz')}
             wide={narrow ? undefined : !!wide}
             onToggleWide={narrow ? undefined : toggleWide}
+            layoutKey={`${narrow ? 'one' : panelWidth}:${read.size}`}
           />
         ) : (
           <StartPanel
