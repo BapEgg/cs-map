@@ -11,7 +11,7 @@ card:
 flow:
   prev: { id: isolation-level, reason: 안 보이게 하면서 안 기다리려면 }
   next: { id: db-lock, reason: 그래도 쓰기끼리는 }
-see_also: [isolation-level, db-lock, copy-on-write]
+see_also: [isolation-level, db-lock, virtual-memory]
 checked: '2026-09-16'
 sources:
   - 'MySQL 8.0 Reference — InnoDB Multi-Versioning (undo 로그, 롤백 세그먼트) — https://dev.mysql.com/doc/refman/8.0/en/innodb-multi-versioning.html'
