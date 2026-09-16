@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import { PHONE, useMedia } from '../ui/media';
 import type { DiagramEdge } from './parseBody';
 
@@ -126,7 +126,8 @@ export default function Diagram({ edges }: { edges: DiagramEdge[] }) {
         .map((e) => `${e.from}에서 ${e.to}${e.label ? `: ${e.label}` : ''}`)
         .join('. ')}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H}>
+      {/* 글자 크기 설정에 따라 그림 전체가 같이 커진다(CSS --read-scale). 본문 폭을 넘으면 가로 스크롤. */}
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ '--dg-w': W } as CSSProperties}>
         <defs>
           <marker
             id="dg-arrow"

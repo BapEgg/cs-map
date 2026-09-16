@@ -33,14 +33,16 @@ export default function Blocks({ blocks, selfId, index, onTerm }: Props) {
         switch (b.kind) {
           case 'p':
             return <Fragment key={i}>{piece(b.text)}</Fragment>;
-          case 'list':
+          case 'list': {
+            const Tag = b.ordered ? 'ol' : 'ul';
             return (
-              <ul key={i} className="rich-list">
+              <Tag key={i} className="rich-list">
                 {b.items.map((item, k) => (
                   <li key={k}>{piece(item, 'span')}</li>
                 ))}
-              </ul>
+              </Tag>
             );
+          }
           case 'table':
             return (
               <div key={i} className="cmp-wrap">

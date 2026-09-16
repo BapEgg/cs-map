@@ -148,6 +148,13 @@ describe('parseBody', () => {
     ]);
   });
 
+  it('번호 목록은 ordered', () => {
+    expect(parseBlocks(['1. 하나', '2. 둘', '- 점'])).toEqual([
+      { kind: 'list', items: ['하나', '둘'], ordered: true },
+      { kind: 'list', items: ['점'] },
+    ]);
+  });
+
   it('parseDiagram: 화살표 없는 줄은 누락', () => {
     const dropped: string[] = [];
     expect(parseDiagram(['A → B', 'C -> D: 이유', '이상한 줄'], dropped)).toEqual([

@@ -328,6 +328,7 @@ span.rich {
 
 .diagram svg {
   display: block;
+  width: calc(var(--dg-w) * 1px * var(--read-scale, 1));
   max-width: 100%;
   height: auto;
   font-family: inherit;

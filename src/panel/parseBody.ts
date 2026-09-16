@@ -10,7 +10,7 @@
 
 export type Block =
   | { kind: 'p'; text: string }
-  | { kind: 'list'; items: string[] }
+  | { kind: 'list'; items: string[]; ordered?: boolean }
   | { kind: 'table'; head: string[]; rows: string[][] }
   | { kind: 'code'; lang: string; code: string }
   | { kind: 'diagram'; edges: DiagramEdge[] };
@@ -93,20 +93,24 @@ export function parseDiagram(lines: string[], dropped: string[] = []): DiagramEd
 }
 
 /**
- * 줄 묶음을 블록으로. 빈 줄이 문단을 가르고, `- `는 목록, `|`는 표, ```은 코드.
+ * 줄 묶음을 블록으로. 빈 줄이 문단을 가르고, `- `는 목록, `1. `은 번호 목록, `|`는 표, ```은 코드.
  * 목록 항목은 들여쓴 다음 줄까지 한 항목이다.
  */
 export function parseBlocks(lines: string[], dropped: string[] = []): Block[] {
   const out: Block[] = [];
   let para: string[] = [];
   let list: string[] | null = null;
+  let ordered = false;
 
   const flushPara = () => {
     if (para.length) out.push({ kind: 'p', text: para.join('\n').trim() });
     para = [];
   };
   const flushList = () => {
-    if (list?.length) out.push({ kind: 'list', items: list });
+    if (list?.length)
+      out.push(
+        ordered ? { kind: 'list', items: list, ordered: true } : { kind: 'list', items: list },
+      );
     list = null;
   };
   const flush = () => {
@@ -144,10 +148,15 @@ export function parseBlocks(lines: string[], dropped: string[] = []): Block[] {
       continue;
     }
 
-    if (/^- /.test(line)) {
+    const bullet = /^- /.test(line);
+    const numbered = /^\d+\.\s/.test(line);
+    if (bullet || numbered) {
       flushPara();
+      // 번호 목록과 점 목록이 붙어 있으면 다른 목록이다.
+      if (list && ordered !== numbered) flushList();
       list ??= [];
-      list.push(line.slice(2).trim());
+      ordered = numbered;
+      list.push(line.replace(/^(- |\d+\.\s+)/, '').trim());
       continue;
     }
     if (list && /^\s/.test(line)) {

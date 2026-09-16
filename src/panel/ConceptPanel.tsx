@@ -364,7 +364,9 @@ export default function ConceptPanel({
         <div className="panel-body">
           {parsed.deep?.sections.map((sec) => (
             <section key={sec.title}>
-              <h3 className="section-title">{sec.title}</h3>
+              <h3 className="section-title">
+                <InlineText text={sec.title} />
+              </h3>
               <Blocks blocks={sec.blocks} {...richProps} />
             </section>
           ))}
