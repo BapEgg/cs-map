@@ -60,7 +60,7 @@ CPU 캐시와 지역성(캐시 메모리 장)의 원리 — "자주 쓰는 것�
 |---|---|---|---|
 | cache-aside | 캐시 miss면 앱이 DB 읽어 채움 | DB 쓰고 캐시 삭제 | 가장 흔함. 앱이 로직 소유 |
 | read-through | 캐시가 DB에서 읽어 채움 | — | 캐시 라이브러리가 대신 |
-| write-through | | 캐시와 DB 동시 쓰기 | 항상 최신, 쓰기 지연 ↑ |
+| write-through | | 캐시와 DB 동시 쓰기 | 캐시가 DB와 같이 갱신됨, 쓰기 지연 ↑ |
 | write-behind | | 캐시에 쓰고 DB는 나중에 | 빠르지만 유실 위험 |
 
 스프링은 `@Cacheable`(읽기)·`@CacheEvict`(삭제)·`@CachePut`로 cache-aside를 선언으로 만든다 — AOP 프록시이므로 자기 호출 제약이 같다.

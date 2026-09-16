@@ -100,7 +100,7 @@ InnoDB는 표 자체를 PK 순서의 B+tree로 저장한다(클러스터드 인�
 
 #### `(status, created_at)` 복합 인덱스가 있는데 `WHERE created_at > ? AND status = 'PAID' ORDER BY created_at` 쿼리가 느립니다.
 
-인덱스는 탈 수 있지만 열 순서가 이 쿼리에 맞습니다 — 등호 조건 `status`가 앞, 범위 조건 `created_at`이 뒤이므로 `status = 'PAID'`인 구간 안에서 `created_at` 범위를 정렬된 채로 읽고 ORDER BY도 공짜입니다. 그래도 느리다면 다른 원인입니다.
+인덱스는 탈 수 있지만 열 순서가 이 쿼리에 맞습니다 — 등호 조건 `status`가 앞, 범위 조건 `created_at`이 뒤이므로 `status = 'PAID'`인 구간 안에서 `created_at` 범위를 정렬된 채로 읽고 ORDER BY에 정렬 단계가 들지 않습니다. 그래도 느리다면 다른 원인입니다.
 확인할 것은 실행 계획에서 실제로 이 인덱스를 타는지(`type: range`, `Using index condition`), `PAID` 행이 표의 대부분이라 옵티마이저가 풀 스캔을 골랐는지, `SELECT *`로 매 행 표를 다시 읽는지(커버링 불가), 통계가 낡았는지입니다.
 반대로 인덱스가 `(created_at, status)` 순이었다면 범위 열이 앞이라 `status` 필터는 인덱스 정렬을 못 쓰고 범위 안을 다 읽으며, 이때는 열 순서를 바꾸는 게 답입니다.
 

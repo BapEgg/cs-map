@@ -67,7 +67,7 @@ Java `Arrays.sort(int[])`는 듀얼 피벗 퀵 정렬(기본형은 안정성이 
 
 ### 실무에서는
 
-- DB `ORDER BY`는 인덱스 순서를 그대로 읽으면 정렬을 안 하고, 못 타면 filesort(메모리·디스크 정렬)를 한다. 인덱스 `(a, b)`가 있으면 `ORDER BY a, b`는 공짜, `ORDER BY b`는 정렬이 든다.
+- DB `ORDER BY`는 인덱스 순서를 그대로 읽으면 정렬을 안 하고, 못 타면 filesort(메모리·디스크 정렬)를 한다. 인덱스 `(a, b)`가 있으면 `ORDER BY a, b`는 인덱스 순서대로 읽어 정렬 단계가 없고, `ORDER BY b`는 정렬이 든다.
 - 페이지네이션의 `ORDER BY created_at LIMIT 10 OFFSET 100000`은 앞 10만 건도 정렬·건너뛰어야 느리다. 마지막 값 기준(keyset)으로 바꾼다.
 - 상위 N개는 전체 정렬 대신 크기 N 힙(힙 장).
 - `Comparator`가 일관되지 않으면(a<b, b<c인데 c<a) `IllegalArgumentException: Comparison method violates its general contract`가 TimSort에서 난다.

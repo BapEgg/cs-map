@@ -88,9 +88,9 @@ sources:
 
 #### `HashMap`과 `ConcurrentHashMap`의 차이는 무엇이고, `Collections.synchronizedMap`은 왜 잘 안 쓰나요?
 
-`HashMap`은 스레드 안전이 아니라 동시 쓰기에 값이 사라지거나 구조가 깨지고, `ConcurrentHashMap`은 버킷 단위 잠금과 CAS로 여러 스레드가 동시에 읽고 쓸 수 있으며 `compute`·`merge` 같은 원자적 갱신을 제공합니다.
+`HashMap`은 스레드 안전이 아니라 동시 쓰기에 값이 사라지거나 구조가 깨지고, `ConcurrentHashMap`은 조회(`get`)는 락 없이 volatile 읽기로 하고, 갱신은 빈 버킷이면 CAS로 노드를 넣고 노드가 있는 버킷이면 그 버킷의 첫 노드만 `synchronized`로 잠가(Java 8+) 다른 버킷의 갱신과 동시에 진행하며, `compute`·`merge` 같은 키 단위 원자적 갱신을 제공합니다.
 `synchronizedMap`은 모든 메서드를 하나의 락으로 감싸 스레드가 많을수록 경합이 심하고, `get` 뒤 `put` 같은 복합 연산은 여전히 원자적이지 않으며 순회 시 직접 잠가야 합니다.
-예를 들어 요청 스레드 200개가 같은 캐시 맵을 갱신하면 `ConcurrentHashMap`은 서로 다른 버킷을 동시에 처리하지만 `synchronizedMap`은 한 번에 하나만 들어갑니다. 한계는 `ConcurrentHashMap`의 `size()`·순회가 순간 스냅숏이 아니라는 점과, 여전히 "여러 키에 걸친 원자성"은 제공하지 않는다는 점입니다.
+예를 들어 요청 스레드 200개가 같은 캐시 맵을 갱신하면 `ConcurrentHashMap`은 서로 다른 버킷을 동시에 처리하지만 `synchronizedMap`은 한 번에 하나만 들어갑니다. 한계는 `ConcurrentHashMap`의 `size()`·순회가 순간 스냅숏이 아니라는 점, 여전히 "여러 키에 걸친 원자성"은 제공하지 않는다는 점, 그리고 같은 키에 쓰기가 몰리면 그 버킷의 락에서 경합이 생긴다는 점입니다.
 
 - 꼬리: `ConcurrentHashMap.computeIfAbsent`가 원자적이라는 건 무슨 뜻인가요?
 - 꼬리: `CopyOnWriteArrayList`는 언제 쓰나요?
