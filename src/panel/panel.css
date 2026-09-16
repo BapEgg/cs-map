@@ -147,13 +147,14 @@
   overflow-wrap: anywhere;
 }
 
-/* 소제목(h4). 절 안에서 주제가 갈릴 때. */
+/* 소제목(h4). 절 안에서 주제가 갈릴 때. 위 24, 아래 10 — 제목은 아래 글에 붙는다. */
 .panel-body h4,
 .qa-h {
   font-size: calc(17px * var(--read-scale, 1));
   font-weight: 600;
   line-height: 1.45;
-  margin: var(--sp-5) 0 var(--sp-3);
+  margin: var(--sp-5) 0 10px;
+  overflow-wrap: anywhere;
 }
 
 .panel-body h4:first-child,
@@ -300,7 +301,7 @@
 }
 
 .rich-list li {
-  margin: 0 0 var(--sp-2);
+  margin: 0 0 10px;
 }
 
 .rich-list li::marker {
@@ -480,10 +481,11 @@ button.term {
   border: none;
   padding: 0;
   cursor: pointer;
+  /* 밑줄은 글자색을 옅게 탄 점선. 굵기·오프셋은 상태가 바뀌어도 같아서 글이 움직이지 않는다. */
   text-decoration: underline dotted;
-  text-decoration-color: var(--border-strong);
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
   text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
+  text-underline-offset: 3px;
   border-radius: 2px;
 }
 
@@ -492,7 +494,8 @@ button.term:focus-visible {
   color: var(--accent);
   text-decoration: underline solid;
   text-decoration-color: currentColor;
-  text-decoration-thickness: 1.5px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   outline: none;
 }
 
@@ -725,6 +728,17 @@ button.term:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+}
+
+/* "넓게 읽기". 오른쪽 끝, 글씨로만. 눌린 상태는 색으로. */
+.panel-wide {
+  margin-left: auto;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.panel-wide[aria-pressed='true'] {
+  color: var(--accent);
 }
 
 .stub-badge {

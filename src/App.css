@@ -165,10 +165,11 @@
 }
 
 .splitter-grip {
-  width: 2px;
-  height: 40px;
+  /* 기본 상태에서도 보이는 손잡이. 끌 수 있다는 걸 미리 알려야 찾는다. */
+  width: 4px;
+  height: 48px;
   border-radius: 2px;
-  background: var(--border);
+  background: var(--border-strong);
   transition:
     background var(--move-fast) ease,
     height var(--move-fast) ease;

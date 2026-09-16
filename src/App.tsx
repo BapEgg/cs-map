@@ -12,7 +12,7 @@ import TreeCanvas, { type TreeHandle } from './tree/TreeCanvas';
 import type { Orientation } from './tree/layout';
 import { useTheme, type ThemeMode } from './theme/useTheme';
 import Splitter from './ui/Splitter';
-import { usePanelWidth } from './ui/panelWidth';
+import { clampPanel, usePanelWidth, wideFor } from './ui/panelWidth';
 import { useReadSize } from './ui/readSize';
 import ToolsMenu, { type Tool } from './ui/ToolsMenu';
 import { ONE_PANE, useMedia } from './ui/media';
@@ -71,6 +71,35 @@ export default function App() {
   const { width: panelWidth, set: setPanelWidth } = usePanelWidth();
   /** 읽는 글씨 크기. 화면 전체를 확대하면 지도가 좁아지니 읽는 글만 키운다. */
   const read = useReadSize();
+  /**
+   * "넓게 읽기" — 본문이 640px(× 글자 크기)을 온전히 얻도록 패널을 한 번에 넓힌다.
+   * 끌어서 맞추는 것과 별개로, 글 읽을 때 한 번 누르는 용도. 다시 누르면 넓히기 직전 폭으로.
+   * 사용자가 직접 끌면 "넓게" 상태는 풀린다 — 버튼 글씨가 실제 폭과 어긋나면 안 된다.
+   */
+  const mapRef = useRef<HTMLElement>(null);
+  const [wide, setWide] = useState<{ before: number } | null>(null);
+  const room = () => mapRef.current?.clientWidth ?? window.innerWidth;
+  const dragPanel = useCallback(
+    (px: number) => {
+      setWide(null);
+      setPanelWidth(px);
+    },
+    [setPanelWidth],
+  );
+  const toggleWide = () => {
+    if (wide) {
+      setPanelWidth(clampPanel(wide.before, room()));
+      setWide(null);
+    } else {
+      setWide({ before: panelWidth });
+      setPanelWidth(clampPanel(wideFor(read.size), room()));
+    }
+  };
+  // 넓게 읽는 중에 글자 크기를 바꾸면 그 크기의 640px에 맞춰 다시 넓힌다.
+  useEffect(() => {
+    if (wide) setPanelWidth(clampPanel(wideFor(read.size), room()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [read.size]);
 
   /**
    * 좁은 화면에서는 지도와 설명을 한 화면에 같이 못 둔다. 세로로 쌓으면 둘 다 반쪽이 된다.
@@ -412,6 +441,7 @@ export default function App() {
       )}
 
       <main
+        ref={mapRef}
         className={`map${narrow ? ` phone-${phoneView}` : ''}`}
         style={
           {
@@ -433,7 +463,7 @@ export default function App() {
           visible={!narrow || phoneView === 'map'}
           handleRef={treeRef}
         />
-        {!narrow && <Splitter width={panelWidth} onChange={setPanelWidth} />}
+        {!narrow && <Splitter width={panelWidth} onChange={dragPanel} />}
 
         {selected ? (
           <ConceptPanel
@@ -448,6 +478,8 @@ export default function App() {
             backTo={backTo}
             onBack={back}
             onOpenViz={() => setOverlay('viz')}
+            wide={narrow ? undefined : !!wide}
+            onToggleWide={narrow ? undefined : toggleWide}
           />
         ) : (
           <StartPanel

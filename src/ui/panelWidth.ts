@@ -11,6 +11,11 @@ const GUTTER = 22;
 
 const KEY = 'csmap.panel-width';
 
+/** 패널 좌우 여백(24×2)과 스크롤바 여유. 본문 폭에 이만큼 더해야 본문이 그 폭으로 들어간다. */
+const PANEL_CHROME = 48 + 16;
+/** 본문 폭(패널 CSS의 .panel-inner 640px × read-scale)이 온전히 들어가는 패널 폭. */
+export const wideFor = (readScale: number) => Math.ceil(640 * readScale + PANEL_CHROME);
+
 export const clampPanel = (px: number, available: number) =>
   Math.round(Math.min(Math.max(px, PANEL_MIN), Math.max(PANEL_MIN, available - MAP_MIN - GUTTER)));
 

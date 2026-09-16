@@ -3,6 +3,7 @@
  *
  *   ## 개념 / ## 왜 나왔나 / ## 확인 질문 / ## 심화
  *   심화 아래 `### 아무 제목`이 순서대로 절이 되고, `### 면접 질문` 아래 `#### 질문`만 면접 문제다.
+ *   다른 절의 `#### 소제목`은 그 절 안의 소제목(h4)이다.
  *
  * 절 안의 글은 블록으로 읽는다 — 문단, `- ` 목록, `| 표 |`, ``` 코드, ```diagram 관계도.
  * 파일에 적었는데 화면에 못 나가는 줄은 `dropped`에 모아 통합 테스트가 잡는다.
@@ -10,6 +11,8 @@
 
 export type Block =
   | { kind: 'p'; text: string }
+  /** 절 안의 소제목(`####`). `### 면접 질문` 아래에서만 질문으로 읽히고, 다른 절에서는 소제목이다. */
+  | { kind: 'h4'; text: string }
   | { kind: 'list'; items: string[]; ordered?: boolean }
   | { kind: 'table'; head: string[]; rows: string[][] }
   | { kind: 'code'; lang: string; code: string }
@@ -121,6 +124,13 @@ export function parseBlocks(lines: string[], dropped: string[] = []): Block[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].replace(/\s+$/, '');
 
+    const h4 = /^####\s+(.*)$/.exec(line);
+    if (h4) {
+      flush();
+      out.push({ kind: 'h4', text: h4[1].trim() });
+      continue;
+    }
+
     const fence = FENCE.exec(line);
     if (fence) {
       flush();
@@ -213,9 +223,16 @@ export function parseBody(body: string): ParsedBody {
     if (m) heads.push({ level: m[1].length, title: m[2].trim(), at: i });
   });
 
-  const sliceAfter = (index: number) => {
+  /** 이 제목 아래 글. 소제목(####)까지 품으려면 `upTo`를 3으로 — 다음 ##/### 앞까지 자른다. */
+  const sliceAfter = (index: number, upTo = 4) => {
     const start = heads[index].at + 1;
-    const end = index + 1 < heads.length ? heads[index + 1].at : lines.length;
+    let end = lines.length;
+    for (let j = index + 1; j < heads.length; j++) {
+      if (heads[j].level <= upTo) {
+        end = heads[j].at;
+        break;
+      }
+    }
     return lines.slice(start, end);
   };
 
@@ -255,12 +272,10 @@ export function parseBody(body: string): ParsedBody {
       if (title === '면접 질문') {
         // 질문은 #### 로 쓴다. 다른 형식은 안 읽히니 누락으로 잡는다.
         dropped.push(...nonEmpty(chunk));
-      } else deep.sections.push({ title, blocks: parseBlocks(chunk, dropped) });
+      } else deep.sections.push({ title, blocks: parseBlocks(sliceAfter(i, 3), dropped) });
     } else if (level === 4) {
-      if (section !== '면접 질문') {
-        dropped.push(`#### ${title}`, ...nonEmpty(chunk));
-        continue;
-      }
+      // 면접 질문 절 밖의 ####는 위에서 소제목으로 이미 읽었다.
+      if (section !== '면접 질문') continue;
       // 답변은 꼬리 질문 앞까지.
       const follow = chunk.filter((l) => FOLLOW.test(l)).map((l) => l.replace(FOLLOW, '').trim());
       const a = chunk

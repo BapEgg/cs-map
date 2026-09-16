@@ -125,10 +125,22 @@ describe('parseBody', () => {
     expect(p.deep).toBeNull();
   });
 
-  it('면접 질문 절 밖의 ####는 질문이 아니라 누락이다', () => {
-    const p = parseBody(`## 심화\n\n### 내부 구조\n\n#### 소제목\n\n- 항목`);
-    expect(p.deep?.interview).toEqual([]);
-    expect(p.dropped).toEqual(['#### 소제목', '- 항목']);
+  it('면접 질문 절 밖의 ####는 질문이 아니라 소제목이다', () => {
+    const p = parseBody(
+      `## 심화\n\n### 내부 구조\n\n글\n\n#### 소제목\n\n- 항목\n\n### 면접 질문\n\n#### 진짜 질문?\n\n답`,
+    );
+    expect(p.deep?.sections).toEqual([
+      {
+        title: '내부 구조',
+        blocks: [
+          { kind: 'p', text: '글' },
+          { kind: 'h4', text: '소제목' },
+          { kind: 'list', items: ['항목'] },
+        ],
+      },
+    ]);
+    expect(p.deep?.interview).toEqual([{ q: '진짜 질문?', a: '답', follow: [] }]);
+    expect(p.dropped).toEqual([]);
   });
 
   it('심화 밖의 ###과 답 없는 확인 질문도 누락이다', () => {

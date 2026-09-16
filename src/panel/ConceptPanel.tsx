@@ -51,6 +51,9 @@ interface Props {
   backTo?: string;
   onBack: () => void;
   onOpenViz: () => void;
+  /** "넓게 읽기" 상태. 지도와 나란히 있는 화면에서만 넘어온다(폰은 이미 한 화면이라 없음). */
+  wide?: boolean;
+  onToggleWide?: () => void;
 }
 
 /** 용어를 눌러 펼친 짧은 설명. 개념이든 용어든 **항상 이걸 먼저 보여준다.** */
@@ -72,6 +75,8 @@ export default function ConceptPanel({
   backTo,
   onBack,
   onOpenViz,
+  wide,
+  onToggleWide,
 }: Props) {
   const node = tree.byId[id];
   const [tab, setTab] = useState<Tab>(restore?.tab ?? 'basic');
@@ -128,6 +133,8 @@ export default function ConceptPanel({
 
   const richProps = { selfId: id, index, onTerm: openTerm };
   const top = cards[cards.length - 1];
+  /** 경로는 보조 정보다. 4단계 넘게 길어지면 가운데를 "…"로 접는다 — 누르면 전부 펼쳐진다. */
+  const shownPath = path.length > 4 && !pathOpen ? [path[0], '…', path[path.length - 2], id] : path;
 
   return (
     <aside className="panel" ref={scroller}>
@@ -136,39 +143,48 @@ export default function ConceptPanel({
         안에서 가운데에 놓인다 — 줄이 길어지면 다음 줄 첫 글자를 찾기 어렵다(HANDOFF 6-2-16).
       */}
       <div className="panel-inner">
-        {backTo && (
+        {(backTo || onToggleWide) && (
           <div className="panel-top">
-            <button className="btn btn-quiet panel-back" onClick={onBack}>
-              ← {backTo}
-            </button>
+            {backTo && (
+              <button className="btn btn-quiet panel-back" onClick={onBack}>
+                ← {backTo}
+              </button>
+            )}
+            {onToggleWide && (
+              <button
+                type="button"
+                className="btn btn-quiet panel-wide"
+                onClick={onToggleWide}
+                aria-pressed={wide}
+                title={
+                  wide
+                    ? '넓히기 전 폭으로 돌아갑니다'
+                    : '본문이 640px 폭으로 들어가게 설명을 넓힙니다'
+                }
+              >
+                {wide ? '원래 폭으로' : '넓게 읽기'}
+              </button>
+            )}
           </div>
         )}
 
         <nav className="panel-path" aria-label="경로">
-          {/*
-          경로는 보조 정보다. 4단계 넘게 길어지면 가운데를 "…"로 접는다 — 누르면 전부 펼쳐진다.
-          첫 항목(뿌리)과 부모, 현재는 늘 보인다.
-        */}
-          {(() => {
-            const shown =
-              path.length > 4 && !pathOpen ? [path[0], '…', path[path.length - 2], id] : path;
-            return shown.map((pid, i) => (
-              <span key={`${pid}-${i}`}>
-                {i > 0 && <span className="sep">›</span>}
-                {pid === '…' ? (
-                  <button type="button" onClick={() => setPathOpen(true)} title="경로 전부 보기">
-                    …
-                  </button>
-                ) : pid === id ? (
-                  <b aria-current="page">{tree.byId[pid].title}</b>
-                ) : (
-                  <button type="button" onClick={() => go(pid)}>
-                    {tree.byId[pid].title}
-                  </button>
-                )}
-              </span>
-            ));
-          })()}
+          {shownPath.map((pid, i) => (
+            <span key={`${pid}-${i}`}>
+              {i > 0 && <span className="sep">›</span>}
+              {pid === '…' ? (
+                <button type="button" onClick={() => setPathOpen(true)} title="경로 전부 보기">
+                  …
+                </button>
+              ) : pid === id ? (
+                <b aria-current="page">{tree.byId[pid].title}</b>
+              ) : (
+                <button type="button" onClick={() => go(pid)}>
+                  {tree.byId[pid].title}
+                </button>
+              )}
+            </span>
+          ))}
         </nav>
 
         <h2 className="panel-title">
