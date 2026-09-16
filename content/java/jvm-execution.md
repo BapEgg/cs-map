@@ -1,7 +1,7 @@
 ---
 id: jvm-execution
 title: JVM 실행
-order: 6
+order: 12
 aliases: [JVM, 클래스 로딩, JIT, 바이트코드 실행]
 card:
   one_line: 'JVM은 컴파일된 바이트코드를 클래스 로더로 읽어 들여 인터프리터로 돌리다가, 자주 도는 부분을 JIT로 기계어로 바꿔 빠르게 만드는 실행 환경이다.'

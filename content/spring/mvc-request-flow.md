@@ -1,7 +1,7 @@
 ---
 id: mvc-request-flow
 title: MVC 요청 흐름
-order: 3
+order: 4
 aliases: [DispatcherServlet, 디스패처 서블릿, 필터, 인터셉터, 컨트롤러]
 card:
   one_line: 'MVC 요청 흐름은 HTTP 요청이 필터 → 디스패처 서블릿 → 핸들러 매핑 → 컨트롤러 → 서비스 → 응답 변환 → 필터를 거쳐 돌아오는 길이다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 우체국은 담당자가 여럿이지만 요청 처리는 한 스레드가 처음부터 끝까지 맡는다. 그래서 그 스레드가 DB를 기다리면 그 요청의 모든 단계가 함께 기다린다.
   keywords: [필터 → 디스패처 → 컨트롤러, 메시지 컨버터, 예외 처리 위치]
 flow:
-  prev: { id: bean-lifecycle, reason: 만들어진 빈들 사이로 요청이 지나는 길 }
+  prev: { id: boot-config, reason: 등록된 빈들 사이로 요청이 지나는 길 }
   next: { id: aop-proxy, reason: 그 길 중간에 공통 일을 끼우려면 }
 see_also: [http, thread-pool, api, exceptions, request-journey]
 checked: '2026-09-16'

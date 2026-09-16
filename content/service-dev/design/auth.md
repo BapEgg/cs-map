@@ -10,7 +10,7 @@ card:
   keywords: [인증 401 vs 인가 403, 필터에서 한 번, 자원마다 소유자 확인]
 flow:
   prev: { id: request-journey, reason: 그 길에서 "누구인지"를 어디서 확인하나 }
-  next: { id: redis-cache, reason: 확인이 끝났으면 매번 DB에 안 가는 법 }
+  next: { id: cors, reason: 누구인지 확인했으니, 어느 사이트의 스크립트가 부르는지도 }
 see_also: [cookie-session-jwt, https-tls, mvc-request-flow, hash]
 checked: '2026-09-16'
 sources:

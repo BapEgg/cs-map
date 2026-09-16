@@ -9,6 +9,7 @@ card:
   analogy_limit: 건물 주소는 안 바뀌지만 IP는 서버를 옮기면 바뀐다. 그래서 이름(DNS)이 있고, 이름이 가리키는 IP에 유효 기간(TTL)이 붙는다.
   keywords: [IP = 컴퓨터, 포트 = 프로그램, DNS = 이름 → IP]
 flow:
+  prev: { id: network-layers, reason: 그 층들의 주소를 하나씩 보면 }
   next: { id: tcp-udp, reason: 주소를 알았으니 데이터를 보내려면 }
 see_also: [process, request-journey, proxy]
 checked: '2026-09-16'

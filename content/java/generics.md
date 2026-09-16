@@ -1,7 +1,7 @@
 ---
 id: generics
 title: 제네릭
-order: 4
+order: 8
 aliases: [타입 소거, 와일드카드, 타입 파라미터]
 card:
   one_line: '제네릭은 "어떤 타입이든 담되 무슨 타입인지는 컴파일러가 확인한다"는 장치로, 실행 시에는 타입이 지워져(소거) 컴파일 때만 안전을 잡는다.'
@@ -10,7 +10,7 @@ card:
   keywords: [컴파일 타임 타입 안전, 타입 소거, 와일드카드 ? extends/super]
 flow:
   prev: { id: collections, reason: 그릇에 담긴 타입을 컴파일러가 알게 하려면 }
-  next: { id: exceptions, reason: 타입은 잡았고, 실패는 어떻게 다루나 }
+  next: { id: lambda-functional, reason: 타입을 매개변수로 넘겼으니 이제 동작을 넘기려면 }
 see_also: [collections, oop]
 checked: '2026-09-16'
 sources:

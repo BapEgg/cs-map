@@ -1,7 +1,7 @@
 ---
 id: message-queue
 title: 메시지 큐
-order: 4
+order: 7
 aliases: [MQ, 메시지 큐, Kafka, RabbitMQ, 비동기 처리, 컨슈머, 이벤트]
 card:
   one_line: '메시지 큐는 지금 당장 안 해도 되는 일을 메시지로 큐에 넣어 두고 별도 소비자가 나중에 처리하게 하는 장치로, 응답을 빠르게 하고 부하를 완충하며 실패해도 다시 처리할 수 있게 한다.'

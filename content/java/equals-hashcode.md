@@ -1,7 +1,7 @@
 ---
 id: equals-hashcode
 title: equals/hashCode
-order: 2
+order: 6
 aliases: [equals, hashCode, 동등성, 동일성]
 card:
   one_line: 'equals는 두 객체가 "같은 값"인지 정하는 규칙이고, hashCode는 그 값을 숫자로 요약한 것이라 equals가 같으면 hashCode도 같아야 HashMap이 제대로 찾는다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 서가 번호는 사서가 붙이지만 hashCode는 클래스를 짠 사람이 정한다. 기본값은 "메모리 주소"라 값이 같아도 다른 서가로 간다.
   keywords: [동일성 vs 동등성, 계약, HashMap 키]
 flow:
-  prev: { id: oop, reason: 객체를 "같다"고 볼 기준이 필요해서 }
+  prev: { id: interface-abstract, reason: 객체를 "같다"고 볼 기준이 필요해서 }
   next: { id: collections, reason: 그 기준으로 담고 찾는 그릇 }
 see_also: [hash, oop, persistence-context]
 checked: '2026-09-16'

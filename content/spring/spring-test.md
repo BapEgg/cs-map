@@ -1,7 +1,7 @@
 ---
 id: spring-test
 title: 스프링 테스트
-order: 8
+order: 10
 aliases: [단위 테스트, 통합 테스트, 슬라이스 테스트, SpringBootTest, MockMvc, Testcontainers]
 card:
   one_line: '스프링 테스트는 스프링 없이 도는 단위 테스트, 한 계층만 띄우는 슬라이스 테스트, 전체를 띄우는 통합 테스트를 층으로 나눠 빠른 것을 많이, 느린 것을 적게 두는 일이다.'

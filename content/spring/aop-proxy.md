@@ -1,7 +1,7 @@
 ---
 id: aop-proxy
 title: AOP와 프록시
-order: 4
+order: 5
 aliases: [AOP, 프록시, 자기 호출, CGLIB, 관점 지향]
 card:
   one_line: 'AOP는 트랜잭션·로깅처럼 여러 메서드에 걸치는 공통 일을 별도로 떼어 두고, 스프링이 빈을 프록시로 감싸 메서드 호출 앞뒤에 끼워 넣는 방식이다.'

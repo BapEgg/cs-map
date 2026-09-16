@@ -1,7 +1,7 @@
 ---
 id: component
 title: 컴포넌트
-order: 6
+order: 7
 card:
   one_line: '컴포넌트는 독립적으로 교체하고 재사용할 수 있게 만든 기능 블록이다.'
   analogy: ''

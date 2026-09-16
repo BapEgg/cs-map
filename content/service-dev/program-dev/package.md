@@ -1,7 +1,7 @@
 ---
 id: package
 title: 패키지
-order: 5
+order: 6
 card:
   one_line: '패키지는 여러 모듈을 묶어 배포하는 단위다.'
   analogy: ''

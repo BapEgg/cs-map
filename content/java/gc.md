@@ -1,7 +1,7 @@
 ---
 id: gc
 title: GC
-order: 8
+order: 14
 aliases: [가비지 컬렉션, 가비지 컬렉터, G1, ZGC, Stop-the-World]
 card:
   one_line: 'GC는 힙에서 아무도 가리키지 않는 객체를 찾아 치우는 일로, 대부분의 객체가 금방 죽는다는 관찰에 따라 젊은 영역을 자주·빠르게, 오래된 영역을 드물게 치운다.'

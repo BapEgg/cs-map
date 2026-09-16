@@ -1,7 +1,7 @@
 ---
 id: exceptions
 title: 예외
-order: 5
+order: 11
 aliases: [checked 예외, unchecked 예외, try-with-resources, 예외 처리]
 card:
   one_line: '예외는 실패를 반환값이 아닌 별도 흐름으로 던져 올리는 장치로, checked는 호출자가 처리를 강제받고 unchecked는 그렇지 않다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 비상 정지는 누르면 무조건 멈추지만 예외는 아무 곳에서나 catch로 삼켜 버릴 수 있다. 삼킨 예외는 라인이 멈춘 척도 안 하고 잘못된 결과를 계속 만든다.
   keywords: [checked vs unchecked, 복구 가능성, 자원 정리]
 flow:
-  prev: { id: generics, reason: 타입은 잡았고, 실패는 어떻게 다루나 }
+  prev: { id: stream-optional, reason: 흐름이 실패하면 어떻게 다루나 }
   next: { id: jvm-execution, reason: 이 코드를 실제로 누가 어떻게 돌리나 }
 see_also: [spring-transaction, file-descriptor, thread]
 checked: '2026-09-16'

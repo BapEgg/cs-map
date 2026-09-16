@@ -1,7 +1,7 @@
 ---
 id: collections
 title: 컬렉션
-order: 3
+order: 7
 aliases: [컬렉션 프레임워크, ArrayList, HashMap, List, Map, Set]
 card:
   one_line: '컬렉션은 자료구조를 인터페이스(List·Set·Map)와 구현(ArrayList·HashMap 등)으로 나눠 제공해, 쓰는 쪽은 약속만 보고 구현은 상황에 맞게 고르게 한 것이다.'

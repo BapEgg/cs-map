@@ -1,7 +1,7 @@
 ---
 id: n-plus-one
 title: N+1 문제
-order: 7
+order: 9
 aliases: [N+1, 페치 조인, fetch join, batch size, EntityGraph]
 card:
   one_line: 'N+1 문제는 목록 하나를 1번 조회한 뒤 각 행의 연관 객체를 N번 더 조회해 쿼리가 N+1개 나가는 것으로, 페치 조인·배치 크기로 한두 번에 가져오게 고친다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 교무실 왕복은 눈에 띄지만 쿼리 N번은 코드 한 줄(`getTeacher()`)에 숨는다. 데이터 10건에서는 아무 문제 없다가 운영 1만 건에서 터진다.
   keywords: [지연 로딩 × 반복문, 페치 조인, default_batch_fetch_size]
 flow:
-  prev: { id: persistence-context, reason: 지연 로딩이 낳는 대표적 문제 }
+  prev: { id: jpa-relations, reason: 연관을 걸었더니 생기는 쿼리 문제 }
   next: { id: spring-test, reason: 이런 문제를 배포 전에 잡으려면 }
 see_also: [persistence-context, sql-join, db-index, cache, explain]
 checked: '2026-09-16'

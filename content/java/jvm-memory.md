@@ -1,7 +1,7 @@
 ---
 id: jvm-memory
 title: JVM 메모리
-order: 7
+order: 13
 aliases: [JVM 메모리 구조, 힙, 스택, 메타스페이스, 런타임 데이터 영역]
 card:
   one_line: 'JVM 메모리는 객체가 사는 힙(스레드 공유), 메서드 호출 프레임이 쌓이는 스택(스레드별), 클래스 정보가 있는 메타스페이스로 나뉘고, 힙만 GC가 치운다.'

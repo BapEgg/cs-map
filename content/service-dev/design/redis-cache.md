@@ -1,7 +1,7 @@
 ---
 id: redis-cache
 title: Redis와 캐시 전략
-order: 3
+order: 6
 aliases: [Redis, 캐시 전략, cache-aside, TTL, 캐시 스탬피드, 캐시 무효화]
 card:
   one_line: 'Redis 캐시는 자주 읽고 드물게 바뀌는 데이터를 메모리 저장소에 두어 DB 대신 답하게 하는 것으로, 없으면 DB에서 읽어 채우고(cache-aside) 만료(TTL)와 무효화로 낡은 값을 관리한다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 선반 물건은 창고 물건과 같은 것이지만 캐시 값은 DB 값의 "복사본"이라 원본이 바뀌면 낡는다. 얼마나 낡아도 되는지가 설계의 핵심이고, 선반에는 그런 문제가 없다.
   keywords: [cache-aside, TTL + 무효화, 스탬피드]
 flow:
-  prev: { id: auth, reason: 확인이 끝났으면 매번 DB에 안 가는 법 }
+  prev: { id: sql-injection, reason: 안전해졌으니 매번 DB에 안 가는 법 }
   next: { id: message-queue, reason: 지금 안 해도 되는 일을 미루는 법 }
 see_also: [cache, lru, hash, http-cache, cookie-session-jwt, replication-sharding]
 checked: '2026-09-16'

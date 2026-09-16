@@ -12,6 +12,7 @@ flow:
   prev:
     - { id: sort, reason: 줄 세우기 말고 얽힌 걸 훑으려면 }
     - { id: graph, reason: 얽힌 걸 빠짐없이 훑으려면 }
+  next: { id: recursion-backtracking, reason: DFS를 재귀로 썼다면 그 재귀 자체를 보자 }
 see_also: [queue, stack, graph, deadlock]
 checked: '2026-09-16'
 sources:

@@ -10,7 +10,7 @@ card:
   keywords: [생성 → 주입 → 초기화 → 소멸, 싱글턴 기본, 프록시가 끼는 시점]
 flow:
   prev: { id: ioc-di, reason: 컨테이너가 만든 객체는 언제 생기고 사라지나 }
-  next: { id: mvc-request-flow, reason: 만들어진 빈들 사이로 요청이 지나는 길 }
+  next: { id: boot-config, reason: 그 많은 빈을 누가 등록하나 }
 see_also: [ioc-di, aop-proxy, thread]
 checked: '2026-09-16'
 sources:

@@ -1,7 +1,7 @@
 ---
 id: spring-transaction
 title: 스프링 트랜잭션
-order: 5
+order: 6
 aliases: ['@Transactional', 전파, 롤백 규칙, readOnly]
 card:
   one_line: '@Transactional은 프록시가 메서드 앞에서 트랜잭션을 열고 정상 종료면 커밋, RuntimeException이면 롤백하게 하며, 전파 옵션으로 안팎 트랜잭션을 합칠지 나눌지 정한다.'

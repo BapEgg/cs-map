@@ -1,7 +1,7 @@
 ---
 id: java-threads
 title: 스레드와 동기화 (Java)
-order: 9
+order: 15
 aliases: [synchronized, volatile, java.util.concurrent, 가상 스레드]
 card:
   one_line: 'Java의 동기화는 synchronized·Lock으로 임계 구역을 잠그고, volatile로 변경이 보이게 하며, java.util.concurrent의 원자 클래스·동시성 컬렉션·Executor로 락을 직접 쓰는 일을 줄인다.'

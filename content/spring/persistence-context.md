@@ -1,7 +1,7 @@
 ---
 id: persistence-context
 title: 영속성 컨텍스트
-order: 6
+order: 7
 aliases: [JPA, 1차 캐시, 변경 감지, 지연 로딩, 플러시, 엔티티 매니저]
 card:
   one_line: '영속성 컨텍스트는 트랜잭션 동안 JPA가 엔티티를 담아 두는 작업 공간으로, 같은 ID는 한 객체로 유지하고(1차 캐시) 바뀐 것을 알아서 UPDATE하며(변경 감지) 연관 객체는 필요할 때 불러온다(지연 로딩).'
@@ -10,7 +10,7 @@ card:
   keywords: [1차 캐시·동일성, 변경 감지·플러시, 지연 로딩과 그 경계]
 flow:
   prev: { id: spring-transaction, reason: 트랜잭션 안에서 엔티티는 어떻게 관리되나 }
-  next: { id: n-plus-one, reason: 지연 로딩이 낳는 대표적 문제 }
+  next: { id: jpa-relations, reason: 엔티티 하나를 관리하는 법을 알았으니 둘 사이의 관계 }
 see_also: [transaction-acid, equals-hashcode, cache, n-plus-one]
 checked: '2026-09-16'
 sources:

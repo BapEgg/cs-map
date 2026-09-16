@@ -8,7 +8,7 @@ card:
   keywords: []
 flow:
   prev: { id: class, reason: 설계도로 실체를 찍어내 }
-  next: { id: module, reason: 파일로 나누려고 }
+  next: { id: object-design, reason: 객체를 만들었으니 어떻게 나누고 이을지 }
 ---
 
 ## 개념
