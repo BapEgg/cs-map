@@ -41,7 +41,7 @@
 | 28 | [API 게이트웨이 설계](https://youtu.be/CVQy7G--49k) | proxy, auth(게이트웨이 언급), monolith-msa | 일부 절 — 게이트웨이 전용 챕터 없음 | 미검증 | 백엔드 심화 |
 | 29 | [Service Discovery](https://youtu.be/5i6HSpxKCqA) | monolith-msa | **없음** | 미검증 | 백엔드 심화 |
 | 30 | [Docker와 VM](https://youtu.be/0ToqmwZ-n3M) | observability-deploy, deploy | **없음** — 컨테이너·VM 챕터 없음 | 미검증 | 백엔드 심화 |
-| 31 | [티어와 레이어 구분](https://youtu.be/tLQ9xr0SyYc) | object-design, monolith-msa | **없음** — 티어/레이어 용어 정리 없음 | 미검증 | 공통 필수 |
+| 31 | [티어와 레이어 구분](https://youtu.be/tLQ9xr0SyYc) | monolith-msa(티어와 레이어 절) | 일부 절 (2026-09-17 추가) | 미검증 | 공통 필수 |
 | 32 | [대규모 분산시스템 일관성 설계](https://youtu.be/UsTPRQ-nahY) | monolith-msa(사가), message-queue(최종 일관성), replication-sharding | 일부 절 — CAP·합의 없음 | 미검증 | 백엔드 심화 |
 | 33 | [키 설계 잘못하면 Redis가 뻗습니다](https://youtu.be/gTCgEFnoi6U) | redis-cache(무엇을 캐시하나·실무 절) | 일부 절 | 미검증 | 백엔드 심화 |
 | 34 | [Redis 메시징(Pub/Sub·Streams)](https://youtu.be/wiHhZih5qNg) | redis-cache(다른 쓰임 절), message-queue | **없음** — Pub/Sub·Streams 미작성 | 미검증 | 선택 확장 |
@@ -51,7 +51,7 @@
 | 38 | [메모리·SSD·HDD 레이턴시](https://youtu.be/jNwI1ABWmbQ) | main-memory(🔶), disk(🔶), request-journey(구간 지연) | 일부 절 — 지연 시간 숫자표 보강 예정(CURRICULUM 1장) | 미검증 | 공통 필수 |
 | 39 | [바이브코딩 시대, 개발자가 알아야 할 숫자](https://youtu.be/WbzMtyyOQpM) | request-journey, complexity | 일부 절 | 미검증 | 공통 필수 |
 | 40 | [INT 오버플로우](https://youtu.be/KTPNTWn-uKE) | data-representation | 챕터 있음 | 미검증 | 공통 필수 |
-| 41 | [보안의 3요소](https://youtu.be/2Px26HdAm34) | auth, https-tls, xss-csrf | **없음** — 기밀성·무결성·가용성 정리 없음 | 미검증 | 공통 필수 |
+| 41 | [보안의 3요소](https://youtu.be/2Px26HdAm34) | auth(보안의 세 요소 절) | 일부 절 (2026-09-17 추가) | 미검증 | 공통 필수 |
 | 42 | [일반화와 추상화의 차이](https://youtu.be/kyerFnx8ngg) | oop, interface-abstract, object-design | 일부 절 | 미검증 | 공통 필수 |
 | 43 | [읽기 성능과 쓰기 성능](https://youtu.be/LGlsqP-dOGU) | db-index(쓰기 비용), replication-sharding(읽기/쓰기 분리), redis-cache | 일부 절 | 미검증 | 공통 필수 |
 | 44 | [속도와 용량 혼동](https://youtu.be/63_ApTsEHhU) | complexity, request-journey | 일부 절 | 미검증 | 공통 필수 |
@@ -63,10 +63,9 @@
 
 ## 집계
 
-- 챕터 있음 19 · 일부 절 15 · 없음 8 · 범위 제외 4 · 불명·모음 3 (49편).
+- 챕터 있음 19 · 일부 절 17 · 없음 6 · 범위 제외 4 · 불명·모음 3 (49편).
 - **없음(누락 후보)** — 신입 필수인지 판단과 함께:
-  - 티어/레이어 구분(#31): **공통 필수 후보**. `object-design`이나 `monolith-msa`에 절 하나로 충분(티어=물리 배치, 레이어=코드 계층).
-  - 보안 3요소(#41): **공통 필수 후보**. `auth` 또는 새 `security-basics` 절 하나. 기밀성·무결성·가용성 + 인증/인가/감사.
+  - ~~티어/레이어(#31), 보안 3요소(#41)~~ — 2026-09-17 `monolith-msa`·`auth`에 절로 추가.
   - SQL vs NoSQL(#13): **백엔드 심화**. 선택 기준(스키마 유연성·조인·일관성·확장)을 `database` 인덱스나 새 노드로.
   - CQRS(#14), 서비스 디스커버리(#29), Docker/VM(#30): **백엔드 심화**. MSA 묶음이 커지면 `service-dev/design` 뒤에 별도 절 또는 노드.
   - Redis Pub/Sub·Streams(#34), Redis 트랜잭션·Lua(#35): **선택 확장**. `redis-cache` 심화에 절 하나씩이면 충분.
@@ -75,5 +74,5 @@
 ## 다음에 할 일
 
 1. 영상을 실제로 볼 수 있게 되면(자막·시청) "내용 확인" 열을 **확인**으로 바꾸고, 본문과 어긋나는 주장이 있으면 공식 문서로 어느 쪽이 맞는지 교차 확인한다. 영상이 틀릴 수도 있다.
-2. 누락 후보 중 공통 필수(#31, #41)부터 절 단위로 보강한다. 나머지는 사용자 우선순위에 따라.
+2. 남은 누락 후보(SQL/NoSQL, CQRS, 서비스 디스커버리, Docker/VM, Redis 메시징·트랜잭션)는 사용자 우선순위에 따라.
 3. `docs/CURRICULUM.md`의 참고 자료 문구("제목·URL만 확인, 내용은 미확인")는 그대로 둔다.

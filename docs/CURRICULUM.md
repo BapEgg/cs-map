@@ -160,11 +160,11 @@
 
 - context-switch: "시스템 호출·모드 전환은 문맥 교환이 아니다" 절 + 면접 질문.
 - oop: 오버로딩/오버라이딩 절 + 면접 질문.
+- monolith-msa: "티어와 레이어" 절(물리 vs 논리) + 면접 질문. auth: "보안의 세 요소"(기밀성·무결성·가용성, AAA) 절 + 면접 질문.
 - 정확성 교정: java-threads·collections(ConcurrentHashMap 갱신 경로), db-index(복합 인덱스 앞 열 없을 때), tcp-udp(handshake 뒤 전송 시점), n-plus-one(EAGER+JPQL), volatile "즉시", 인덱스 "공짜" 등 — 근거는 각 파일 sources.
 
 ## 11. 아직 없는 것 (신입 백엔드 기준, 우선순위 순)
 
-- 티어/레이어 구분, 보안 3요소(기밀성·무결성·가용성) — 절 하나씩이면 충분. `docs/VIDEO-MAP.md` 누락 후보.
 - SQL vs NoSQL 선택 기준, CQRS, 서비스 디스커버리, Docker/VM — 백엔드 심화.
 - Redis Pub/Sub·Streams·트랜잭션 — 선택 확장.
 - 컴퓨터 구조·OS 🔶 항목 보강(1·2장), 지연 시간 숫자표.
