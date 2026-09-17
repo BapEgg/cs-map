@@ -10,6 +10,7 @@ card:
   keywords: [읽기 분산·장애 대비, 복제 지연, 샤드 키와 조인 포기]
 flow:
   prev: { id: db-lock, reason: 한 대로 부족하면 }
+  next: { id: sql-vs-nosql, reason: 관계형을 늘리는 법을 봤으니 아예 다른 저장소는 언제 }
 see_also: [transaction-acid, redis-cache, monolith-msa, hash]
 checked: '2026-09-16'
 sources:

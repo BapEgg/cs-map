@@ -97,6 +97,7 @@
 | mvcc | MVCC | ✅ | isolation-level | InnoDB vs PostgreSQL 차이 |
 | db-lock | 락 | ✅ | mutex, isolation-level | 비관적/낙관적, 갭 락, 교착(deadlock 연결) |
 | replication-sharding | 복제·샤딩 | ✅ | transaction-acid | 읽기/쓰기 분리, 샤드 키 |
+| sql-vs-nosql | SQL과 NoSQL 선택 | ✅ | relational-model, replication-sharding | 접근 패턴 기준, 임베딩/참조, 일관성 모델, 폴리글랏 (2026-09-17) |
 
 ## 6. Java/JVM `java`
 
@@ -147,7 +148,8 @@
 | message-queue | MQ | ✅ | queue, thread-pool | 비동기, 순서, 재처리 |
 | idempotency-retry-timeout | 멱등성·재시도·타임아웃 | ✅ | http, transaction-acid | 두 번 결제 방지 |
 | observability-deploy | 관측·배포 | ✅ | deploy(stages) | 로그·메트릭·트레이스, 무중단 배포 |
-| monolith-msa | 모놀리스/MSA | ✅ | 전부 | 모듈러 모놀리스 |
+| monolith-msa | 모놀리스/MSA | ✅ | 전부 | 모듈러 모놀리스, 티어와 레이어 절 |
+| cqrs | CQRS | ✅ | monolith-msa, message-queue | 쓰기/읽기 모델 분리 단계, 지연 다루기, 재구축 (2026-09-17) |
 | order-journey | 주문 요청 하나가 끝까지 | ✅ | 위 전부 | 예매·주문 시나리오로 전 단원을 잇는 마지막 개념 |
 
 ## 9. 프로그램 개발 보강 `service-dev/program-dev`
@@ -165,7 +167,7 @@
 
 ## 11. 아직 없는 것 (신입 백엔드 기준, 우선순위 순)
 
-- SQL vs NoSQL 선택 기준, CQRS, 서비스 디스커버리, Docker/VM — 백엔드 심화.
+- 서비스 디스커버리, Docker/VM — 백엔드 심화.
 - Redis Pub/Sub·Streams·트랜잭션 — 선택 확장.
 - 컴퓨터 구조·OS 🔶 항목 보강(1·2장), 지연 시간 숫자표.
 - **과목 전체 충분성 검토는 아직이다.** 위 표의 ✅는 "파일 작성 완료(형식·출처·면접 질문 포함)"이지 "그 과목을 신입 면접 기준으로 빠짐없이 다뤘다"가 아니다. 충분성은 사용자 검토와 실제 면접 질문 대조 뒤에 표시한다.

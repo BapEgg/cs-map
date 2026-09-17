@@ -1,7 +1,7 @@
 ---
 id: order-journey
 title: 주문 하나의 여정
-order: 11
+order: 12
 aliases: [예매 요청, 주문 처리 과정, 끝까지 따라가기, 전 단원 연결]
 card:
   one_line: '주문 하나의 여정은 "예매하기" 클릭이 브라우저·네트워크·서버 스레드·트랜잭션·DB 락·캐시·큐를 거쳐 확정되기까지를 따라가며 이 앱의 모든 단원이 어디에 쓰이는지 한 줄로 잇는 마지막 장이다.'
@@ -9,7 +9,7 @@ card:
   analogy_limit: 공항은 승객 한 명씩 처리하지만 서버는 같은 좌석을 수천 명이 같은 순간에 누른다. 그 "동시"를 다루는 것(락·격리·멱등)이 이 장의 절반이다.
   keywords: [클릭에서 확정까지, 동시에 누른 1,000명, 각 단계 = 어느 단원]
 flow:
-  prev: { id: monolith-msa, reason: 지금까지의 전부를 주문 하나로 잇기 }
+  prev: { id: cqrs, reason: 지금까지의 전부를 주문 하나로 잇기 }
 see_also: [request-journey, auth, db-lock, isolation-level, spring-transaction, persistence-context, redis-cache, message-queue, idempotency-retry-timeout, observability-deploy, thread-pool, race-condition]
 checked: '2026-09-16'
 sources:

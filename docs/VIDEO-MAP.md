@@ -23,8 +23,8 @@
 | 10 | [RDB 정규화 정리](https://youtu.be/KDkPizapEAA) | normalization | 챕터 있음 | 미검증 | 공통 필수 |
 | 11 | [파티셔닝과 샤딩](https://youtu.be/lVRJv4qVWFo) | replication-sharding | 챕터 있음(파티셔닝은 절 하나) | 미검증 | 백엔드 심화 |
 | 12 | [샤딩과 리플리케이션](https://youtu.be/_N8THUCBX_w) | replication-sharding | 챕터 있음 | 미검증 | 백엔드 심화 |
-| 13 | [SQL vs NoSQL 선택](https://youtu.be/ge5duJS0tms) | relational-model(관계형의 전제), redis-cache | **없음** — NoSQL 선택 기준 챕터 없음 | 미검증 | 백엔드 심화 |
-| 14 | [JOIN이 안 되는 순간, CQRS](https://youtu.be/FIZpKju2qLk) | monolith-msa(나눌 때의 데이터 절) | **없음** — CQRS 자체는 미작성 | 미검증 | 백엔드 심화 |
+| 13 | [SQL vs NoSQL 선택](https://youtu.be/ge5duJS0tms) | sql-vs-nosql | 챕터 있음 (2026-09-17 추가) | 미검증 | 백엔드 심화 |
+| 14 | [JOIN이 안 되는 순간, CQRS](https://youtu.be/FIZpKju2qLk) | cqrs | 챕터 있음 (2026-09-17 추가) | 미검증 | 백엔드 심화 |
 | 15 | [ORM? SP? 영원한 난제](https://youtu.be/B6GcNoZtkkk) | persistence-context, n-plus-one | 일부 절(SP 비교 없음) | 미검증 | 선택 확장 |
 | 16 | [쿠키·세션·JWT 변천사](https://youtu.be/lggnXKm-RyY) | cookie-session-jwt, auth | 챕터 있음 | 미검증 | 공통 필수 |
 | 17 | [폴링–롱폴링–SSE–WebSocket](https://youtu.be/Xq3PmcK52vI) | sse-websocket | 챕터 있음 | 미검증 | 공통 필수 |
@@ -63,16 +63,16 @@
 
 ## 집계
 
-- 챕터 있음 19 · 일부 절 17 · 없음 6 · 범위 제외 4 · 불명·모음 3 (49편).
+- 챕터 있음 21 · 일부 절 17 · 없음 4 · 범위 제외 4 · 불명·모음 3 (49편).
 - **없음(누락 후보)** — 신입 필수인지 판단과 함께:
   - ~~티어/레이어(#31), 보안 3요소(#41)~~ — 2026-09-17 `monolith-msa`·`auth`에 절로 추가.
-  - SQL vs NoSQL(#13): **백엔드 심화**. 선택 기준(스키마 유연성·조인·일관성·확장)을 `database` 인덱스나 새 노드로.
-  - CQRS(#14), 서비스 디스커버리(#29), Docker/VM(#30): **백엔드 심화**. MSA 묶음이 커지면 `service-dev/design` 뒤에 별도 절 또는 노드.
+  - ~~SQL vs NoSQL(#13), CQRS(#14)~~ — 2026-09-17 `sql-vs-nosql`, `cqrs` 노드로 추가.
+  - 서비스 디스커버리(#29), Docker/VM(#30): **백엔드 심화**. 필요해지면 `service-dev/design`에 노드.
   - Redis Pub/Sub·Streams(#34), Redis 트랜잭션·Lua(#35): **선택 확장**. `redis-cache` 심화에 절 하나씩이면 충분.
 - 이 표는 채널 전체를 "신입 필수"로 넣지 않는다. 공통 필수 25 · 백엔드 심화 12 · 선택 확장 9 · 미분류 3.
 
 ## 다음에 할 일
 
 1. 영상을 실제로 볼 수 있게 되면(자막·시청) "내용 확인" 열을 **확인**으로 바꾸고, 본문과 어긋나는 주장이 있으면 공식 문서로 어느 쪽이 맞는지 교차 확인한다. 영상이 틀릴 수도 있다.
-2. 남은 누락 후보(SQL/NoSQL, CQRS, 서비스 디스커버리, Docker/VM, Redis 메시징·트랜잭션)는 사용자 우선순위에 따라.
+2. 남은 누락 후보(서비스 디스커버리, Docker/VM, Redis 메시징·트랜잭션)는 사용자 우선순위에 따라.
 3. `docs/CURRICULUM.md`의 참고 자료 문구("제목·URL만 확인, 내용은 미확인")는 그대로 둔다.

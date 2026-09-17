@@ -10,7 +10,7 @@ card:
   keywords: [배포 단위가 기준, 나누면 트랜잭션이 사라진다, 먼저 모듈 경계]
 flow:
   prev: { id: observability-deploy, reason: 한 덩어리로 둘지 나눌지 }
-  next: { id: order-journey, reason: 지금까지의 전부를 주문 하나로 잇기 }
+  next: { id: cqrs, reason: 서비스를 나누면 조인이 사라진다 — 그러면 조회는 어떻게 }
 see_also: [message-queue, transaction-acid, replication-sharding, idempotency-retry-timeout, module]
 checked: '2026-09-16'
 sources:
